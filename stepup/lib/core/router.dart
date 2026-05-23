@@ -1,25 +1,10 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import '../features/auth/screens/splash_screen.dart';
+import '../features/auth/screens/login_screen.dart';
+import '../features/auth/screens/onboarding_screen.dart';
 
-// Stubs — replaced by real screens in Tasks 5-7
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Splash')));
-}
-
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Login')));
-}
-
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Onboarding')));
-}
-
+// Stubs for screens not yet implemented (Tasks 6-7)
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
   @override
