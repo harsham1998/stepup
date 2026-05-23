@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:health/health.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import '../../core/api_client.dart';
@@ -32,12 +33,15 @@ class StepSyncService {
     await ApiClient.instance.post('/steps/sync', {
       'steps': steps,
       'syncedAt': DateTime.now().toIso8601String(),
-      'source': 'healthkit',
+      'source': Platform.isIOS ? 'healthkit' : 'health_connect',
       'deviceModel': 'unknown',
       'osVersion': 'unknown',
     });
   }
 
+  // Permissions must be requested on the UI thread before the background service
+  // starts syncing. Call StepSyncService.instance.requestPermissions() from a
+  // screen widget (e.g., HomeScreen initState) on first launch.
   static Future<void> initialiseBackgroundService() async {
     final service = FlutterBackgroundService();
     await service.configure(
