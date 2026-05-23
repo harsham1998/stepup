@@ -14,7 +14,10 @@ class AuthService {
       {'phone': phone, 'otp': otp},
     ) as Map<String, dynamic>;
     final session = response['session'] as Map<String, dynamic>;
-    await _supabase.auth.setSession(session['access_token'] as String);
+    await _supabase.auth.setSession(
+      session['refresh_token'] as String,
+      accessToken: session['access_token'] as String,
+    );
   }
 
   Future<void> signInWithGoogle() async {

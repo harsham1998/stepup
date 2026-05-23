@@ -44,8 +44,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       await ref.read(authServiceProvider).verifyOtp(_phoneCtrl.text, otp);
       if (mounted) context.go('/onboard');
+      return; // navigation disposes the widget — don't reset loading
     } catch (e) {
-      setState(() { _error = 'Invalid OTP. Try again.'; _loading = false; });
+      if (mounted) setState(() { _error = 'Invalid OTP. Try again.'; _loading = false; });
     }
   }
 

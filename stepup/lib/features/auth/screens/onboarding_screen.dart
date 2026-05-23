@@ -71,6 +71,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ..._goals.map((g) => _GoalTile(
                 emoji: g.$2, title: g.$3, subtitle: g.$4,
                 selected: _goalTier == g.$1,
+                isPopular: g.$1 == 'active',
                 onTap: () => setState(() => _goalTier = g.$1),
               )),
               const SizedBox(height: 28),
@@ -86,9 +87,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 class _GoalTile extends StatelessWidget {
   final String emoji, title, subtitle;
   final bool selected;
+  final bool isPopular;
   final VoidCallback onTap;
   const _GoalTile({required this.emoji, required this.title, required this.subtitle,
-    required this.selected, required this.onTap});
+    required this.selected, required this.onTap, this.isPopular = false});
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +114,7 @@ class _GoalTile extends StatelessWidget {
             Text(title, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
             Text(subtitle, style: const TextStyle(color: Color(0xFF6B7280), fontSize: 11)),
           ])),
-          if (title == 'Active')
+          if (isPopular)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
