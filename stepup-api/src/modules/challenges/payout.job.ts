@@ -73,6 +73,7 @@ export async function processPayout(challengeId: string) {
         idempotency_key: `payout:${challengeId}:${winner.userId}`,
         reference_id: challengeId,
         description: `Challenge winnings — rank #${prevCutoff - tierWinners.length + rank + 1}`,
+        status: 'completed',
       });
 
       // Fix 3: check update errors

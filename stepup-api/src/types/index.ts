@@ -40,6 +40,7 @@ export interface WalletTransaction {
   idempotency_key: string;
   reference_id?: string;
   description: string;
+  status: 'completed' | 'pending' | 'failed';
   created_at: string;
 }
 

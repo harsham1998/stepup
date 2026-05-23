@@ -1,7 +1,8 @@
-// Capture mockInsert in module scope so it survives jest.mock hoisting
+// Capture mocks in module scope so they survive jest.mock hoisting
 let mockInsert: jest.Mock;
 let mockUpdate: jest.Mock;
 let mockUpdateChain: { eq: jest.Mock; error: null };
+let mockSingle: jest.Mock;
 
 jest.mock('../../src/lib/supabase', () => {
   // These are re-initialised before each test via beforeEach; we create them
@@ -19,7 +20,7 @@ jest.mock('../../src/lib/supabase', () => {
     }),
   });
 
-  const mockSingle = jest.fn().mockResolvedValue({
+  mockSingle = jest.fn().mockResolvedValue({
     data: {
       id: 'ch-1',
       prize_pool: 90000,
@@ -85,7 +86,23 @@ describe('processPayout', () => {
     );
   });
 
-  it('resolves without throwing for a valid ended challenge', async () => {
-    await expect(processPayout('ch-1')).resolves.not.toThrow();
+  it('skips processing if challenge is already paid_out', async () => {
+    mockSingle.mockResolvedValueOnce({
+      data: {
+        id: 'ch-1',
+        prize_pool: 90000,
+        status: 'paid_out',
+        prize_distribution: {
+          platform_fee_percent: 10,
+          tiers: [{ top_percent: 50, share_percent: 90 }],
+        },
+      },
+      error: null,
+    });
+
+    await processPayout('ch-1');
+
+    // Should have returned early — no wallet inserts should occur
+    expect(mockInsert).not.toHaveBeenCalled();
   });
 });
