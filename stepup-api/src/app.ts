@@ -18,7 +18,7 @@ export function createApp() {
   app.use(express.json());
 
   // Public routes
-  app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  app.get('/health', (_req, res) => res.json({ status: 'ok', version: '2' }));
   app.use('/auth', authRouter);
   app.post('/wallet/webhook/razorpay',
     express.raw({ type: 'application/json' }),
