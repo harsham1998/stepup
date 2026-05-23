@@ -4,38 +4,11 @@ import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/onboarding_screen.dart';
 import '../features/home/screens/home_screen.dart';
-
-// Stubs for screens not yet implemented (Tasks 7+)
-class ChallengesScreen extends StatelessWidget {
-  const ChallengesScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Battles')));
-}
-
-class ChallengeDetailScreen extends StatelessWidget {
-  final String id;
-  const ChallengeDetailScreen({required this.id, super.key});
-  @override
-  Widget build(BuildContext context) => Scaffold(body: Center(child: Text('Challenge $id')));
-}
-
-class LeaderboardScreen extends StatelessWidget {
-  const LeaderboardScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Rankings')));
-}
-
-class WalletScreen extends StatelessWidget {
-  const WalletScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Wallet')));
-}
-
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Profile')));
-}
+import '../features/challenges/screens/challenges_screen.dart';
+import '../features/challenges/screens/challenge_detail_screen.dart';
+import '../features/leaderboard/screens/leaderboard_screen.dart';
+import '../features/wallet/screens/wallet_screen.dart';
+import '../features/profile/screens/profile_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
