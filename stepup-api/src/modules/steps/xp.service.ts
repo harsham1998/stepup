@@ -3,10 +3,10 @@ import { getSupabase } from '../../lib/supabase';
 const XP_PER_1K_STEPS = 10;
 
 const LEAGUE_THRESHOLDS = [
-  { league: 'elite',  min_xp: 4000 },
-  { league: 'gold',   min_xp: 1500 },
-  { league: 'silver', min_xp: 500  },
-  { league: 'bronze', min_xp: 0    },
+  { league: 'elite',  min_weekly_xp: 4000 },
+  { league: 'gold',   min_weekly_xp: 1500 },
+  { league: 'silver', min_weekly_xp: 500  },
+  { league: 'bronze', min_weekly_xp: 0    },
 ];
 
 const BADGES: Array<{ slug: string; check: (xp: number, streak: number) => boolean }> = [
@@ -28,15 +28,18 @@ export async function awardStepXp(userId: string, steps: number) {
 }
 
 async function checkAndAwardBadges(
-  userId: string, xp: number, streak: number,
-  db: ReturnType<typeof getSupabase>,
+  userId: string,
+  xp: number,
+  streak: number,
+  db: ReturnType<typeof getSupabase>
 ) {
   for (const badge of BADGES) {
     if (badge.check(xp, streak)) {
-      await db.from('user_badges').upsert(
-        { user_id: userId, badge_slug: badge.slug },
-        { onConflict: 'user_id,badge_slug', ignoreDuplicates: true },
-      );
+      await db.from('user_badges')
+        .upsert(
+          { user_id: userId, badge_slug: badge.slug, earned_at: new Date().toISOString() },
+          { onConflict: 'user_id,badge_slug', ignoreDuplicates: true }
+        );
     }
   }
 }
@@ -45,7 +48,7 @@ export async function recalculateLeagues() {
   const db = getSupabase();
   const { data: users } = await db.from('users').select('id, xp');
   for (const user of users ?? []) {
-    const league = LEAGUE_THRESHOLDS.find(t => user.xp >= t.min_xp)?.league ?? 'bronze';
+    const league = LEAGUE_THRESHOLDS.find(t => user.xp >= t.min_weekly_xp)?.league ?? 'bronze';
     await db.from('users').update({ league }).eq('id', user.id);
   }
 }
