@@ -11,7 +11,7 @@ const sendOtpSchema = z.object({
 
 const verifyOtpSchema = z.object({
   phone: z.string().regex(/^\d{10}$/),
-  otp: z.string().length(4),
+  otp: z.string().length(6),
 });
 
 const profileSchema = z.object({
@@ -25,8 +25,9 @@ authRouter.post('/otp/send', validateBody(sendOtpSchema), async (req: Request, r
   try {
     const result = await sendOtp(req.body.phone);
     res.json(result);
-  } catch {
-    res.status(500).json({ error: 'Failed to send OTP' });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to send OTP';
+    res.status(500).json({ error: message });
   }
 });
 
@@ -34,8 +35,9 @@ authRouter.post('/otp/verify', validateBody(verifyOtpSchema), async (req: Reques
   try {
     const result = await verifyOtp({ phone: req.body.phone, otp: req.body.otp });
     res.json(result);
-  } catch {
-    res.status(401).json({ error: 'Invalid OTP' });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Invalid OTP';
+    res.status(401).json({ error: message });
   }
 });
 

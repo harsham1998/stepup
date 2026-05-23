@@ -12,7 +12,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _phoneCtrl = TextEditingController();
-  final _otpCtrls = List.generate(4, (_) => TextEditingController());
+  final _otpCtrls = List.generate(6, (_) => TextEditingController());
   bool _otpSent = false, _loading = false;
   String? _error;
 
@@ -39,7 +39,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _verifyOtp() async {
     final otp = _otpCtrls.map((c) => c.text).join();
-    if (otp.length != 4) return;
+    if (otp.length != 6) return;
     setState(() { _loading = true; _error = null; });
     try {
       await ref.read(authServiceProvider).verifyOtp(_phoneCtrl.text, otp);
@@ -86,8 +86,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(4, (i) => Container(
-                    width: 52, height: 56, margin: const EdgeInsets.symmetric(horizontal: 5),
+                  children: List.generate(6, (i) => Container(
+                    width: 44, height: 52, margin: const EdgeInsets.symmetric(horizontal: 3),
                     child: TextField(
                       controller: _otpCtrls[i],
                       textAlign: TextAlign.center,
@@ -102,7 +102,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       onChanged: (v) {
-                        if (v.isNotEmpty && i < 3) FocusScope.of(context).nextFocus();
+                        if (v.isNotEmpty && i < 5) FocusScope.of(context).nextFocus();
                       },
                     ),
                   )),
