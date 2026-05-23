@@ -81,6 +81,11 @@ export async function processPayout(challengeId: string) {
         .update({ final_rank: prevCutoff - tierWinners.length + rank + 1, payout_amount: perWinner })
         .eq('challenge_id', challengeId).eq('user_id', winner.userId);
       if (updateErr) throw new Error(`Failed to update participant rank: ${updateErr.message}`);
+
+      // Fire-and-forget notification (non-blocking)
+      import('../notifications/notifications.service')
+        .then(({ notifyChallengePayout }) => notifyChallengePayout(winner.userId, perWinner, rank + 1))
+        .catch(() => {});
     }
   }
 
