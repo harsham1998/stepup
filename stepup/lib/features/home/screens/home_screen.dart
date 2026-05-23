@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../challenges/providers/challenges_provider.dart';
+import '../../steps/step_sync_service.dart';
 import '../../wallet/providers/wallet_provider.dart';
 import '../providers/home_provider.dart';
 import '../../../shared/widgets/step_ring_widget.dart';
 import '../../../shared/widgets/challenge_card.dart';
 import '../../../core/theme.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _requestHealthPermissions();
+  }
+
+  Future<void> _requestHealthPermissions() async {
+    try {
+      await StepSyncService.instance.requestPermissions();
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final stepsAsync = ref.watch(dailyStepsProvider);
     final walletAsync = ref.watch(walletBalanceProvider);
     final challengesAsync = ref.watch(activeChallengesProvider);
@@ -83,7 +102,10 @@ class HomeScreen extends ConsumerWidget {
                   data: (challenges) => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: challenges.take(2).map((c) =>
-                        ChallengeCard(challenge: c, onTap: () {})).toList(),
+                        ChallengeCard(
+                          challenge: c,
+                          onTap: () => context.push('/challenges/${c.id}'),
+                        )).toList(),
                   ),
                 ),
               ])),

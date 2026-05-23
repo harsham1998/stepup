@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:health/health.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/api_client.dart';
 
 class StepSyncService {
@@ -63,7 +65,18 @@ class StepSyncService {
   static Future<bool> _onIosBackground(ServiceInstance service) async => true;
 
   @pragma('vm:entry-point')
-  static void _onStart(ServiceInstance service) {
+  static void _onStart(ServiceInstance service) async {
+    // Initialize Supabase in the background isolate
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final url = prefs.getString('supabase_url') ?? '';
+      final anonKey = prefs.getString('supabase_anon_key') ?? '';
+      if (url.isNotEmpty && anonKey.isNotEmpty) {
+        await Supabase.initialize(url: url, anonKey: anonKey);
+      }
+    } catch (_) {}
+
+    // Sync every 15 minutes
     Future.doWhile(() async {
       await Future.delayed(const Duration(minutes: 15));
       try {

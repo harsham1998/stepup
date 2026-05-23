@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'features/notifications/notification_service.dart';
@@ -15,10 +16,16 @@ void main() async {
     // Firebase not configured yet — set up via flutterfire configure
     debugPrint('Firebase init skipped: $e');
   }
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL', defaultValue: 'https://placeholder.supabase.co');
+  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'placeholder-anon-key');
   await Supabase.initialize(
-    url: const String.fromEnvironment('SUPABASE_URL', defaultValue: 'https://placeholder.supabase.co'),
-    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'placeholder-anon-key'),
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
+  // Persist credentials for background isolate (flutter_background_service)
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('supabase_url', supabaseUrl);
+  await prefs.setString('supabase_anon_key', supabaseAnonKey);
   try {
     await NotificationService.initialise();
   } catch (e) {
