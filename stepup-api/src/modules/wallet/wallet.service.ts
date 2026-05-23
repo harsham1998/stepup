@@ -6,8 +6,9 @@ import { v4 as uuid } from 'uuid';
 export async function getBalance(userId: string) {
   const { data, error } = await getSupabase()
     .from('wallet_transactions')
-    .select('type, amount')
-    .eq('user_id', userId);
+    .select('type, amount, status')
+    .eq('user_id', userId)
+    .neq('status', 'rejected');
   if (error) throw new Error(error.message);
 
   const balance_paise = (data ?? []).reduce((sum: number, t: { type: string; amount: number }) =>
