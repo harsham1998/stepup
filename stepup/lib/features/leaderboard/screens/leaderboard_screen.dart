@@ -22,7 +22,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    final lbAsync = ref.watch(globalLeaderboardProvider);
+    final globalAsync = ref.watch(globalLeaderboardProvider);
+    final friendsAsync = ref.watch(friendsLeaderboardProvider);
+    final cityAsync = ref.watch(cityLeaderboardProvider);
+
     return Scaffold(
       body: SafeArea(
         child: Column(children: [
@@ -53,23 +56,41 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen>
               ),
             ]),
           ),
-          Expanded(child: lbAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(
-              child: Text('$e', style: const TextStyle(color: Color(0xFF9CA3AF))),
+          Expanded(
+            child: TabBarView(
+              controller: _tabCtrl,
+              children: [
+                _LeaderboardList(lbAsync: globalAsync),
+                _LeaderboardList(lbAsync: friendsAsync),
+                _LeaderboardList(lbAsync: cityAsync),
+              ],
             ),
-            data: (entries) => entries.isEmpty
-                ? const Center(
-                    child: Text('No rankings yet',
-                        style: TextStyle(color: Color(0xFF6B7280))))
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: entries.length,
-                    itemBuilder: (_, i) => _LeaderboardRow(entry: entries[i]),
-                  ),
-          )),
+          ),
         ]),
       ),
+    );
+  }
+}
+
+class _LeaderboardList extends StatelessWidget {
+  final AsyncValue<List<LeaderboardEntry>> lbAsync;
+  const _LeaderboardList({required this.lbAsync});
+
+  @override
+  Widget build(BuildContext context) {
+    return lbAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(
+        child: Text('$e', style: const TextStyle(color: Color(0xFF9CA3AF))),
+      ),
+      data: (entries) => entries.isEmpty
+          ? const Center(
+              child: Text('No rankings yet', style: TextStyle(color: Color(0xFF6B7280))))
+          : ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: entries.length,
+              itemBuilder: (_, i) => _LeaderboardRow(entry: entries[i]),
+            ),
     );
   }
 }

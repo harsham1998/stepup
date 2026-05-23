@@ -13,3 +13,9 @@ final friendsLeaderboardProvider = FutureProvider<List<LeaderboardEntry>>((ref) 
   final entries = data['entries'] as List? ?? [];
   return entries.map((j) => LeaderboardEntry.fromJson(j as Map<String, dynamic>)).toList();
 });
+
+final cityLeaderboardProvider = FutureProvider<List<LeaderboardEntry>>((ref) async {
+  final data = await ApiClient.instance.get('/leaderboard/city/all') as Map<String, dynamic>;
+  final entries = data['entries'] as List? ?? [];
+  return entries.map((j) => LeaderboardEntry.fromJson(j as Map<String, dynamic>)).toList();
+});

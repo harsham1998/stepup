@@ -29,7 +29,16 @@ class WalletScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              error: (e, _) => const SizedBox(),
+              error: (e, _) => Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+                ),
+                child: const Text('Could not load balance',
+                    style: TextStyle(color: Color(0xFFF87171), fontSize: 12)),
+              ),
               data: (w) => Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
