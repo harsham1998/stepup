@@ -35,3 +35,11 @@ describe('GET /leaderboard/friends', () => {
     expect(res.body.entries).toHaveLength(1);
   });
 });
+
+describe('GET /leaderboard/city/:city', () => {
+  it('returns city leaderboard entries', async () => {
+    const res = await request(app).get('/leaderboard/city/Mumbai');
+    expect(res.status).toBe(200);
+    expect(res.body.entries).toEqual([]);
+  });
+});
