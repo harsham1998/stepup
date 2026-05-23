@@ -3,14 +3,9 @@ import 'package:flutter/material.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/onboarding_screen.dart';
+import '../features/home/screens/home_screen.dart';
 
-// Stubs for screens not yet implemented (Tasks 6-7)
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Home')));
-}
-
+// Stubs for screens not yet implemented (Tasks 7+)
 class ChallengesScreen extends StatelessWidget {
   const ChallengesScreen({super.key});
   @override
