@@ -3,6 +3,7 @@ import { getSupabase } from '../../lib/supabase';
 import { getRedis } from '../../lib/redis';
 import { logger } from '../../lib/logger';
 import { PrizeDistribution, WalletTransaction } from '../../types';
+import { notifyChallengePayout } from '../notifications/notifications.service';
 
 const PAYOUT_QUEUE = 'challenge-payout';
 
@@ -83,9 +84,7 @@ export async function processPayout(challengeId: string) {
       if (updateErr) throw new Error(`Failed to update participant rank: ${updateErr.message}`);
 
       // Fire-and-forget notification (non-blocking)
-      import('../notifications/notifications.service')
-        .then(({ notifyChallengePayout }) => notifyChallengePayout(winner.userId, perWinner, rank + 1))
-        .catch(() => {});
+      notifyChallengePayout(winner.userId, perWinner, prevCutoff + rank + 1).catch(() => {});
     }
   }
 
