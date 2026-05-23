@@ -10,36 +10,40 @@ class ChallengeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF13131F),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: challenge.isPaid
-                ? AppTheme.primary.withValues(alpha: 0.35)
-                : Colors.white.withValues(alpha: 0.07),
+    return Semantics(
+      button: true,
+      label: '${challenge.title}, ${challenge.isPaid ? 'paid' : 'free'} challenge, prize pool ${challenge.prizePoolInr}',
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF13131F),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: challenge.isPaid
+                  ? AppTheme.primary.withValues(alpha: 0.35)
+                  : Colors.white.withValues(alpha: 0.07),
+            ),
           ),
-        ),
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              _TypeBadge(challenge),
-              const Spacer(),
-              Text(challenge.prizePoolInr,
-                  style: const TextStyle(color: Color(0xFF34D399), fontSize: 14, fontWeight: FontWeight.w800)),
-            ]),
-            const SizedBox(height: 6),
-            Text(challenge.title,
-                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 2),
-            Text('${challenge.stepGoal ~/ 1000}k steps',
-                style: const TextStyle(color: Color(0xFF6B7280), fontSize: 11)),
-          ],
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                _TypeBadge(challenge),
+                const Spacer(),
+                Text(challenge.prizePoolInr,
+                    style: const TextStyle(color: Color(0xFF34D399), fontSize: 14, fontWeight: FontWeight.w800)),
+              ]),
+              const SizedBox(height: 6),
+              Text(challenge.title,
+                  style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 2),
+              Text('${(challenge.stepGoal / 1000).toStringAsFixed(challenge.stepGoal % 1000 == 0 ? 0 : 1)}k steps',
+                  style: const TextStyle(color: Color(0xFF6B7280), fontSize: 11)),
+            ],
+          ),
         ),
       ),
     );
