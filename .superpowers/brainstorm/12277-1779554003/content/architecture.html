@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StepUp — Architecture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #07070f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 28px 24px 60px; color: #e5e7eb; }
+  h1 { color: #fff; font-size: 20px; font-weight: 900; text-align: center; margin-bottom: 4px; }
+  .sub { color: #4b5563; font-size: 12px; text-align: center; margin-bottom: 32px; }
+
+  /* ── Diagram canvas ── */
+  .diagram { display: flex; flex-direction: column; gap: 12px; max-width: 900px; margin: 0 auto; }
+
+  /* ── Layer ── */
+  .layer { display: flex; align-items: stretch; gap: 10px; }
+  .layer-label {
+    writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);
+    font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: #374151; padding: 0 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    min-width: 18px;
+  }
+  .layer-content { flex: 1; display: flex; gap: 10px; align-items: stretch; }
+
+  /* ── Box ── */
+  .box {
+    border-radius: 10px; padding: 12px 14px;
+    display: flex; flex-direction: column; gap: 6px;
+    position: relative;
+  }
+  .box-title { font-size: 11px; font-weight: 800; line-height: 1.2; }
+  .box-sub   { font-size: 9px; color: #6b7280; line-height: 1.4; }
+  .box-tags  { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+  .tag { font-size: 7.5px; font-weight: 700; padding: 2px 7px; border-radius: 20px; }
+
+  /* ── Color themes ── */
+  .theme-client   { background: rgba(99,102,241,0.1);  border: 1px solid rgba(99,102,241,0.3); }
+  .theme-api      { background: rgba(139,92,246,0.1);  border: 1px solid rgba(139,92,246,0.3); }
+  .theme-module   { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); }
+  .theme-infra    { background: rgba(16,185,129,0.08);  border: 1px solid rgba(16,185,129,0.25); }
+  .theme-external { background: rgba(245,158,11,0.08);  border: 1px solid rgba(245,158,11,0.25); }
+  .theme-db       { background: rgba(6,182,212,0.08);   border: 1px solid rgba(6,182,212,0.25); }
+
+  .tag-purple { background: rgba(99,102,241,0.2);  color: #a5b4fc; }
+  .tag-green  { background: rgba(16,185,129,0.2);  color: #6ee7b7; }
+  .tag-amber  { background: rgba(245,158,11,0.2);  color: #fcd34d; }
+  .tag-cyan   { background: rgba(6,182,212,0.2);   color: #67e8f9; }
+  .tag-pink   { background: rgba(244,114,182,0.2); color: #f9a8d4; }
+  .tag-red    { background: rgba(239,68,68,0.2);   color: #fca5a5; }
+
+  /* ── Arrow connector ── */
+  .arrows { display: flex; justify-content: center; gap: 60px; padding: 0 30px; }
+  .arrow { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+  .arrow-line { width: 1px; height: 20px; background: linear-gradient(180deg, rgba(99,102,241,0.6), rgba(99,102,241,0.2)); }
+  .arrow-head { width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid rgba(99,102,241,0.5); }
+  .arrow-label { font-size: 7.5px; color: #374151; font-weight: 600; text-align: center; line-height: 1.3; }
+
+  /* ── Module grid ── */
+  .module-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; flex: 1; }
+
+  /* ── Flow section ── */
+  .flows { max-width: 900px; margin: 32px auto 0; }
+  .flows h2 { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .flow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .flow-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 12px; }
+  .flow-title { font-size: 10px; font-weight: 700; color: #a5b4fc; margin-bottom: 8px; }
+  .flow-step { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 5px; }
+  .step-num { width: 16px; height: 16px; background: rgba(99,102,241,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7.5px; font-weight: 800; color: #a5b4fc; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 8.5px; color: #9ca3af; line-height: 1.45; }
+
+  /* ── Tech stack ── */
+  .stack { max-width: 900px; margin: 24px auto 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .stack-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 11px 12px; }
+  .stack-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #4b5563; margin-bottom: 6px; }
+  .stack-item { font-size: 9px; color: #d1d5db; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+  .stack-item::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #6366f1; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<h1>StepUp — System Architecture</h1>
+<p class="sub">Option C · Modular Monolith · 100k+ users · National scale</p>
+
+<div class="diagram">
+
+  <!-- ── LAYER 1: CLIENTS ── -->
+  <div class="layer">
+    <div class="layer-label">Clients</div>
+    <div class="layer-content">
+      <div class="box theme-client" style="flex:2;">
+        <div class="box-title" style="color:#a5b4fc;">📱 Flutter App (iOS + Android)</div>
+        <div class="box-sub">Single codebase. Riverpod state management. BLoC for complex flows (challenge, leaderboard).</div>
+        <div class="box-tags">
+          <span class="tag tag-purple">HealthKit</span>
+          <span class="tag tag-purple">Health Connect</span>
+          <span class="tag tag-purple">Supabase Realtime</span>
+          <span class="tag tag-purple">FCM Push</span>
+          <span class="tag tag-purple">Razorpay SDK</span>
+        </div>
+      </div>
+      <div class="box theme-client" style="flex:1;">
+        <div class="box-title" style="color:#a5b4fc;">🌐 Admin Dashboard</div>
+        <div class="box-sub">Web app (React). Fraud analytics, challenge management, payout approvals, user reports.</div>
+        <div class="box-tags">
+          <span class="tag tag-purple">React</span>
+          <span class="tag tag-purple">Supabase Studio</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="arrows">
+    <div class="arrow"><div class="arrow-label">HTTPS / REST</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+    <div class="arrow"><div class="arrow-label">Supabase Realtime<br>(WebSocket)</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+    <div class="arrow"><div class="arrow-label">FCM</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+  </div>
+
+  <!-- ── LAYER 2: API GATEWAY ── -->
+  <div class="layer">
+    <div class="layer-label">Gateway</div>
+    <div class="layer-content">
+      <div class="box theme-api" style="flex:1;">
+        <div class="box-title" style="color:#c4b5fd;">🔀 Node.js API Gateway (Express)</div>
+        <div class="box-sub">Single entry point. JWT validation via Supabase Auth. Rate limiting (100 req/min per user). Request routing to modules. Helmet + CORS security headers.</div>
+        <div class="box-tags">
+          <span class="tag tag-purple">JWT Auth</span>
+          <span class="tag tag-red">Rate Limiting</span>
+          <span class="tag tag-pink">HTTPS only</span>
+          <span class="tag tag-amber">Logging (Pino)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="arrows" style="gap:40px;">
+    <div class="arrow"><div class="arrow-label">Auth</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+    <div class="arrow"><div class="arrow-label">Challenges</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+    <div class="arrow"><div class="arrow-label">Leaderboard</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+    <div class="arrow"><div class="arrow-label">Wallet</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+    <div class="arrow"><div class="arrow-label">Steps</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+  </div>
+
+  <!-- ── LAYER 3: MODULES ── -->
+  <div class="layer">
+    <div class="layer-label">Modules</div>
+    <div class="layer-content">
+      <div class="module-grid">
+
+        <div class="box theme-module">
+          <div style="font-size:14px;">🔐</div>
+          <div class="box-title" style="font-size:10px;color:#fff;">Auth</div>
+          <div class="box-sub" style="font-size:8px;">Phone OTP · Google · Apple · Profile setup · Language pref</div>
+          <div class="box-tags"><span class="tag tag-cyan" style="font-size:7px;">Supabase Auth</span></div>
+        </div>
+
+        <div class="box theme-module">
+          <div style="font-size:14px;">⚔️</div>
+          <div class="box-title" style="font-size:10px;color:#fff;">Challenges</div>
+          <div class="box-sub" style="font-size:8px;">Create · Join · Entry fee · Pool management · Results · Payouts queue</div>
+          <div class="box-tags"><span class="tag tag-amber" style="font-size:7px;">BullMQ Jobs</span></div>
+        </div>
+
+        <div class="box theme-module">
+          <div style="font-size:14px;">🏆</div>
+          <div class="box-title" style="font-size:10px;color:#fff;">Leaderboard</div>
+          <div class="box-sub" style="font-size:8px;">Global · Friends · City · Real-time rank updates via Redis sorted sets</div>
+          <div class="box-tags"><span class="tag tag-red" style="font-size:7px;">Redis ZADD</span></div>
+        </div>
+
+        <div class="box theme-module">
+          <div style="font-size:14px;">💰</div>
+          <div class="box-title" style="font-size:10px;color:#fff;">Wallet</div>
+          <div class="box-sub" style="font-size:8px;">Balance · UPI withdraw · Deposit · Idempotent txn ledger · Razorpay</div>
+          <div class="box-tags"><span class="tag tag-green" style="font-size:7px;">Razorpay</span></div>
+        </div>
+
+        <div class="box theme-module">
+          <div style="font-size:14px;">👟</div>
+          <div class="box-title" style="font-size:10px;color:#fff;">Steps</div>
+          <div class="box-sub" style="font-size:8px;">Sync from HealthKit / Health Connect · Anti-cheat validation · Hourly aggregation</div>
+          <div class="box-tags"><span class="tag tag-pink" style="font-size:7px;">Anti-cheat</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="arrows" style="gap:80px;">
+    <div class="arrow"><div class="arrow-label">Postgres (Supabase)</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+    <div class="arrow"><div class="arrow-label">Redis Cache + Queues</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+    <div class="arrow"><div class="arrow-label">External APIs</div><div class="arrow-line"></div><div class="arrow-head"></div></div>
+  </div>
+
+  <!-- ── LAYER 4: DATA + INFRA ── -->
+  <div class="layer">
+    <div class="layer-label">Data</div>
+    <div class="layer-content" style="gap:10px;">
+
+      <div class="box theme-db" style="flex:2;">
+        <div class="box-title" style="color:#67e8f9;">🐘 Supabase (PostgreSQL)</div>
+        <div class="box-sub">Primary database. Row-level security on all tables. Realtime subscriptions for leaderboard pushes. Storage for profile photos.</div>
+        <div class="box-tags">
+          <span class="tag tag-cyan">users</span>
+          <span class="tag tag-cyan">challenges</span>
+          <span class="tag tag-cyan">challenge_participants</span>
+          <span class="tag tag-cyan">step_logs</span>
+          <span class="tag tag-cyan">wallet_txns</span>
+          <span class="tag tag-cyan">leaderboard_snapshots</span>
+        </div>
+      </div>
+
+      <div class="box theme-infra" style="flex:1;">
+        <div class="box-title" style="color:#6ee7b7;">⚡ Redis</div>
+        <div class="box-sub">Sorted sets for live leaderboards. BullMQ job queues for step sync, payout processing, notifications.</div>
+        <div class="box-tags">
+          <span class="tag tag-green">ZADD ranks</span>
+          <span class="tag tag-green">BullMQ</span>
+          <span class="tag tag-green">Session cache</span>
+        </div>
+      </div>
+
+      <div class="box theme-external" style="flex:1.2;">
+        <div class="box-title" style="color:#fcd34d;">🔌 External</div>
+        <div class="box-sub">Razorpay for UPI in/out. Firebase FCM for push. MSG91 for OTP SMS.</div>
+        <div class="box-tags">
+          <span class="tag tag-amber">Razorpay</span>
+          <span class="tag tag-amber">Firebase FCM</span>
+          <span class="tag tag-amber">MSG91 OTP</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ── KEY FLOWS ── -->
+<div class="flows">
+  <h2>Key Data Flows</h2>
+  <div class="flow-grid">
+
+    <div class="flow-card">
+      <div class="flow-title">Step Sync Flow</div>
+      <div class="flow-step"><div class="step-num">1</div><div class="step-text">Flutter polls HealthKit/Health Connect every 15 min in background</div></div>
+      <div class="flow-step"><div class="step-num">2</div><div class="step-text">POST /steps/sync with raw step data + device metadata</div></div>
+      <div class="flow-step"><div class="step-num">3</div><div class="step-text">Anti-cheat validates: steps/min rate, heart rate consistency, GPS movement</div></div>
+      <div class="flow-step"><div class="step-num">4</div><div class="step-text">Valid steps → write to step_logs, update Redis ZADD for active challenges</div></div>
+      <div class="flow-step"><div class="step-num">5</div><div class="step-text">Supabase Realtime pushes updated rank to all subscribers</div></div>
+    </div>
+
+    <div class="flow-card">
+      <div class="flow-title">Join Paid Challenge</div>
+      <div class="flow-step"><div class="step-num">1</div><div class="step-text">User taps "Join · ₹50" — Razorpay SDK opens UPI/card sheet</div></div>
+      <div class="flow-step"><div class="step-num">2</div><div class="step-text">Razorpay webhook → POST /wallet/deposit confirmed</div></div>
+      <div class="flow-step"><div class="step-num">3</div><div class="step-text">Wallet module: debit entry fee, credit challenge pool atomically (DB transaction)</div></div>
+      <div class="flow-step"><div class="step-num">4</div><div class="step-text">Insert into challenge_participants, add to Redis leaderboard set</div></div>
+      <div class="flow-step"><div class="step-num">5</div><div class="step-text">Push notification: "You've joined Weekend Warriors! 47 competitors."</div></div>
+    </div>
+
+    <div class="flow-card">
+      <div class="flow-title">Challenge Payout</div>
+      <div class="flow-step"><div class="step-num">1</div><div class="step-text">BullMQ cron job runs at challenge end time</div></div>
+      <div class="flow-step"><div class="step-num">2</div><div class="step-text">Fetch final ranks from Redis, cross-check with Postgres step_logs</div></div>
+      <div class="flow-step"><div class="step-num">3</div><div class="step-text">Anti-cheat final sweep: flag suspicious step patterns</div></div>
+      <div class="flow-step"><div class="step-num">4</div><div class="step-text">Distribute pool to winners (top % based on challenge config), deduct 10% platform fee</div></div>
+      <div class="flow-step"><div class="step-num">5</div><div class="step-text">Credit winner wallets, queue Razorpay payout for UPI withdrawals</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── TECH STACK ── -->
+<div style="max-width:900px;margin:24px auto 0;">
+  <h2 style="font-size:14px;font-weight:800;color:#fff;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.06);">Full Tech Stack</h2>
+  <div class="stack" style="margin:0;">
+    <div class="stack-card">
+      <div class="stack-label">Mobile</div>
+      <div class="stack-item">Flutter 3.x</div>
+      <div class="stack-item">Riverpod (state)</div>
+      <div class="stack-item">BLoC (complex flows)</div>
+      <div class="stack-item">supabase_flutter</div>
+      <div class="stack-item">health (HealthKit/HC)</div>
+      <div class="stack-item">razorpay_flutter</div>
+      <div class="stack-item">firebase_messaging</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-label">Backend</div>
+      <div class="stack-item">Node.js 20 + Express</div>
+      <div class="stack-item">TypeScript</div>
+      <div class="stack-item">BullMQ (job queues)</div>
+      <div class="stack-item">Zod (validation)</div>
+      <div class="stack-item">Pino (logging)</div>
+      <div class="stack-item">Helmet + CORS</div>
+      <div class="stack-item">Jest (tests)</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-label">Database</div>
+      <div class="stack-item">Supabase (Postgres)</div>
+      <div class="stack-item">Supabase Auth</div>
+      <div class="stack-item">Supabase Realtime</div>
+      <div class="stack-item">Supabase Storage</div>
+      <div class="stack-item">Redis (Upstash)</div>
+      <div class="stack-item">Row Level Security</div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-label">External</div>
+      <div class="stack-item">Razorpay (UPI/cards)</div>
+      <div class="stack-item">Firebase FCM</div>
+      <div class="stack-item">MSG91 (OTP SMS)</div>
+      <div class="stack-item">Railway (deploy)</div>
+      <div class="stack-item">GitHub Actions CI</div>
+      <div class="stack-item">Sentry (errors)</div>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:900px;margin:20px auto 0;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:10px;padding:14px 16px;">
+  <div style="font-size:10px;font-weight:700;color:#a5b4fc;margin-bottom:4px;">Scale headroom at 100k users</div>
+  <div style="font-size:9px;color:#6b7280;line-height:1.6;">
+    Redis sorted sets handle 10M+ leaderboard ops/sec. Supabase Postgres scales to ~50k concurrent connections with pgBouncer.
+    BullMQ with Redis processes 100k+ step sync jobs/hour. When one module becomes the bottleneck, extract it to its own service — the clean boundaries make this a lift-and-shift operation.
+  </div>
+</div>
+
+</body>
+</html>

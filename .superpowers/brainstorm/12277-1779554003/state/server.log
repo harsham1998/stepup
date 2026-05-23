@@ -1,0 +1,10 @@
+{"type":"server-started","port":51129,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:51129","screen_dir":"/Users/harsha/StepUp/.superpowers/brainstorm/12277-1779554003/content","state_dir":"/Users/harsha/StepUp/.superpowers/brainstorm/12277-1779554003/state"}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/12277-1779554003/content/app-style.html"}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/12277-1779554003/content/app-style-mobile.html"}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/12277-1779554003/content/styles-10.html"}
+{"source":"user-event","type":"click","text":"9:41●●●\n      Good morning,Harsha 👋\n      \n        Today\n        12,450\n        / 15,000 steps\n        \n      \n      \n        🏆#3Rank\n        ₹480Wallet\n        🔥21Streak\n      \n      \n        Challenge\n        Weekend Warriors ⚔️\n        ₹500 pool · 47 joined\n      \n      \n        🏠Home\n        ⚔️Battle\n        🏆Rank\n        👤Me\n      \n    \n    1 · Dark Neon\n    Purple/indigo gaming vibes. Premium competitive feel.\n    Select","choice":"1","id":null,"timestamp":1779554475351}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/12277-1779554003/content/all-screens.html"}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/12277-1779554003/content/screens-v2.html"}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/12277-1779554003/content/waiting-1.html"}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/12277-1779554003/content/architecture.html"}
+{"type":"server-stopped","reason":"idle timeout"}

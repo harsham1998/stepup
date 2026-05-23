@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Choose Your App Style</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f13; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 32px 24px; min-height: 100vh; }
+  h1 { color: #fff; font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 6px; }
+  .subtitle { color: #6b7280; font-size: 14px; text-align: center; margin-bottom: 32px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 28px; max-width: 1100px; margin: 0 auto; }
+  .phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: transform 0.2s; }
+  .phone-wrap:hover { transform: translateY(-4px); }
+  .phone-wrap.selected .phone { box-shadow: 0 0 0 3px #6366f1, 0 20px 40px rgba(99,102,241,0.4); }
+  .phone-wrap.selected .badge { background: #6366f1; color: #fff; }
+  .phone { width: 155px; height: 310px; border-radius: 28px; border: 2.5px solid rgba(255,255,255,0.12); overflow: hidden; position: relative; transition: box-shadow 0.2s; }
+  .label { color: #e5e7eb; font-size: 12px; font-weight: 700; text-align: center; }
+  .desc { color: #6b7280; font-size: 10px; text-align: center; max-width: 150px; line-height: 1.4; }
+  .badge { border: 1.5px solid #6366f1; color: #a5b4fc; font-size: 10px; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
+  .confirm { display: block; margin: 40px auto 0; background: #6366f1; color: #fff; border: none; padding: 14px 40px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.5px; }
+  .confirm:hover { background: #4f46e5; }
+  #selection-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1f2937; border-top: 1px solid #374151; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+  #selected-label { color: #9ca3af; font-size: 13px; }
+  #selected-label span { color: #a5b4fc; font-weight: 700; }
+  /* phone inner shared */
+  .sb { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px 4px; }
+  .sb-time { font-size: 9px; }
+  .sb-dots { font-size: 8px; letter-spacing: 1px; }
+  .greeting { padding: 0 10px 6px; }
+  .greeting .g1 { font-size: 9px; opacity: 0.7; }
+  .greeting .g2 { font-size: 14px; font-weight: 900; line-height: 1.2; }
+  .step-card { margin: 0 8px 6px; border-radius: 12px; padding: 10px; }
+  .step-label { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 2px; }
+  .step-num { font-size: 20px; font-weight: 900; line-height: 1; }
+  .step-goal { font-size: 8px; opacity: 0.8; margin-top: 1px; }
+  .pbar-bg { border-radius: 3px; height: 4px; margin-top: 7px; }
+  .pbar-fill { height: 100%; border-radius: 3px; width: 83%; }
+  .stats { display: flex; gap: 5px; margin: 0 8px 6px; }
+  .stat { flex: 1; border-radius: 8px; padding: 6px 3px; text-align: center; }
+  .stat-val { font-size: 11px; font-weight: 800; }
+  .stat-key { font-size: 7px; opacity: 0.7; margin-top: 1px; }
+  .challenge { margin: 0 8px; border-radius: 10px; padding: 8px 10px; }
+  .ch-label { font-size: 8px; opacity: 0.6; margin-bottom: 2px; }
+  .ch-title { font-size: 10px; font-weight: 800; }
+  .ch-sub { font-size: 8px; opacity: 0.75; margin-top: 2px; }
+  .nav { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; padding: 6px 0 8px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .nav-item { text-align: center; }
+  .nav-icon { font-size: 12px; }
+  .nav-lbl { font-size: 6px; margin-top: 1px; opacity: 0.6; }
+  .nav-lbl.active { opacity: 1; }
+</style>
+</head>
+<body>
+<h1>Choose Your App Style</h1>
+<p class="subtitle">10 distinct visual directions — click to select, then confirm.</p>
+
+<div class="grid" id="grid">
+
+  <!-- 1. Dark Neon Purple -->
+  <div class="phone-wrap" onclick="pick(this,'1')" data-choice="1">
+    <div class="phone" style="background:#0d0d1a;">
+      <div class="sb" style="color:#9ca3af;"><span class="sb-time">9:41</span><span class="sb-dots">●●●</span></div>
+      <div class="greeting"><div class="g1" style="color:#9ca3af;">Good morning,</div><div class="g2" style="color:#fff;">Harsha 👋</div></div>
+      <div class="step-card" style="background:linear-gradient(135deg,#1e1b4b,#2d2b6b);border:1px solid rgba(99,102,241,0.4);">
+        <div class="step-label" style="color:#a5b4fc;">Today</div>
+        <div class="step-num" style="color:#fff;">12,450</div>
+        <div class="step-goal" style="color:#6366f1;">/ 15,000 steps</div>
+        <div class="pbar-bg" style="background:#1e1b4b;"><div class="pbar-fill" style="background:linear-gradient(90deg,#6366f1,#a78bfa);"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat" style="background:#1a1a2e;"><div class="stat-val" style="color:#fbbf24;">🏆#3</div><div class="stat-key" style="color:#6b7280;">Rank</div></div>
+        <div class="stat" style="background:#1a1a2e;"><div class="stat-val" style="color:#34d399;">₹480</div><div class="stat-key" style="color:#6b7280;">Wallet</div></div>
+        <div class="stat" style="background:#1a1a2e;"><div class="stat-val" style="color:#f472b6;">🔥21</div><div class="stat-key" style="color:#6b7280;">Streak</div></div>
+      </div>
+      <div class="challenge" style="background:#1a1a2e;border-left:3px solid #6366f1;">
+        <div class="ch-label" style="color:#6b7280;">Challenge</div>
+        <div class="ch-title" style="color:#fff;">Weekend Warriors ⚔️</div>
+        <div class="ch-sub" style="color:#6366f1;">₹500 pool · 47 joined</div>
+      </div>
+      <div class="nav" style="background:#070710;">
+        <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-lbl active" style="color:#6366f1;">Home</div></div>
+        <div class="nav-item"><div class="nav-icon">⚔️</div><div class="nav-lbl" style="color:#4b5563;">Battle</div></div>
+        <div class="nav-item"><div class="nav-icon">🏆</div><div class="nav-lbl" style="color:#4b5563;">Rank</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl" style="color:#4b5563;">Me</div></div>
+      </div>
+    </div>
+    <div class="label">1 · Dark Neon</div>
+    <div class="desc">Purple/indigo gaming vibes. Premium competitive feel.</div>
+    <div class="badge">Select</div>
+  </div>
+
+  <!-- 2. Clean White Green -->
+  <div class="phone-wrap" onclick="pick(this,'2')" data-choice="2">
+    <div class="phone" style="background:#f8fafc;border-color:#e2e8f0;">
+      <div class="sb" style="color:#64748b;"><span class="sb-time">9:41</span><span class="sb-dots">●●●</span></div>
+      <div class="greeting"><div class="g1" style="color:#94a3b8;">Good morning,</div><div class="g2" style="color:#0f172a;">Harsha 👋</div></div>
+      <div class="step-card" style="background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <div class="step-label" style="color:#94a3b8;">Today's Steps</div>
+        <div class="step-num" style="color:#0f172a;">12,450</div>
+        <div class="step-goal" style="color:#22c55e;">83% of goal</div>
+        <div class="pbar-bg" style="background:#f1f5f9;"><div class="pbar-fill" style="background:linear-gradient(90deg,#22c55e,#16a34a);"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat" style="background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06);"><div class="stat-val" style="color:#f59e0b;">#3</div><div class="stat-key" style="color:#94a3b8;">Rank</div></div>
+        <div class="stat" style="background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06);"><div class="stat-val" style="color:#22c55e;">₹480</div><div class="stat-key" style="color:#94a3b8;">Earned</div></div>
+        <div class="stat" style="background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06);"><div class="stat-val" style="color:#ef4444;">🔥21</div><div class="stat-key" style="color:#94a3b8;">Streak</div></div>
+      </div>
+      <div class="challenge" style="background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:3px solid #22c55e;">
+        <div class="ch-label" style="color:#94a3b8;">Active Challenge</div>
+        <div class="ch-title" style="color:#0f172a;">Weekend Warriors</div>
+        <div class="ch-sub" style="color:#22c55e;">₹500 pool · 47 joined</div>
+      </div>
+      <div class="nav" style="background:#fff;border-color:#f1f5f9;">
+        <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-lbl active" style="color:#22c55e;">Home</div></div>
+        <div class="nav-item"><div class="nav-icon">⚔️</div><div class="nav-lbl" style="color:#94a3b8;">Challenges</div></div>
+        <div class="nav-item"><div class="nav-icon">🏆</div><div class="nav-lbl" style="color:#94a3b8;">Leaderboard</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl" style="color:#94a3b8;">Profile</div></div>
+      </div>
+    </div>
+    <div class="label" style="color:#e5e7eb;">2 · Clean Light</div>
+    <div class="desc">White &amp; green. Familiar, health-focused, trustworthy.</div>
+    <div class="badge">Select</div>
+  </div>
+
+  <!-- 3. Desi Orange -->
+  <div class="phone-wrap" onclick="pick(this,'3')" data-choice="3">
+    <div class="phone" style="background:#fff7ed;border-color:#fed7aa;">
+      <div class="sb" style="color:#9a3412;"><span class="sb-time">9:41</span><span class="sb-dots">●●●</span></div>
+      <div class="greeting"><div class="g1" style="color:#c2410c;">शुभ प्रभात,</div><div class="g2" style="color:#1c1917;">Harsha 🙏</div></div>
+      <div class="step-card" style="background:linear-gradient(135deg,#ff6b35,#f59e0b);">
+        <div class="step-label" style="color:rgba(255,255,255,0.8);">आज के कदम</div>
+        <div class="step-num" style="color:#fff;">12,450</div>
+        <div class="step-goal" style="color:rgba(255,255,255,0.85);">15,000 का लक्ष्य</div>
+        <div class="pbar-bg" style="background:rgba(255,255,255,0.3);"><div class="pbar-fill" style="background:#fff;"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat" style="background:#fff;box-shadow:0 2px 8px rgba(234,88,12,0.1);"><div class="stat-val" style="color:#d97706;">🥇#3</div><div class="stat-key" style="color:#9a3412;">Rank</div></div>
+        <div class="stat" style="background:#fff;box-shadow:0 2px 8px rgba(234,88,12,0.1);"><div class="stat-val" style="color:#15803d;">₹480</div><div class="stat-key" style="color:#9a3412;">जीत</div></div>
+        <div class="stat" style="background:#fff;box-shadow:0 2px 8px rgba(234,88,12,0.1);"><div class="stat-val" style="color:#dc2626;">🔥21</div><div class="stat-key" style="color:#9a3412;">Streak</div></div>
+      </div>
+      <div class="challenge" style="background:#fff;box-shadow:0 2px 8px rgba(234,88,12,0.1);border-left:3px solid #f59e0b;">
+        <div class="ch-label" style="color:#c2410c;">Challenge</div>
+        <div class="ch-title" style="color:#1c1917;">Weekend Warriors 🎯</div>
+        <div class="ch-sub" style="color:#ea580c;">₹500 pool · 47 joined</div>
+      </div>
+      <div class="nav" style="background:#fff;border-color:#fed7aa;">
+        <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-lbl active" style="color:#ea580c;">Home</div></div>
+        <div class="nav-item"><div class="nav-icon">⚔️</div><div class="nav-lbl" style="color:#9a3412;">Challenges</div></div>
+        <div class="nav-item"><div class="nav-icon">🏆</div><div class="nav-lbl" style="color:#9a3412;">Rank</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl" style="color:#9a3412;">Me</div></div>
+      </div>
+    </div>
+    <div class="label" style="color:#e5e7eb;">3 · Desi Orange</div>
+    <div class="desc">Warm saffron &amp; gold. Bilingual. Feels native to India.</div>
+    <div class="badge">Select</div>
+  </div>
+
+  <!-- 4. Deep Navy / Cyan -->
+  <div class="phone-wrap" onclick="pick(this,'4')" data-choice="4">
+    <div class="phone" style="background:#0c1929;">
+      <div class="sb" style="color:#94a3b8;"><span class="sb-time">9:41</span><span class="sb-dots">●●●</span></div>
+      <div class="greeting"><div class="g1" style="color:#64748b;">Good morning,</div><div class="g2" style="color:#f0f9ff;">Harsha 👋</div></div>
+      <div class="step-card" style="background:linear-gradient(135deg,#0c2d4a,#0e3a5c);border:1px solid rgba(6,182,212,0.3);">
+        <div class="step-label" style="color:#67e8f9;">Today</div>
+        <div class="step-num" style="color:#fff;">12,450</div>
+        <div class="step-goal" style="color:#06b6d4;">/ 15,000 steps</div>
+        <div class="pbar-bg" style="background:rgba(6,182,212,0.15);"><div class="pbar-fill" style="background:linear-gradient(90deg,#06b6d4,#0ea5e9);"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat" style="background:#0f2033;"><div class="stat-val" style="color:#fbbf24;">🏆#3</div><div class="stat-key" style="color:#475569;">Rank</div></div>
+        <div class="stat" style="background:#0f2033;"><div class="stat-val" style="color:#06b6d4;">₹480</div><div class="stat-key" style="color:#475569;">Wallet</div></div>
+        <div class="stat" style="background:#0f2033;"><div class="stat-val" style="color:#f97316;">🔥21</div><div class="stat-key" style="color:#475569;">Streak</div></div>
+      </div>
+      <div class="challenge" style="background:#0f2033;border-left:3px solid #06b6d4;">
+        <div class="ch-label" style="color:#475569;">Challenge</div>
+        <div class="ch-title" style="color:#f0f9ff;">Weekend Warriors</div>
+        <div class="ch-sub" style="color:#06b6d4;">₹500 pool · 47 joined</div>
+      </div>
+      <div class="nav" style="background:#070f1a;">
+        <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-lbl active" style="color:#06b6d4;">Home</div></div>
+        <div class="nav-item"><div class="nav-icon">⚔️</div><div class="nav-lbl" style="color:#334155;">Battle</div></div>
+        <div class="nav-item"><div class="nav-icon">🏆</div><div class="nav-lbl" style="color:#334155;">Rank</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl" style="color:#334155;">Me</div></div>
+      </div>
+    </div>
+    <div class="label" style="color:#e5e7eb;">4 · Deep Navy</div>
+    <div class="desc">Navy &amp; cyan. Sleek, corporate. Great for B2B wellness.</div>
+    <div class="badge">Select</div>
+  </div>
+
+  <!-- 5. Pitch Black Gold -->
+  <div class="phone-wrap" onclick="pick(this,'5')" data-choice="5">
+    <div class="phone" style="background:#000;">
+      <div class="sb" style="color:#6b7280;"><span class="sb-time">9:41</span><span class="sb-dots">●●●</span></div>
+      <div class="greeting"><div class="g1" style="color:#4b5563;">Good morning,</div><div class="g2" style="color:#f9fafb;">Harsha 👋</div></div>
+      <div class="step-card" style="background:#111;border:1px solid rgba(217,119,6,0.4);">
+        <div class="step-label" style="color:#d97706;">TODAY</div>
+        <div class="step-num" style="color:#fef3c7;">12,450</div>
+        <div class="step-goal" style="color:#92400e;">/ 15,000 steps</div>
+        <div class="pbar-bg" style="background:#1c1c1c;"><div class="pbar-fill" style="background:linear-gradient(90deg,#d97706,#fbbf24);"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat" style="background:#111;border:1px solid #1f1f1f;"><div class="stat-val" style="color:#fbbf24;">👑 #3</div><div class="stat-key" style="color:#4b5563;">Rank</div></div>
+        <div class="stat" style="background:#111;border:1px solid #1f1f1f;"><div class="stat-val" style="color:#d97706;">₹480</div><div class="stat-key" style="color:#4b5563;">Wallet</div></div>
+        <div class="stat" style="background:#111;border:1px solid #1f1f1f;"><div class="stat-val" style="color:#ef4444;">🔥21</div><div class="stat-key" style="color:#4b5563;">Streak</div></div>
+      </div>
+      <div class="challenge" style="background:#111;border:1px solid rgba(217,119,6,0.3);">
+        <div class="ch-label" style="color:#4b5563;">Challenge</div>
+        <div class="ch-title" style="color:#fef3c7;">Weekend Warriors 👑</div>
+        <div class="ch-sub" style="color:#d97706;">₹500 pool · 47 joined</div>
+      </div>
+      <div class="nav" style="background:#000;border-color:#111;">
+        <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-lbl active" style="color:#d97706;">Home</div></div>
+        <div class="nav-item"><div class="nav-icon">⚔️</div><div class="nav-lbl" style="color:#374151;">Battle</div></div>
+        <div class="nav-item"><div class="nav-icon">🏆</div><div class="nav-lbl" style="color:#374151;">Rank</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl" style="color:#374151;">Me</div></div>
+      </div>
+    </div>
+    <div class="label" style="color:#e5e7eb;">5 · Black &amp; Gold</div>
+    <div class="desc">OLED black + gold. Ultra-premium luxury feel.</div>
+    <div class="badge">Select</div>
+  </div>
+
+  <!-- 6. Rose Gold -->
+  <div class="phone-wrap" onclick="pick(this,'6')" data-choice="6">
+    <div class="phone" style="background:#fff1f5;border-color:#fecdd3;">
+      <div class="sb" style="color:#9f1239;"><span class="sb-time">9:41</span><span class="sb-dots">●●●</span></div>
+      <div class="greeting"><div class="g1" style="color:#fb7185;">Good morning,</div><div class="g2" style="color:#1c1917;">Harsha ✨</div></div>
+      <div class="step-card" style="background:linear-gradient(135deg,#fb7185,#f43f5e);">
+        <div class="step-label" style="color:rgba(255,255,255,0.8);">Today's Steps</div>
+        <div class="step-num" style="color:#fff;">12,450</div>
+        <div class="step-goal" style="color:rgba(255,255,255,0.85);">/ 15,000 steps</div>
+        <div class="pbar-bg" style="background:rgba(255,255,255,0.3);"><div class="pbar-fill" style="background:#fff;"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat" style="background:#fff;box-shadow:0 2px 8px rgba(244,63,94,0.1);"><div class="stat-val" style="color:#f43f5e;">#3</div><div class="stat-key" style="color:#9f1239;">Rank</div></div>
+        <div class="stat" style="background:#fff;box-shadow:0 2px 8px rgba(244,63,94,0.1);"><div class="stat-val" style="color:#d97706;">₹480</div><div class="stat-key" style="color:#9f1239;">Earned</div></div>
+        <div class="stat" style="background:#fff;box-shadow:0 2px 8px rgba(244,63,94,0.1);"><div class="stat-val" style="color:#f43f5e;">🔥21</div><div class="stat-key" style="color:#9f1239;">Streak</div></div>
+      </div>
+      <div class="challenge" style="background:#fff;box-shadow:0 2px 8px rgba(244,63,94,0.1);border-left:3px solid #fb7185;">
+        <div class="ch-label" style="color:#fb7185;">Challenge</div>
+        <div class="ch-title" style="color:#1c1917;">Weekend Warriors 💪</div>
+        <div class="ch-sub" style="color:#f43f5e;">₹500 pool · 47 joined</div>
+      </div>
+      <div class="nav" style="background:#fff;border-color:#fecdd3;">
+        <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-lbl active" style="color:#f43f5e;">Home</div></div>
+        <div class="nav-item"><div class="nav-icon">⚔️</div><div class="nav-lbl" style="color:#fca5a5;">Challenges</div></div>
+        <div class="nav-item"><div class="nav-icon">🏆</div><div class="nav-lbl" style="color:#fca5a5;">Rank</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl" style="color:#fca5a5;">Me</div></div>
+      </div>
+    </div>
+    <div class="label" style="color:#e5e7eb;">6 · Rose Pink</div>
+    <div class="desc">Rose &amp; blush. Aspirational lifestyle app feel.</div>
+    <div class="badge">Select</div>
+  </div>
+
+  <!-- 7. Forest Green -->
+  <div class="phone-wrap" onclick="pick(this,'7')" data-choice="7">
+    <div class="phone" style="background:#052e16;">
+      <div class="sb" style="color:#4ade80;"><span class="sb-time">9:41</span><span class="sb-dots">●●●</span></div>
+      <div class="greeting"><div class="g1" style="color:#16a34a;">Good morning,</div><div class="g2" style="color:#f0fdf4;">Harsha 🌿</div></div>
+      <div class="step-card" style="background:linear-gradient(135deg,#14532d,#166534);border:1px solid rgba(74,222,128,0.3);">
+        <div class="step-label" style="color:#4ade80;">Today</div>
+        <div class="step-num" style="color:#f0fdf4;">12,450</div>
+        <div class="step-goal" style="color:#86efac;">/ 15,000 steps</div>
+        <div class="pbar-bg" style="background:rgba(74,222,128,0.15);"><div class="pbar-fill" style="background:linear-gradient(90deg,#4ade80,#22c55e);"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat" style="background:#0a3d1f;"><div class="stat-val" style="color:#fbbf24;">🌟#3</div><div class="stat-key" style="color:#166534;">Rank</div></div>
+        <div class="stat" style="background:#0a3d1f;"><div class="stat-val" style="color:#4ade80;">₹480</div><div class="stat-key" style="color:#166534;">Earned</div></div>
+        <div class="stat" style="background:#0a3d1f;"><div class="stat-val" style="color:#fb923c;">🔥21</div><div class="stat-key" style="color:#166534;">Streak</div></div>
+      </div>
+      <div class="challenge" style="background:#0a3d1f;border-left:3px solid #4ade80;">
+        <div class="ch-label" style="color:#166534;">Challenge</div>
+        <div class="ch-title" style="color:#f0fdf4;">Weekend Warriors 🌿</div>
+        <div class="ch-sub" style="color:#4ade80;">₹500 pool · 47 joined</div>
+      </div>
+      <div class="nav" style="background:#030f07;border-color:#0a3d1f;">
+        <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-lbl active" style="color:#4ade80;">Home</div></div>
+        <div class="nav-item"><div class="nav-icon">⚔️</div><div class="nav-lbl" style="color:#166534;">Challenges</div></div>
+        <div class="nav-item"><div class="nav-icon">🏆</div><div class="nav-lbl" style="color:#166534;">Rank</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl" style="color:#166534;">Me</div></div>
+      </div>
+    </div>
+    <div class="label" style="color:#e5e7eb;">7 · Forest Dark</div>
+    <div class="desc">Deep forest greens. Mindful, nature wellness feel.</div>
+    <div class="badge">Select</div>
+  </div>
+
+  <!-- 8. Electric Blue -->
+  <div class="phone-wrap" onclick="pick(this,'8')" data-choice="8">
+    <div class="phone" style="background:#eff6ff;border-color:#bfdbfe;">
+      <div class="sb" style="color:#1d4ed8;"><span class="sb-time">9:41</span><span class="sb-dots">●●●</span></div>
+      <div class="greeting"><div class="g1" style="color:#3b82f6;">Good morning,</div><div class="g2" style="color:#1e3a5f;">Harsha ⚡</div></div>
+      <div class="step-card" style="background:linear-gradient(135deg,#1d4ed8,#2563eb);">
+        <div class="step-label" style="color:rgba(255,255,255,0.75);">Today's Steps</div>
+        <div class="step-num" style="color:#fff;">12,450</div>
+        <div class="step-goal" style="color:#bfdbfe;">/ 15,000 steps</div>
+        <div class="pbar-bg" style="background:rgba(255,255,255,0.25);"><div class="pbar-fill" style="background:#fff;"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat" style="background:#fff;box-shadow:0 1px 4px rgba(37,99,235,0.15);"><div class="stat-val" style="color:#f59e0b;">#3</div><div class="stat-key" style="color:#3b82f6;">Rank</div></div>
+        <div class="stat" style="background:#fff;box-shadow:0 1px 4px rgba(37,99,235,0.15);"><div class="stat-val" style="color:#2563eb;">₹480</div><div class="stat-key" style="color:#3b82f6;">Earned</div></div>
+        <div class="stat" style="background:#fff;box-shadow:0 1px 4px rgba(37,99,235,0.15);"><div class="stat-val" style="color:#ef4444;">🔥21</div><div class="stat-key" style="color:#3b82f6;">Streak</div></div>
+      </div>
+      <div class="challenge" style="background:#fff;box-shadow:0 1px 4px rgba(37,99,235,0.15);border-left:3px solid #2563eb;">
+        <div class="ch-label" style="color:#3b82f6;">Challenge</div>
+        <div class="ch-title" style="color:#1e3a5f;">Weekend Warriors ⚡</div>
+        <div class="ch-sub" style="color:#2563eb;">₹500 pool · 47 joined</div>
+      </div>
+      <div class="nav" style="background:#fff;border-color:#bfdbfe;">
+        <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-lbl active" style="color:#2563eb;">Home</div></div>
+        <div class="nav-item"><div class="nav-icon">⚔️</div><div class="nav-lbl" style="color:#93c5fd;">Challenges</div></div>
+        <div class="nav-item"><div class="nav-icon">🏆</div><div class="nav-lbl" style="color:#93c5fd;">Rank</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl" style="color:#93c5fd;">Me</div></div>
+      </div>
+    </div>
+    <div class="label" style="color:#e5e7eb;">8 · Electric Blue</div>
+    <div class="desc">Bold blue gradients. Modern tech startup energy.</div>
+    <div class="badge">Select</div>
+  </div>
+
+  <!-- 9. Sunset Gradient -->
+  <div class="phone-wrap" onclick="pick(this,'9')" data-choice="9">
+    <div class="phone" style="background:linear-gradient(180deg,#1a0533 0%,#2d0a0a 100%);">
+      <div class="sb" style="color:#f97316;"><span class="sb-time">9:41</span><span class="sb-dots">●●●</span></div>
+      <div class="greeting"><div class="g1" style="color:#fb923c;">Good morning,</div><div class="g2" style="color:#fff7ed;">Harsha 🌅</div></div>
+      <div class="step-card" style="background:linear-gradient(135deg,#7c2d12,#9a1c1c);border:1px solid rgba(251,146,60,0.4);">
+        <div class="step-label" style="color:#fb923c;">Today</div>
+        <div class="step-num" style="color:#fff7ed;">12,450</div>
+        <div class="step-goal" style="color:#fdba74;">/ 15,000 steps</div>
+        <div class="pbar-bg" style="background:rgba(251,146,60,0.2);"><div class="pbar-fill" style="background:linear-gradient(90deg,#f97316,#fbbf24);"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat" style="background:rgba(255,255,255,0.06);border:1px solid rgba(251,146,60,0.2);"><div class="stat-val" style="color:#fbbf24;">🏅#3</div><div class="stat-key" style="color:#9a3412;">Rank</div></div>
+        <div class="stat" style="background:rgba(255,255,255,0.06);border:1px solid rgba(251,146,60,0.2);"><div class="stat-val" style="color:#34d399;">₹480</div><div class="stat-key" style="color:#9a3412;">Wallet</div></div>
+        <div class="stat" style="background:rgba(255,255,255,0.06);border:1px solid rgba(251,146,60,0.2);"><div class="stat-val" style="color:#f97316;">🔥21</div><div class="stat-key" style="color:#9a3412;">Streak</div></div>
+      </div>
+      <div class="challenge" style="background:rgba(255,255,255,0.06);border:1px solid rgba(251,146,60,0.3);">
+        <div class="ch-label" style="color:#9a3412;">Challenge</div>
+        <div class="ch-title" style="color:#fff7ed;">Weekend Warriors 🌅</div>
+        <div class="ch-sub" style="color:#fb923c;">₹500 pool · 47 joined</div>
+      </div>
+      <div class="nav" style="background:rgba(0,0,0,0.4);border-color:rgba(251,146,60,0.2);">
+        <div class="nav-item"><div class="nav-icon">🏠</div><div class="nav-lbl active" style="color:#f97316;">Home</div></div>
+        <div class="nav-item"><div class="nav-icon">⚔️</div><div class="nav-lbl" style="color:#7c2d12;">Battle</div></div>
+        <div class="nav-item"><div class="nav-icon">🏆</div><div class="nav-lbl" style="color:#7c2d12;">Rank</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl" style="color:#7c2d12;">Me</div></div>
+      </div>
+    </div>
+    <div class="label" style="color:#e5e7eb;">9 · Sunset</div>
+    <div class="desc">Deep maroon to orange. Dramatic, motivational energy.</div>
+    <div class="badge">Select</div>
+  </div>
+
+  <!-- 10. Minimal Monochrome -->
+  <div class="phone-wrap" onclick="pick(this,'10')" data-choice="10">
+    <div class="phone" style="background:#fafafa;border-color:#e5e7eb;">
+      <div class="sb" style="color:#9ca3af;"><span class="sb-time">9:41</span><span class="sb-dots">●●●</span></div>
+      <div class="greeting"><div class="g1" style="color:#9ca3af;">Good morning,</div><div class="g2" style="color:#111827;">Harsha</div></div>
+      <div class="step-card" style="background:#111827;border-radius:12px;">
+        <div class="step-label" style="color:#6b7280;">STEPS</div>
+        <div class="step-num" style="color:#f9fafb;">12,450</div>
+        <div class="step-goal" style="color:#4b5563;">of 15,000</div>
+        <div class="pbar-bg" style="background:#374151;"><div class="pbar-fill" style="background:#f9fafb;"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat" style="background:#f3f4f6;border-radius:8px;"><div class="stat-val" style="color:#111827;">#3</div><div class="stat-key" style="color:#9ca3af;">Rank</div></div>
+        <div class="stat" style="background:#f3f4f6;border-radius:8px;"><div class="stat-val" style="color:#111827;">₹480</div><div class="stat-key" style="color:#9ca3af;">Wallet</div></div>
+        <div class="stat" style="background:#f3f4f6;border-radius:8px;"><div class="stat-val" style="color:#111827;">21d</div><div class="stat-key" style="color:#9ca3af;">Streak</div></div>
+      </div>
+      <div class="challenge" style="background:#f3f4f6;border-radius:10px;padding:8px 10px;">
+        <div class="ch-label" style="color:#9ca3af;">ACTIVE</div>
+        <div class="ch-title" style="color:#111827;">Weekend Warriors</div>
+        <div class="ch-sub" style="color:#6b7280;">₹500 pool · 47 joined</div>
+      </div>
+      <div class="nav" style="background:#fafafa;border-color:#e5e7eb;">
+        <div class="nav-item"><div class="nav-icon" style="font-size:12px;">●</div><div class="nav-lbl active" style="color:#111827;">Home</div></div>
+        <div class="nav-item"><div class="nav-icon" style="font-size:12px;">○</div><div class="nav-lbl" style="color:#9ca3af;">Challenges</div></div>
+        <div class="nav-item"><div class="nav-icon" style="font-size:12px;">○</div><div class="nav-lbl" style="color:#9ca3af;">Rank</div></div>
+        <div class="nav-item"><div class="nav-icon" style="font-size:12px;">○</div><div class="nav-lbl" style="color:#9ca3af;">Me</div></div>
+      </div>
+    </div>
+    <div class="label" style="color:#e5e7eb;">10 · Minimal Mono</div>
+    <div class="desc">Pure black &amp; white. Timeless, no-distraction design.</div>
+    <div class="badge">Select</div>
+  </div>
+
+</div>
+
+<div id="selection-bar">
+  <div id="selected-label">No style selected yet — click a phone above</div>
+  <button class="confirm" id="confirm-btn" onclick="confirm()" style="display:none;padding:10px 24px;font-size:13px;margin:0;">Confirm Selection →</button>
+</div>
+
+<script>
+let selected = null;
+function pick(el, id) {
+  document.querySelectorAll('.phone-wrap').forEach(w => w.classList.remove('selected'));
+  el.classList.add('selected');
+  selected = id;
+  const names = {
+    '1':'1 · Dark Neon Purple','2':'2 · Clean Light Green','3':'3 · Desi Orange',
+    '4':'4 · Deep Navy','5':'5 · Black & Gold','6':'6 · Rose Pink',
+    '7':'7 · Forest Dark','8':'8 · Electric Blue','9':'9 · Sunset','10':'10 · Minimal Mono'
+  };
+  document.getElementById('selected-label').innerHTML = 'Selected: <span>' + names[id] + '</span>';
+  document.getElementById('confirm-btn').style.display = 'inline-block';
+  if (window.__superpowers_record) window.__superpowers_record({type:'click', choice: id, text: names[id]});
+}
+function confirm() {
+  if (!selected) return;
+  if (window.__superpowers_record) window.__superpowers_record({type:'confirmed', choice: selected});
+  document.getElementById('selected-label').innerHTML = '✅ Confirmed: <span>' + document.querySelector('[data-choice="'+selected+'"] .label').textContent + '</span> — reply in terminal to continue';
+}
+</script>
+</body>
+</html>

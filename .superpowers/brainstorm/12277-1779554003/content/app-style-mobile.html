@@ -1,0 +1,207 @@
+<h2>Choose your app's visual style</h2>
+<p class="subtitle">Pick the direction that feels right — shown as real mobile screens.</p>
+
+<div style="display:flex;gap:32px;justify-content:center;align-items:flex-start;flex-wrap:wrap;margin-top:24px;">
+
+  <!-- Option A: Bold Dark -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;" onclick="toggleSelect(this)" data-choice="bold-dark">
+    <div style="font-size:13px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:1px;">A — Bold &amp; Dark</div>
+    <!-- Phone frame -->
+    <div style="width:220px;height:440px;background:#111827;border-radius:36px;border:3px solid #374151;box-shadow:0 20px 60px rgba(0,0,0,0.5);overflow:hidden;position:relative;padding:12px 10px;">
+      <!-- Status bar -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 4px;">
+        <span style="color:#9ca3af;font-size:10px;">9:41</span>
+        <div style="width:60px;height:14px;background:#1f2937;border-radius:7px;"></div>
+        <div style="display:flex;gap:3px;align-items:center;">
+          <span style="color:#9ca3af;font-size:9px;">●●●</span>
+        </div>
+      </div>
+      <!-- Greeting -->
+      <div style="margin-bottom:10px;">
+        <div style="color:#9ca3af;font-size:10px;">Good morning,</div>
+        <div style="color:#fff;font-size:16px;font-weight:800;">Harsha 👋</div>
+      </div>
+      <!-- Step ring card -->
+      <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;padding:12px;margin-bottom:8px;border:1px solid rgba(99,102,241,0.3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="color:#a5b4fc;font-size:9px;text-transform:uppercase;letter-spacing:1px;">TODAY</div>
+            <div style="color:#fff;font-size:22px;font-weight:900;line-height:1;">12,450</div>
+            <div style="color:#6366f1;font-size:9px;">/ 15,000 steps</div>
+          </div>
+          <!-- Circle progress -->
+          <svg width="52" height="52" style="transform:rotate(-90deg)">
+            <circle cx="26" cy="26" r="22" fill="none" stroke="#312e81" stroke-width="4"/>
+            <circle cx="26" cy="26" r="22" fill="none" stroke="#6366f1" stroke-width="4"
+              stroke-dasharray="138" stroke-dashoffset="24" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="background:rgba(99,102,241,0.2);border-radius:4px;height:4px;margin-top:8px;">
+          <div style="background:linear-gradient(90deg,#6366f1,#a78bfa);width:83%;height:100%;border-radius:4px;"></div>
+        </div>
+      </div>
+      <!-- Stats row -->
+      <div style="display:flex;gap:5px;margin-bottom:8px;">
+        <div style="flex:1;background:#1f2937;border-radius:10px;padding:8px 5px;text-align:center;">
+          <div style="color:#fbbf24;font-size:13px;font-weight:800;">🏆 #3</div>
+          <div style="color:#6b7280;font-size:8px;">Rank</div>
+        </div>
+        <div style="flex:1;background:#1f2937;border-radius:10px;padding:8px 5px;text-align:center;">
+          <div style="color:#34d399;font-size:13px;font-weight:800;">₹480</div>
+          <div style="color:#6b7280;font-size:8px;">Wallet</div>
+        </div>
+        <div style="flex:1;background:#1f2937;border-radius:10px;padding:8px 5px;text-align:center;">
+          <div style="color:#f472b6;font-size:13px;font-weight:800;">🔥 21</div>
+          <div style="color:#6b7280;font-size:8px;">Streak</div>
+        </div>
+      </div>
+      <!-- Challenge card -->
+      <div style="background:#1f2937;border-radius:12px;padding:10px;border-left:3px solid #6366f1;">
+        <div style="color:#9ca3af;font-size:9px;">Active Challenge</div>
+        <div style="color:#fff;font-size:11px;font-weight:700;">Weekend Warriors ⚔️</div>
+        <div style="color:#6366f1;font-size:9px;margin-top:2px;">₹500 pool · 47 joined</div>
+      </div>
+      <!-- Bottom nav -->
+      <div style="position:absolute;bottom:0;left:0;right:0;background:#0d1117;border-top:1px solid #1f2937;display:flex;justify-content:space-around;padding:8px 0 12px;">
+        <div style="text-align:center;"><div style="font-size:14px;">🏠</div><div style="color:#6366f1;font-size:7px;">Home</div></div>
+        <div style="text-align:center;"><div style="font-size:14px;">⚔️</div><div style="color:#4b5563;font-size:7px;">Challenges</div></div>
+        <div style="text-align:center;"><div style="font-size:14px;">🏆</div><div style="color:#4b5563;font-size:7px;">Leaderboard</div></div>
+        <div style="text-align:center;"><div style="font-size:14px;">👤</div><div style="color:#4b5563;font-size:7px;">Profile</div></div>
+      </div>
+    </div>
+    <div style="text-align:center;max-width:200px;">
+      <div style="font-size:12px;color:#374151;font-weight:600;">Gaming League</div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:4px;">Dark, neon, competitive. Feels premium for young urban users.</div>
+    </div>
+    <div style="padding:6px 20px;border:2px solid #6366f1;border-radius:20px;color:#6366f1;font-size:12px;font-weight:700;">Select A</div>
+  </div>
+
+  <!-- Option B: Clean Light -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;" onclick="toggleSelect(this)" data-choice="clean-light">
+    <div style="font-size:13px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:1px;">B — Clean &amp; Light</div>
+    <div style="width:220px;height:440px;background:#f8fafc;border-radius:36px;border:3px solid #e2e8f0;box-shadow:0 20px 60px rgba(0,0,0,0.15);overflow:hidden;position:relative;padding:12px 10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 4px;">
+        <span style="color:#64748b;font-size:10px;">9:41</span>
+        <div style="width:60px;height:14px;background:#e2e8f0;border-radius:7px;"></div>
+        <span style="color:#64748b;font-size:9px;">●●●</span>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="color:#94a3b8;font-size:10px;">Good morning,</div>
+        <div style="color:#0f172a;font-size:16px;font-weight:800;">Harsha 👋</div>
+      </div>
+      <!-- Step card -->
+      <div style="background:#fff;border-radius:16px;padding:12px;margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="color:#94a3b8;font-size:9px;text-transform:uppercase;letter-spacing:1px;">TODAY'S STEPS</div>
+            <div style="color:#0f172a;font-size:22px;font-weight:900;line-height:1;">12,450</div>
+            <div style="color:#22c55e;font-size:9px;">83% of daily goal</div>
+          </div>
+          <svg width="52" height="52" style="transform:rotate(-90deg)">
+            <circle cx="26" cy="26" r="22" fill="none" stroke="#dcfce7" stroke-width="4"/>
+            <circle cx="26" cy="26" r="22" fill="none" stroke="#22c55e" stroke-width="4"
+              stroke-dasharray="138" stroke-dashoffset="24" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="background:#f1f5f9;border-radius:4px;height:4px;margin-top:8px;">
+          <div style="background:linear-gradient(90deg,#22c55e,#16a34a);width:83%;height:100%;border-radius:4px;"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:5px;margin-bottom:8px;">
+        <div style="flex:1;background:#fff;border-radius:10px;padding:8px 5px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="color:#f59e0b;font-size:13px;font-weight:800;">#3</div>
+          <div style="color:#94a3b8;font-size:8px;">Rank</div>
+        </div>
+        <div style="flex:1;background:#fff;border-radius:10px;padding:8px 5px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="color:#22c55e;font-size:13px;font-weight:800;">₹480</div>
+          <div style="color:#94a3b8;font-size:8px;">Earned</div>
+        </div>
+        <div style="flex:1;background:#fff;border-radius:10px;padding:8px 5px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="color:#ef4444;font-size:13px;font-weight:800;">🔥21</div>
+          <div style="color:#94a3b8;font-size:8px;">Streak</div>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:12px;padding:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:3px solid #22c55e;">
+        <div style="color:#94a3b8;font-size:9px;">Active Challenge</div>
+        <div style="color:#0f172a;font-size:11px;font-weight:700;">Weekend Warriors</div>
+        <div style="color:#22c55e;font-size:9px;margin-top:2px;">₹500 pool · 47 joined</div>
+      </div>
+      <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #f1f5f9;display:flex;justify-content:space-around;padding:8px 0 12px;">
+        <div style="text-align:center;"><div style="font-size:14px;">🏠</div><div style="color:#22c55e;font-size:7px;">Home</div></div>
+        <div style="text-align:center;"><div style="font-size:14px;">⚔️</div><div style="color:#94a3b8;font-size:7px;">Challenges</div></div>
+        <div style="text-align:center;"><div style="font-size:14px;">🏆</div><div style="color:#94a3b8;font-size:7px;">Leaderboard</div></div>
+        <div style="text-align:center;"><div style="font-size:14px;">👤</div><div style="color:#94a3b8;font-size:7px;">Profile</div></div>
+      </div>
+    </div>
+    <div style="text-align:center;max-width:200px;">
+      <div style="font-size:12px;color:#374151;font-weight:600;">Health First</div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:4px;">Clean whites, soft greens. Familiar to HealthifyMe / Google Fit users.</div>
+    </div>
+    <div style="padding:6px 20px;border:2px solid #16a34a;border-radius:20px;color:#16a34a;font-size:12px;font-weight:700;">Select B</div>
+  </div>
+
+  <!-- Option C: Vibrant Indian -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;" onclick="toggleSelect(this)" data-choice="vibrant-indian">
+    <div style="font-size:13px;font-weight:700;color:#ea580c;text-transform:uppercase;letter-spacing:1px;">C — Vibrant &amp; Desi</div>
+    <div style="width:220px;height:440px;background:#fff7ed;border-radius:36px;border:3px solid #fed7aa;box-shadow:0 20px 60px rgba(234,88,12,0.2);overflow:hidden;position:relative;padding:12px 10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 4px;">
+        <span style="color:#9a3412;font-size:10px;">9:41</span>
+        <div style="width:60px;height:14px;background:#fed7aa;border-radius:7px;"></div>
+        <span style="color:#9a3412;font-size:9px;">●●●</span>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="color:#c2410c;font-size:10px;">शुभ प्रभात / Good morning,</div>
+        <div style="color:#1c1917;font-size:16px;font-weight:900;">Harsha 🙏</div>
+      </div>
+      <!-- Gradient step card -->
+      <div style="background:linear-gradient(135deg,#ff6b35,#f59e0b);border-radius:16px;padding:12px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="color:rgba(255,255,255,0.8);font-size:9px;text-transform:uppercase;letter-spacing:1px;">आज के कदम</div>
+            <div style="color:#fff;font-size:22px;font-weight:900;line-height:1;">12,450</div>
+            <div style="color:rgba(255,255,255,0.8);font-size:9px;">15,000 का लक्ष्य</div>
+          </div>
+          <svg width="52" height="52" style="transform:rotate(-90deg)">
+            <circle cx="26" cy="26" r="22" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="4"/>
+            <circle cx="26" cy="26" r="22" fill="none" stroke="#fff" stroke-width="4"
+              stroke-dasharray="138" stroke-dashoffset="24" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="background:rgba(255,255,255,0.3);border-radius:4px;height:4px;margin-top:8px;">
+          <div style="background:#fff;width:83%;height:100%;border-radius:4px;"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:5px;margin-bottom:8px;">
+        <div style="flex:1;background:#fff;border-radius:10px;padding:8px 5px;text-align:center;box-shadow:0 2px 8px rgba(234,88,12,0.1);">
+          <div style="color:#d97706;font-size:13px;font-weight:900;">🥇 #3</div>
+          <div style="color:#9a3412;font-size:8px;">Rank</div>
+        </div>
+        <div style="flex:1;background:#fff;border-radius:10px;padding:8px 5px;text-align:center;box-shadow:0 2px 8px rgba(234,88,12,0.1);">
+          <div style="color:#15803d;font-size:13px;font-weight:900;">₹480</div>
+          <div style="color:#9a3412;font-size:8px;">जीत</div>
+        </div>
+        <div style="flex:1;background:#fff;border-radius:10px;padding:8px 5px;text-align:center;box-shadow:0 2px 8px rgba(234,88,12,0.1);">
+          <div style="color:#dc2626;font-size:13px;font-weight:900;">🔥 21</div>
+          <div style="color:#9a3412;font-size:8px;">Streak</div>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:12px;padding:10px;box-shadow:0 2px 8px rgba(234,88,12,0.1);border-left:3px solid #f59e0b;">
+        <div style="color:#c2410c;font-size:9px;">Active Challenge</div>
+        <div style="color:#1c1917;font-size:11px;font-weight:800;">Weekend Warriors 🎯</div>
+        <div style="color:#ea580c;font-size:9px;margin-top:2px;">₹500 pool · 47 joined</div>
+      </div>
+      <div style="position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #fed7aa;display:flex;justify-content:space-around;padding:8px 0 12px;">
+        <div style="text-align:center;"><div style="font-size:14px;">🏠</div><div style="color:#ea580c;font-size:7px;">Home</div></div>
+        <div style="text-align:center;"><div style="font-size:14px;">⚔️</div><div style="color:#9a3412;font-size:7px;">Challenges</div></div>
+        <div style="text-align:center;"><div style="font-size:14px;">🏆</div><div style="color:#9a3412;font-size:7px;">Leaderboard</div></div>
+        <div style="text-align:center;"><div style="font-size:14px;">👤</div><div style="color:#9a3412;font-size:7px;">Profile</div></div>
+      </div>
+    </div>
+    <div style="text-align:center;max-width:200px;">
+      <div style="font-size:12px;color:#374151;font-weight:600;">Desi Energy</div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:4px;">Warm oranges, bilingual hints. Feels like a celebration, native to India.</div>
+    </div>
+    <div style="padding:6px 20px;border:2px solid #ea580c;border-radius:20px;color:#ea580c;font-size:12px;font-weight:700;">Select C</div>
+  </div>
+
+</div>

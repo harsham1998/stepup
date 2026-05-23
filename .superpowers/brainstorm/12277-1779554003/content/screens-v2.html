@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StepUp — Screens v2</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #07070f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 28px 20px 60px; }
+  h1 { color: #fff; font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 4px; }
+  .sub { color: #4b5563; font-size: 11px; text-align: center; margin-bottom: 28px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
+
+  /* ── Phone shell ── */
+  .pw { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .pt { color: #6366f1; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; }
+  .phone {
+    width: 180px; height: 390px;
+    background: #0c0c18;
+    border-radius: 30px;
+    border: 1.5px solid rgba(99,102,241,0.2);
+    box-shadow: 0 0 30px rgba(99,102,241,0.08), 0 16px 40px rgba(0,0,0,0.7);
+    overflow: hidden; position: relative;
+    display: flex; flex-direction: column;
+  }
+
+  /* ── Status bar ── */
+  .sb {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 12px 2px; flex-shrink: 0;
+  }
+  .sb span { color: #4b5563; font-size: 8px; font-weight: 600; }
+
+  /* ── Bottom nav ── */
+  .bnav {
+    margin-top: auto;
+    background: rgba(8,8,20,0.97);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; justify-content: space-around;
+    padding: 5px 0 8px; flex-shrink: 0;
+  }
+  .bni { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 28px; }
+  .bni svg { width: 14px; height: 14px; }
+  .bni span { font-size: 6px; color: #374151; line-height: 1; }
+  .bni.on span { color: #6366f1; }
+
+  /* ── Scrollable content area ── */
+  .scroll { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* ── Shared layout ── */
+  .px { padding-left: 12px; padding-right: 12px; }
+  .card {
+    margin: 0 10px 6px;
+    border-radius: 11px;
+    padding: 10px 11px;
+  }
+  .card-dark { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); }
+  .card-purple { background: linear-gradient(135deg,rgba(99,102,241,0.18),rgba(139,92,246,0.1)); border: 1px solid rgba(99,102,241,0.3); }
+  .card-green { background: linear-gradient(135deg,rgba(5,78,59,0.9),rgba(6,95,70,0.9)); border: 1px solid rgba(52,211,153,0.25); }
+
+  .section-label { color: #4b5563; font-size: 7.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+  .row { display: flex; align-items: center; }
+  .col { display: flex; flex-direction: column; }
+  .fill { flex: 1; }
+  .gap4 { gap: 4px; }
+  .gap6 { gap: 6px; }
+
+  /* ── Typography scale ── */
+  .t-screen  { font-size: 13px; font-weight: 800; color: #fff; }
+  .t-title   { font-size: 11px; font-weight: 700; color: #fff; }
+  .t-body    { font-size: 9.5px; font-weight: 400; color: #9ca3af; }
+  .t-caption { font-size: 8px; color: #4b5563; }
+  .t-num     { font-size: 20px; font-weight: 900; color: #fff; line-height: 1; }
+  .t-num-sm  { font-size: 13px; font-weight: 800; }
+  .t-accent  { color: #6366f1; }
+  .t-green   { color: #34d399; }
+  .t-amber   { color: #fbbf24; }
+  .t-pink    { color: #f472b6; }
+  .t-red     { color: #ef4444; }
+
+  /* ── Pill / badge ── */
+  .pill { display:inline-flex; align-items:center; padding: 2px 7px; border-radius: 20px; font-size: 7.5px; font-weight: 700; }
+  .pill-purple { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+  .pill-green  { background: rgba(52,211,153,0.2); color: #6ee7b7; }
+  .pill-amber  { background: rgba(251,191,36,0.18); color: #fbbf24; }
+  .pill-red    { background: rgba(239,68,68,0.18); color: #f87171; }
+
+  /* ── Progress bar ── */
+  .pbar { height: 3px; border-radius: 2px; overflow: hidden; }
+  .pbar-bg { background: rgba(255,255,255,0.07); }
+  .pbar-fill { height: 100%; border-radius: 2px; }
+
+  /* ── Stat box ── */
+  .statbox { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 9px; padding: 7px 4px; text-align: center; }
+
+  /* ── Button ── */
+  .btn-primary { background: linear-gradient(135deg,#6366f1,#8b5cf6); border: none; border-radius: 10px; color: #fff; font-size: 10px; font-weight: 800; padding: 9px; width: 100%; cursor: pointer; }
+  .btn-ghost   { background: transparent; border: 1px solid rgba(99,102,241,0.35); border-radius: 10px; color: #a5b4fc; font-size: 10px; font-weight: 700; padding: 8px; width: 100%; cursor: pointer; }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 0 10px; }
+
+  /* ── Circle progress SVG wrapper ── */
+  .ring-wrap { position: relative; width: 46px; height: 46px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-label { position: absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+</style>
+</head>
+<body>
+
+<h1>StepUp — All Screens · Dark Neon</h1>
+<p class="sub">v2 — correct proportions, tighter spacing, proper hierarchy</p>
+
+<div class="grid">
+
+<!-- ═══════════ 1. SPLASH ═══════════ -->
+<div class="pw">
+  <div class="pt">1 · Splash</div>
+  <div class="phone" style="background: radial-gradient(ellipse at 50% 28%, #1a1740 0%, #0a0a14 65%); justify-content: center;">
+    <div style="text-align:center; padding: 0 20px;">
+      <div style="width:52px;height:52px;margin:0 auto 10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(99,102,241,0.6);">
+        <svg width="26" height="26" fill="none" viewBox="0 0 24 24"><path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z" fill="#fff"/></svg>
+      </div>
+      <div style="font-size:22px;font-weight:900;color:#fff;letter-spacing:-0.5px;">StepUp</div>
+      <div style="font-size:9px;color:#7c83f7;margin-top:3px;letter-spacing:0.3px;">Walk · Compete · Win</div>
+      <div style="font-size:8.5px;color:#374151;margin-top:8px;line-height:1.6;">India's most competitive<br>step challenge platform</div>
+    </div>
+    <div style="position:absolute;bottom:36px;left:14px;right:14px;">
+      <button class="btn-primary" style="margin-bottom:7px;box-shadow:0 4px 16px rgba(99,102,241,0.4);">Get Started</button>
+      <button class="btn-ghost">Sign in to existing account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 2. LOGIN ═══════════ -->
+<div class="pw">
+  <div class="pt">2 · Login</div>
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll">
+      <div class="px" style="padding-top:8px; padding-bottom:10px;">
+        <div style="font-size:10px;color:#6366f1;margin-bottom:6px;">← Back</div>
+        <div class="t-screen" style="margin-bottom:2px;">Sign In</div>
+        <div class="t-body" style="font-size:8.5px;margin-bottom:14px;">Enter your number to receive an OTP</div>
+
+        <!-- Phone input -->
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(99,102,241,0.35);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+          <span style="color:#6366f1;font-size:8.5px;font-weight:700;">🇮🇳 +91</span>
+          <div style="width:1px;height:12px;background:rgba(99,102,241,0.35);"></div>
+          <span style="color:#d1d5db;font-size:9px;">98765 43210</span>
+          <div style="margin-left:auto;width:1.5px;height:11px;background:#6366f1;"></div>
+        </div>
+
+        <!-- OR divider -->
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
+          <div style="flex:1;height:1px;background:rgba(255,255,255,0.07);"></div>
+          <span style="color:#374151;font-size:8px;">or</span>
+          <div style="flex:1;height:1px;background:rgba(255,255,255,0.07);"></div>
+        </div>
+
+        <!-- Social -->
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:9px;padding:8px;text-align:center;">
+            <div style="font-size:12px;margin-bottom:1px;">G</div>
+            <div class="t-caption" style="font-size:7.5px;">Google</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:9px;padding:8px;text-align:center;">
+            <div style="font-size:12px;margin-bottom:1px;"></div>
+            <div class="t-caption" style="font-size:7.5px;">Apple</div>
+          </div>
+        </div>
+
+        <!-- OTP section -->
+        <div class="t-caption" style="text-align:center;margin-bottom:7px;font-size:8px;color:#6b7280;">OTP sent to +91 98765 43210</div>
+        <div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px;">
+          <div style="width:34px;height:36px;background:rgba(99,102,241,0.12);border:1.5px solid #6366f1;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;">4</div>
+          <div style="width:34px;height:36px;background:rgba(99,102,241,0.12);border:1.5px solid #6366f1;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;">2</div>
+          <div style="width:34px;height:36px;background:rgba(99,102,241,0.12);border:1.5px solid #6366f1;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;">1</div>
+          <div style="width:34px;height:36px;background:rgba(255,255,255,0.04);border:1px solid rgba(99,102,241,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#374151;font-size:14px;">_</div>
+        </div>
+        <button class="btn-primary">Verify &amp; Continue</button>
+        <div class="t-caption" style="text-align:center;margin-top:8px;font-size:7.5px;">Resend OTP in 0:28</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 3. HOME ═══════════ -->
+<div class="pw">
+  <div class="pt">3 · Home</div>
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span style="color:#6366f1;">●●●</span></div>
+    <div class="scroll">
+
+      <!-- Greeting row -->
+      <div class="row px gap4" style="padding-top:4px;padding-bottom:8px;justify-content:space-between;">
+        <div class="col">
+          <span class="t-caption">Good morning,</span>
+          <span style="font-size:13px;font-weight:800;color:#fff;">Harsha 👋</span>
+        </div>
+        <div style="position:relative;">
+          <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;">H</div>
+          <div style="position:absolute;top:0;right:0;width:7px;height:7px;background:#ef4444;border-radius:50%;border:1.5px solid #0c0c18;"></div>
+        </div>
+      </div>
+
+      <!-- Step card -->
+      <div class="card card-purple" style="position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-16px;right:-12px;width:60px;height:60px;background:radial-gradient(circle,rgba(139,92,246,0.25),transparent);border-radius:50%;pointer-events:none;"></div>
+        <div class="row" style="justify-content:space-between;align-items:flex-start;">
+          <div class="col gap4">
+            <span class="t-caption" style="color:#7c83f7;font-size:7.5px;text-transform:uppercase;letter-spacing:0.7px;">Today's Steps</span>
+            <span class="t-num" style="font-size:22px;">12,450</span>
+            <span class="t-caption" style="font-size:8px;color:#6366f1;">2,550 to goal</span>
+          </div>
+          <div class="ring-wrap">
+            <svg width="46" height="46" viewBox="0 0 46 46">
+              <circle cx="23" cy="23" r="18" fill="none" stroke="rgba(99,102,241,0.18)" stroke-width="4"/>
+              <circle cx="23" cy="23" r="18" fill="none" stroke="#6366f1" stroke-width="4"
+                stroke-dasharray="113" stroke-dashoffset="19" stroke-linecap="round"/>
+            </svg>
+            <div class="ring-label">
+              <span style="font-size:8px;font-weight:800;color:#fff;">83%</span>
+            </div>
+          </div>
+        </div>
+        <div class="pbar pbar-bg" style="margin-top:8px;">
+          <div class="pbar-fill" style="background:linear-gradient(90deg,#6366f1,#a78bfa);width:83%;box-shadow:0 0 4px rgba(99,102,241,0.5);"></div>
+        </div>
+        <div class="row" style="justify-content:space-between;margin-top:3px;">
+          <span class="t-caption" style="font-size:7px;">0</span>
+          <span class="t-caption" style="font-size:7px;">15,000</span>
+        </div>
+      </div>
+
+      <!-- Stats row -->
+      <div class="row gap4 px" style="margin-bottom:6px;">
+        <div class="statbox">
+          <div class="t-num-sm t-amber">🏆 #3</div>
+          <div class="t-caption" style="font-size:7px;margin-top:2px;">Rank</div>
+        </div>
+        <div class="statbox">
+          <div class="t-num-sm t-green">₹480</div>
+          <div class="t-caption" style="font-size:7px;margin-top:2px;">Wallet</div>
+        </div>
+        <div class="statbox">
+          <div class="t-num-sm t-pink">🔥 21</div>
+          <div class="t-caption" style="font-size:7px;margin-top:2px;">Streak</div>
+        </div>
+      </div>
+
+      <!-- Active challenge -->
+      <div class="card card-dark">
+        <div class="row" style="justify-content:space-between;margin-bottom:5px;">
+          <div class="col gap4">
+            <span class="t-caption" style="font-size:7.5px;">Active Challenge</span>
+            <span class="t-title" style="font-size:10.5px;">Weekend Warriors ⚔️</span>
+            <span class="t-caption" style="color:#6366f1;font-size:7.5px;">₹500 pool · 47 joined · 18h left</span>
+          </div>
+          <span class="pill pill-red" style="align-self:flex-start;">Live</span>
+        </div>
+        <div class="pbar pbar-bg">
+          <div class="pbar-fill" style="background:linear-gradient(90deg,#6366f1,#f472b6);width:62%;"></div>
+        </div>
+      </div>
+
+      <!-- League -->
+      <div class="row card card-dark gap4" style="align-items:center;">
+        <span style="font-size:14px;">🥈</span>
+        <div class="col fill">
+          <span class="t-title" style="font-size:9.5px;">Silver League</span>
+          <span class="t-caption" style="font-size:7.5px;">1,200 XP to Gold</span>
+        </div>
+        <div style="width:44px;height:3px;background:rgba(255,255,255,0.07);border-radius:2px;">
+          <div style="background:#6366f1;width:60%;height:100%;border-radius:2px;"></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="bnav">
+      <div class="bni on"><svg viewBox="0 0 20 20" fill="#6366f1"><path d="M10 2L2 9h2v9h5v-5h2v5h5V9h2L10 2z"/></svg><span>Home</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M3 10l7-7 7 7v8h-4v-5H7v5H3v-8z"/></svg><span>Battle</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M10 2a1 1 0 011 1v1h3a1 1 0 010 2h-.5l-1.5 8H8L6.5 6H6a1 1 0 010-2h3V3a1 1 0 011-1z"/></svg><span>Rank</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><rect x="3" y="6" width="14" height="10" rx="2"/><path d="M7 6V5a3 3 0 016 0v1"/></svg><span>Wallet</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span>Me</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 4. CHALLENGES ═══════════ -->
+<div class="pw">
+  <div class="pt">4 · Challenges</div>
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span style="color:#6366f1;">●●●</span></div>
+    <div class="scroll">
+      <div class="row px gap4" style="padding-top:5px;padding-bottom:8px;align-items:center;justify-content:space-between;">
+        <span class="t-screen">Battles ⚔️</span>
+        <span class="pill pill-red">12 Live</span>
+      </div>
+
+      <!-- Filter chips -->
+      <div style="display:flex;gap:5px;padding:0 10px 8px;overflow-x:auto;">
+        <span style="background:#6366f1;color:#fff;font-size:8px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;">All</span>
+        <span style="background:rgba(255,255,255,0.05);color:#6b7280;font-size:8px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;">Free</span>
+        <span style="background:rgba(255,255,255,0.05);color:#6b7280;font-size:8px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;">Paid</span>
+        <span style="background:rgba(255,255,255,0.05);color:#6b7280;font-size:8px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;">Team</span>
+        <span style="background:rgba(255,255,255,0.05);color:#6b7280;font-size:8px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;">City</span>
+      </div>
+
+      <!-- Card 1: Paid -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(30,27,75,0.95),rgba(45,34,98,0.95));border:1px solid rgba(99,102,241,0.35);">
+        <div class="row" style="justify-content:space-between;margin-bottom:5px;">
+          <div class="col gap4" style="flex:1;margin-right:8px;">
+            <div class="row gap4">
+              <span class="pill pill-amber" style="font-size:7px;">PAID POOL</span>
+              <span class="pill pill-red" style="font-size:7px;">● LIVE</span>
+            </div>
+            <span class="t-title" style="font-size:10.5px;">Weekend Warriors</span>
+            <span class="t-caption" style="font-size:7.5px;color:#7c83f7;">10,000 steps · 48 hrs · 47 joined</span>
+          </div>
+          <div class="col" style="align-items:flex-end;">
+            <span class="t-num-sm t-green">₹500</span>
+            <span class="t-caption" style="font-size:7px;">prize pool</span>
+          </div>
+        </div>
+        <button style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:7px;color:#fff;font-size:8.5px;font-weight:800;padding:6px;width:100%;cursor:pointer;">Join · ₹50 entry</button>
+      </div>
+
+      <!-- Card 2: Free -->
+      <div class="card card-dark">
+        <div class="row" style="justify-content:space-between;margin-bottom:5px;">
+          <div class="col gap4" style="flex:1;margin-right:8px;">
+            <div class="row gap4">
+              <span class="pill pill-green" style="font-size:7px;">FREE</span>
+              <span class="t-caption" style="font-size:7px;">by Decathlon</span>
+            </div>
+            <span class="t-title" style="font-size:10.5px;">Morning Movers</span>
+            <span class="t-caption" style="font-size:7.5px;">8,000 steps · Daily</span>
+          </div>
+          <div class="col" style="align-items:flex-end;">
+            <span style="font-size:11px;color:#a5b4fc;font-weight:700;">🎁 Gear</span>
+            <span class="t-caption" style="font-size:7px;">prize</span>
+          </div>
+        </div>
+        <button style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3);border-radius:7px;color:#34d399;font-size:8.5px;font-weight:700;padding:6px;width:100%;cursor:pointer;">Join Free</button>
+      </div>
+
+      <!-- Card 3: City -->
+      <div class="card card-dark">
+        <div class="row" style="justify-content:space-between;margin-bottom:5px;">
+          <div class="col gap4" style="flex:1;margin-right:8px;">
+            <span class="pill pill-purple" style="font-size:7px;align-self:flex-start;">CITY BATTLE</span>
+            <span class="t-title" style="font-size:10.5px;">Hyderabad vs Mumbai</span>
+            <span class="t-caption" style="font-size:7.5px;">7-day city challenge</span>
+          </div>
+          <div class="col" style="align-items:flex-end;">
+            <span class="t-num-sm t-amber">₹10K</span>
+            <span class="t-caption" style="font-size:7px;">city prize</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:3px;height:3px;border-radius:2px;overflow:hidden;margin-bottom:3px;">
+          <div style="flex:55;background:#f472b6;"></div>
+          <div style="flex:45;background:#6366f1;"></div>
+        </div>
+        <div class="row" style="justify-content:space-between;">
+          <span style="font-size:7px;color:#f472b6;">HYD 55%</span>
+          <span style="font-size:7px;color:#6366f1;">MUM 45%</span>
+        </div>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M10 2L2 9h2v9h5v-5h2v5h5V9h2L10 2z"/></svg><span>Home</span></div>
+      <div class="bni on"><svg viewBox="0 0 20 20" fill="#6366f1"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9zm-4 6a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm0 4a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z"/></svg><span>Battle</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M10 2a1 1 0 011 1v1h3a1 1 0 010 2h-.5l-1.5 8H8L6.5 6H6a1 1 0 010-2h3V3a1 1 0 011-1z"/></svg><span>Rank</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><rect x="3" y="6" width="14" height="10" rx="2"/><path d="M7 6V5a3 3 0 016 0v1"/></svg><span>Wallet</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span>Me</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 5. LEADERBOARD ═══════════ -->
+<div class="pw">
+  <div class="pt">5 · Leaderboard</div>
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span style="color:#6366f1;">●●●</span></div>
+    <div class="scroll">
+      <div class="px" style="padding-top:5px;padding-bottom:8px;">
+        <span class="t-screen" style="margin-bottom:7px;display:block;">Rankings</span>
+        <!-- Tabs -->
+        <div style="display:flex;gap:3px;background:rgba(255,255,255,0.04);border-radius:8px;padding:2px;">
+          <div style="flex:1;background:#6366f1;border-radius:6px;text-align:center;padding:4px 0;font-size:8px;font-weight:700;color:#fff;">Global</div>
+          <div style="flex:1;text-align:center;padding:4px 0;font-size:8px;font-weight:600;color:#374151;">Friends</div>
+          <div style="flex:1;text-align:center;padding:4px 0;font-size:8px;font-weight:600;color:#374151;">City</div>
+        </div>
+      </div>
+
+      <!-- Podium -->
+      <div style="display:flex;justify-content:center;align-items:flex-end;gap:8px;padding:0 16px 10px;">
+        <!-- 2nd -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+          <span style="font-size:8.5px;font-weight:700;color:#94a3b8;">Rahul</span>
+          <div style="width:36px;height:36px;background:linear-gradient(135deg,#94a3b8,#64748b);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;border:1.5px solid #94a3b8;">R</div>
+          <span style="background:#64748b;color:#fff;font-size:7.5px;font-weight:800;padding:1px 7px;border-radius:5px;">🥈 2</span>
+          <div style="background:rgba(100,116,139,0.12);border-radius:6px;width:40px;height:28px;display:flex;align-items:center;justify-content:center;">
+            <div style="text-align:center;"><div style="color:#94a3b8;font-size:8.5px;font-weight:700;">14.2k</div><div style="color:#374151;font-size:7px;">steps</div></div>
+          </div>
+        </div>
+        <!-- 1st -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:8px;">
+          <span style="font-size:8.5px;font-weight:700;color:#fbbf24;">Priya</span>
+          <div style="position:relative;">
+            <div style="width:44px;height:44px;background:linear-gradient(135deg,#fbbf24,#d97706);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;border:2px solid #fbbf24;box-shadow:0 0 12px rgba(251,191,36,0.45);">P</div>
+            <div style="position:absolute;top:-7px;left:50%;transform:translateX(-50%);font-size:10px;">👑</div>
+          </div>
+          <span style="background:linear-gradient(135deg,#fbbf24,#d97706);color:#000;font-size:7.5px;font-weight:800;padding:1px 7px;border-radius:5px;">🥇 1</span>
+          <div style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.25);border-radius:6px;width:46px;height:32px;display:flex;align-items:center;justify-content:center;">
+            <div style="text-align:center;"><div style="color:#fbbf24;font-size:9px;font-weight:800;">18.5k</div><div style="color:#374151;font-size:7px;">steps</div></div>
+          </div>
+        </div>
+        <!-- 3rd -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+          <span style="font-size:8.5px;font-weight:700;color:#b45309;">Arjun</span>
+          <div style="width:36px;height:36px;background:linear-gradient(135deg,#cd7c2f,#92400e);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;border:1.5px solid #cd7c2f;">A</div>
+          <span style="background:#92400e;color:#fff;font-size:7.5px;font-weight:800;padding:1px 7px;border-radius:5px;">🥉 3</span>
+          <div style="background:rgba(146,64,14,0.12);border-radius:6px;width:40px;height:28px;display:flex;align-items:center;justify-content:center;">
+            <div style="text-align:center;"><div style="color:#cd7c2f;font-size:8.5px;font-weight:700;">11.8k</div><div style="color:#374151;font-size:7px;">steps</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Your rank -->
+      <div class="row card" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.35);gap:7px;align-items:center;">
+        <span style="font-size:10px;font-weight:800;color:#a5b4fc;min-width:16px;">#7</span>
+        <div style="width:26px;height:26px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;">H</div>
+        <div class="col fill">
+          <span style="font-size:9.5px;font-weight:700;color:#fff;">You · Harsha</span>
+          <span style="font-size:7.5px;color:#6366f1;">12,450 steps</span>
+        </div>
+        <div class="col" style="align-items:flex-end;">
+          <span style="font-size:8.5px;font-weight:700;color:#34d399;">▲ 2</span>
+          <span class="t-caption" style="font-size:7px;">moved up</span>
+        </div>
+      </div>
+
+      <!-- Next competitor -->
+      <div class="row card card-dark" style="gap:7px;align-items:center;">
+        <span style="font-size:10px;font-weight:600;color:#374151;min-width:16px;">#8</span>
+        <div style="width:26px;height:26px;background:#1f2937;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#6b7280;flex-shrink:0;">V</div>
+        <div class="col fill">
+          <span style="font-size:9.5px;font-weight:600;color:#9ca3af;">Vikram</span>
+          <span style="font-size:7.5px;color:#374151;">11,200 steps</span>
+        </div>
+        <span class="t-caption" style="font-size:7.5px;">1.2k behind</span>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M10 2L2 9h2v9h5v-5h2v5h5V9h2L10 2z"/></svg><span>Home</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/></svg><span>Battle</span></div>
+      <div class="bni on"><svg viewBox="0 0 20 20" fill="#6366f1"><path d="M10 2a1 1 0 011 1v1h3a1 1 0 010 2h-.5l-1.5 8H8L6.5 6H6a1 1 0 010-2h3V3a1 1 0 011-1z"/></svg><span>Rank</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><rect x="3" y="6" width="14" height="10" rx="2"/></svg><span>Wallet</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span>Me</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 6. WALLET ═══════════ -->
+<div class="pw">
+  <div class="pt">6 · Wallet</div>
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span style="color:#6366f1;">●●●</span></div>
+    <div class="scroll">
+      <div class="px" style="padding-top:5px;padding-bottom:8px;">
+        <span class="t-screen">Wallet</span>
+      </div>
+
+      <!-- Balance card -->
+      <div class="card card-green" style="position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-12px;right:-12px;width:60px;height:60px;background:radial-gradient(circle,rgba(52,211,153,0.2),transparent);border-radius:50%;pointer-events:none;"></div>
+        <div class="t-caption" style="color:rgba(167,243,208,0.6);font-size:7.5px;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:3px;">Total Balance</div>
+        <div style="font-size:24px;font-weight:900;color:#fff;line-height:1;margin-bottom:2px;">₹1,840</div>
+        <div style="font-size:8px;color:#6ee7b7;margin-bottom:10px;">+₹120 this week</div>
+        <div style="display:flex;gap:6px;">
+          <button style="flex:1;background:rgba(16,185,129,0.9);border:none;border-radius:8px;color:#fff;font-size:9px;font-weight:800;padding:7px;cursor:pointer;">Withdraw UPI</button>
+          <button style="flex:1;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3);border-radius:8px;color:#34d399;font-size:9px;font-weight:700;padding:7px;cursor:pointer;">Add Money</button>
+        </div>
+      </div>
+
+      <!-- Breakdown -->
+      <div class="row gap4 px" style="margin-bottom:6px;">
+        <div class="statbox"><div class="t-num-sm t-accent" style="font-size:12px;">₹1,200</div><div class="t-caption" style="font-size:7px;margin-top:2px;">Winnings</div></div>
+        <div class="statbox"><div class="t-num-sm t-amber" style="font-size:12px;">₹340</div><div class="t-caption" style="font-size:7px;margin-top:2px;">Rewards</div></div>
+        <div class="statbox"><div class="t-num-sm t-green" style="font-size:12px;">₹300</div><div class="t-caption" style="font-size:7px;margin-top:2px;">Cashback</div></div>
+      </div>
+
+      <!-- Transactions -->
+      <div class="px" style="margin-bottom:5px;">
+        <span class="section-label">Recent Activity</span>
+      </div>
+      <div style="margin: 0 10px; background:rgba(255,255,255,0.03);border-radius:10px;overflow:hidden;">
+        <div class="row" style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.04);gap:7px;align-items:center;">
+          <div style="width:24px;height:24px;background:rgba(52,211,153,0.12);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🏆</div>
+          <div class="col fill">
+            <span style="font-size:9px;font-weight:600;color:#d1d5db;">Challenge Won</span>
+            <span class="t-caption" style="font-size:7.5px;">Weekend Warriors</span>
+          </div>
+          <span style="font-size:9.5px;font-weight:700;color:#34d399;">+₹240</span>
+        </div>
+        <div class="row" style="padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.04);gap:7px;align-items:center;">
+          <div style="width:24px;height:24px;background:rgba(239,68,68,0.1);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">⚔️</div>
+          <div class="col fill">
+            <span style="font-size:9px;font-weight:600;color:#d1d5db;">Challenge Entry</span>
+            <span class="t-caption" style="font-size:7.5px;">Morning Movers</span>
+          </div>
+          <span style="font-size:9.5px;font-weight:700;color:#ef4444;">−₹50</span>
+        </div>
+        <div class="row" style="padding:7px 10px;gap:7px;align-items:center;">
+          <div style="width:24px;height:24px;background:rgba(251,191,36,0.1);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">🎁</div>
+          <div class="col fill">
+            <span style="font-size:9px;font-weight:600;color:#d1d5db;">Streak Bonus</span>
+            <span class="t-caption" style="font-size:7.5px;">21-day streak reward</span>
+          </div>
+          <span style="font-size:9.5px;font-weight:700;color:#fbbf24;">+₹50</span>
+        </div>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M10 2L2 9h2v9h5v-5h2v5h5V9h2L10 2z"/></svg><span>Home</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/></svg><span>Battle</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M10 2a1 1 0 011 1v1h3a1 1 0 010 2h-.5l-1.5 8H8L6.5 6H6a1 1 0 010-2h3V3a1 1 0 011-1z"/></svg><span>Rank</span></div>
+      <div class="bni on"><svg viewBox="0 0 20 20" fill="#6366f1"><rect x="3" y="6" width="14" height="10" rx="2"/><path d="M7 6V5a3 3 0 016 0v1"/></svg><span>Wallet</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span>Me</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 7. PROFILE ═══════════ -->
+<div class="pw">
+  <div class="pt">7 · Profile</div>
+  <div class="phone">
+    <div class="sb"><span>9:41</span><span style="color:#6366f1;">●●●</span></div>
+    <div class="scroll">
+      <!-- Header -->
+      <div style="text-align:center;padding:8px 12px 10px;background:linear-gradient(180deg,rgba(99,102,241,0.1) 0%,transparent 100%);">
+        <div style="position:relative;display:inline-block;margin-bottom:5px;">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;margin:0 auto;border:2px solid rgba(99,102,241,0.4);">H</div>
+          <div style="position:absolute;bottom:0;right:0;background:#6366f1;border-radius:50%;width:14px;height:14px;display:flex;align-items:center;justify-content:center;border:1.5px solid #0c0c18;">
+            <svg width="7" height="7" viewBox="0 0 12 12" fill="#fff"><path d="M8.5 1.5l2 2L4 10H2V8L8.5 1.5z"/></svg>
+          </div>
+        </div>
+        <div style="font-size:12px;font-weight:800;color:#fff;">Harsha M.</div>
+        <div style="font-size:8px;color:#6b7280;margin-top:1px;">Hyderabad · Silver League 🥈</div>
+        <div style="display:flex;justify-content:center;gap:4px;margin-top:5px;">
+          <span class="pill pill-purple" style="font-size:7.5px;">🔥 21-day Streak</span>
+          <span class="pill pill-amber" style="font-size:7.5px;">Verified ✓</span>
+        </div>
+      </div>
+
+      <!-- 4 stats -->
+      <div style="display:flex;gap:4px;padding:0 10px 6px;">
+        <div class="statbox"><div style="font-size:11px;font-weight:800;color:#a5b4fc;">148</div><div class="t-caption" style="font-size:7px;margin-top:1px;">Challenges</div></div>
+        <div class="statbox"><div style="font-size:11px;font-weight:800;color:#34d399;">₹4.8k</div><div class="t-caption" style="font-size:7px;margin-top:1px;">Won</div></div>
+        <div class="statbox"><div style="font-size:11px;font-weight:800;color:#fbbf24;">2.4M</div><div class="t-caption" style="font-size:7px;margin-top:1px;">Steps</div></div>
+        <div class="statbox"><div style="font-size:11px;font-weight:800;color:#f472b6;">24</div><div class="t-caption" style="font-size:7px;margin-top:1px;">Badges</div></div>
+      </div>
+
+      <!-- Badges -->
+      <div class="px" style="margin-bottom:5px;">
+        <span class="section-label">Badges</span>
+        <div style="display:flex;gap:5px;margin-top:4px;align-items:center;">
+          <div style="text-align:center;"><div style="font-size:16px;line-height:1;">🔥</div><div class="t-caption" style="font-size:6.5px;margin-top:1px;">21-Day</div></div>
+          <div style="text-align:center;"><div style="font-size:16px;line-height:1;">⚡</div><div class="t-caption" style="font-size:6.5px;margin-top:1px;">Speed</div></div>
+          <div style="text-align:center;"><div style="font-size:16px;line-height:1;">👑</div><div class="t-caption" style="font-size:6.5px;margin-top:1px;">Top 10</div></div>
+          <div style="text-align:center;"><div style="font-size:16px;line-height:1;">🎯</div><div class="t-caption" style="font-size:6.5px;margin-top:1px;">Goal×10</div></div>
+          <div style="text-align:center;">
+            <div style="width:22px;height:22px;background:rgba(255,255,255,0.05);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+              <span style="font-size:7.5px;color:#4b5563;font-weight:700;">+20</span>
+            </div>
+            <div class="t-caption" style="font-size:6.5px;margin-top:1px;">more</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div style="margin:0 10px;background:rgba(255,255,255,0.03);border-radius:10px;overflow:hidden;">
+        <div style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.04);">
+          <span style="font-size:9px;color:#d1d5db;">Connected Devices</span>
+          <span style="font-size:8px;color:#6366f1;">Apple Watch ›</span>
+        </div>
+        <div style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.04);">
+          <span style="font-size:9px;color:#d1d5db;">Language</span>
+          <span style="font-size:8px;color:#6b7280;">Telugu ›</span>
+        </div>
+        <div style="padding:8px 11px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:9px;color:#d1d5db;">Notifications</span>
+          <span style="font-size:8px;color:#6b7280;">On ›</span>
+        </div>
+      </div>
+    </div>
+    <div class="bnav">
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M10 2L2 9h2v9h5v-5h2v5h5V9h2L10 2z"/></svg><span>Home</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/></svg><span>Battle</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><path d="M10 2a1 1 0 011 1v1h3a1 1 0 010 2h-.5l-1.5 8H8L6.5 6H6a1 1 0 010-2h3V3a1 1 0 011-1z"/></svg><span>Rank</span></div>
+      <div class="bni"><svg viewBox="0 0 20 20" fill="#374151"><rect x="3" y="6" width="14" height="10" rx="2"/></svg><span>Wallet</span></div>
+      <div class="bni on"><svg viewBox="0 0 20 20" fill="#6366f1"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg><span>Me</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 8. ONBOARDING ═══════════ -->
+<div class="pw">
+  <div class="pt">8 · Onboarding</div>
+  <div class="phone" style="background:radial-gradient(ellipse at 50% 15%,#1a1740 0%,#0a0a14 60%);">
+    <div class="sb"><span>9:41</span><span>●●●</span></div>
+    <div class="scroll">
+      <!-- Progress dots -->
+      <div style="display:flex;justify-content:center;gap:4px;padding:5px 0 10px;">
+        <div style="width:16px;height:3px;background:#6366f1;border-radius:2px;"></div>
+        <div style="width:16px;height:3px;background:#6366f1;border-radius:2px;"></div>
+        <div style="width:16px;height:3px;background:rgba(99,102,241,0.2);border-radius:2px;"></div>
+        <div style="width:16px;height:3px;background:rgba(99,102,241,0.2);border-radius:2px;"></div>
+      </div>
+      <div class="px">
+        <div style="font-size:14px;font-weight:900;color:#fff;line-height:1.3;margin-bottom:4px;">Set your daily goal 🎯</div>
+        <div style="font-size:8.5px;color:#6b7280;margin-bottom:14px;line-height:1.5;">We'll match challenges and rewards to your fitness level</div>
+
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px;">
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:9px 11px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:14px;line-height:1;">🚶</span>
+            <div class="col fill">
+              <span style="font-size:9.5px;font-weight:700;color:#d1d5db;">Casual</span>
+              <span style="font-size:7.5px;color:#4b5563;">5,000 steps/day</span>
+            </div>
+          </div>
+          <div style="background:rgba(99,102,241,0.14);border:1.5px solid #6366f1;border-radius:10px;padding:9px 11px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:14px;line-height:1;">🏃</span>
+            <div class="col fill">
+              <span style="font-size:9.5px;font-weight:700;color:#fff;">Active</span>
+              <span style="font-size:7.5px;color:#a5b4fc;">10,000 steps/day</span>
+            </div>
+            <span style="background:#6366f1;color:#fff;font-size:7px;font-weight:800;padding:2px 6px;border-radius:6px;flex-shrink:0;">Popular</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:9px 11px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:14px;line-height:1;">⚡</span>
+            <div class="col fill">
+              <span style="font-size:9.5px;font-weight:700;color:#d1d5db;">Champion</span>
+              <span style="font-size:7.5px;color:#4b5563;">15,000 steps/day</span>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:9px 11px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:14px;line-height:1;">👑</span>
+            <div class="col fill">
+              <span style="font-size:9.5px;font-weight:700;color:#d1d5db;">Elite</span>
+              <span style="font-size:7.5px;color:#4b5563;">20,000+ steps/day</span>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary" style="box-shadow:0 4px 14px rgba(99,102,241,0.35);">Continue →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end grid -->
+</body>
+</html>
