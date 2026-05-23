@@ -7,6 +7,13 @@ app.use(express.json());
 app.use((req, _res, next) => { (req as any).user = { id: 'user-123' }; next(); });
 app.use('/wallet', walletRouter);
 
+jest.mock('../../src/lib/redis', () => ({
+  getRedis: () => ({
+    set: jest.fn().mockResolvedValue('OK'),
+    del: jest.fn().mockResolvedValue(1),
+  }),
+}));
+
 jest.mock('../../src/modules/wallet/wallet.service', () => ({
   getBalance: jest.fn().mockResolvedValue({ balance_paise: 184000, balance_inr: '1840.00' }),
   getTransactions: jest.fn().mockResolvedValue([

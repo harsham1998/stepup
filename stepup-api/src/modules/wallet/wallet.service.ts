@@ -1,5 +1,6 @@
 import { getSupabase } from '../../lib/supabase';
 import { getRazorpay } from '../../lib/razorpay';
+import { getRedis } from '../../lib/redis';
 import { v4 as uuid } from 'uuid';
 
 export async function getBalance(userId: string) {
@@ -53,32 +54,58 @@ export async function creditWallet(userId: string, amount_paise: number, referen
 
 export async function requestWithdrawal(userId: string, amount_inr: number, upi_vpa: string) {
   const amount_paise = Math.floor(amount_inr * 100);
-  const { balance_paise } = await getBalance(userId);
-  if (balance_paise < amount_paise) throw new Error('Insufficient balance');
 
-  const payoutId = uuid();
-  const idempotencyKey = `withdraw:${userId}:${payoutId}`;
+  const redis = getRedis();
+  const lockKey = `wallet:withdraw:lock:${userId}`;
+  const locked = await redis.set(lockKey, '1', 'EX', 30, 'NX');
+  if (!locked) throw new Error('Withdrawal already in progress');
 
-  const { error: debitErr } = await getSupabase().from('wallet_transactions').insert({
-    user_id: userId,
-    type: 'debit',
-    amount: amount_paise,
-    status: 'completed',
-    idempotency_key: idempotencyKey,
-    description: `UPI withdrawal to ${upi_vpa}`,
-  });
-  if (debitErr && debitErr.code !== '23505') throw new Error(debitErr.message);
+  try {
+    const { balance_paise } = await getBalance(userId);
+    if (balance_paise < amount_paise) throw new Error('Insufficient balance');
 
-  const payout = await (getRazorpay() as any).payouts.create({
-    account_number: process.env.RAZORPAY_ACCOUNT_NUMBER,
-    fund_account: { account_type: 'vpa', vpa: { address: upi_vpa } },
-    amount: amount_paise,
-    currency: 'INR',
-    mode: 'UPI',
-    purpose: 'payout',
-    queue_if_low_balance: false,
-    reference_id: payoutId,
-  });
+    const payoutId = uuid();
+    const idempotencyKey = `withdraw:${userId}:${payoutId}`;
 
-  return { success: true, reference: payout.id };
+    // Insert pending debit
+    const { error: debitErr } = await getSupabase().from('wallet_transactions').insert({
+      user_id: userId,
+      type: 'debit',
+      amount: amount_paise,
+      status: 'pending',
+      idempotency_key: idempotencyKey,
+      description: `UPI withdrawal to ${upi_vpa}`,
+    });
+    if (debitErr && debitErr.code !== '23505') throw new Error(debitErr.message);
+
+    try {
+      const payout = await (getRazorpay() as any).payouts.create({
+        account_number: process.env.RAZORPAY_ACCOUNT_NUMBER,
+        fund_account: { account_type: 'vpa', vpa: { address: upi_vpa } },
+        amount: amount_paise,
+        currency: 'INR',
+        mode: 'UPI',
+        purpose: 'payout',
+        queue_if_low_balance: false,
+        reference_id: payoutId,
+      });
+
+      // Mark debit as completed
+      await getSupabase()
+        .from('wallet_transactions')
+        .update({ status: 'completed' })
+        .eq('idempotency_key', idempotencyKey);
+
+      return { success: true, reference: payout.id };
+    } catch (payoutErr) {
+      // Razorpay failed — mark debit as rejected (reverses the pending hold)
+      await getSupabase()
+        .from('wallet_transactions')
+        .update({ status: 'rejected' })
+        .eq('idempotency_key', idempotencyKey);
+      throw payoutErr;
+    }
+  } finally {
+    await redis.del(lockKey);
+  }
 }

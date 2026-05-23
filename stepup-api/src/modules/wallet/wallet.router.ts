@@ -12,18 +12,30 @@ const withdrawSchema = z.object({
 });
 
 walletRouter.get('/balance', async (req: Request, res: Response) => {
-  const data = await getBalance(req.user!.id);
-  res.json(data);
+  try {
+    const data = await getBalance(req.user!.id);
+    res.json(data);
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 walletRouter.get('/transactions', async (req: Request, res: Response) => {
-  const data = await getTransactions(req.user!.id);
-  res.json(data);
+  try {
+    const data = await getTransactions(req.user!.id);
+    res.json(data);
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 walletRouter.post('/deposit/order', validateBody(depositSchema), async (req: Request, res: Response) => {
-  const order = await createDepositOrder(req.user!.id, req.body.amount_inr);
-  res.json(order);
+  try {
+    const order = await createDepositOrder(req.user!.id, req.body.amount_inr);
+    res.json(order);
+  } catch (err: unknown) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 walletRouter.post('/withdraw', validateBody(withdrawSchema), async (req: Request, res: Response) => {
