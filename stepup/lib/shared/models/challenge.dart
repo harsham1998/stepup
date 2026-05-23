@@ -12,14 +12,19 @@ class Challenge {
   });
 
   factory Challenge.fromJson(Map<String, dynamic> j) => Challenge(
-    id: j['id'], title: j['title'], type: j['type'], status: j['status'],
-    stepGoal: j['step_goal'], entryFee: j['entry_fee'], prizePool: j['prize_pool'],
-    startTime: DateTime.parse(j['start_time']),
-    endTime: DateTime.parse(j['end_time']),
-    sponsorName: j['sponsor_name'],
+    id: j['id'] as String,
+    title: j['title'] as String,
+    type: j['type'] as String,
+    status: j['status'] as String,
+    stepGoal: (j['step_goal'] as num).toInt(),
+    entryFee: (j['entry_fee'] as num).toInt(),
+    prizePool: (j['prize_pool'] as num).toInt(),
+    startTime: DateTime.parse(j['start_time'] as String),
+    endTime: DateTime.parse(j['end_time'] as String),
+    sponsorName: j['sponsor_name'] as String?,
   );
 
   bool get isPaid => entryFee > 0;
-  String get entryFeeInr => '₹${(entryFee / 100).toStringAsFixed(0)}';
-  String get prizePoolInr => '₹${(prizePool / 100).toStringAsFixed(0)}';
+  String get entryFeeInr => '₹${entryFee ~/ 100}';
+  String get prizePoolInr => '₹${prizePool ~/ 100}';
 }

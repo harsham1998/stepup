@@ -9,10 +9,13 @@ class WalletTransaction {
   });
 
   factory WalletTransaction.fromJson(Map<String, dynamic> j) => WalletTransaction(
-    id: j['id'], type: j['type'], description: j['description'],
-    amount: j['amount'], createdAt: DateTime.parse(j['created_at']),
+    id: j['id'] as String,
+    type: j['type'] as String,
+    description: j['description'] as String,
+    amount: (j['amount'] as num).toInt(),
+    createdAt: DateTime.parse(j['created_at'] as String),
   );
 
   bool get isCredit => type == 'credit';
-  String get amountInr => '${isCredit ? '+' : '-'}₹${(amount / 100).toStringAsFixed(0)}';
+  String get amountInr => '${isCredit ? '+' : '-'}₹${amount ~/ 100}';
 }

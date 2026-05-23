@@ -8,7 +8,10 @@ class LeaderboardEntry {
   });
 
   factory LeaderboardEntry.fromJson(Map<String, dynamic> j) => LeaderboardEntry(
-    rank: j['rank'], steps: j['steps'],
-    userId: j['user_id'], name: j['name'], city: j['city'] ?? '',
+    rank: (j['rank'] as num).toInt(),
+    steps: (j['steps'] as num).toInt(),
+    userId: j['user_id'] as String,
+    name: j['name'] as String,
+    city: (j['city'] as String?) ?? '',
   );
 }
