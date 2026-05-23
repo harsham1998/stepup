@@ -19,7 +19,10 @@ class AppTheme {
       secondary: _secondary,
       surface: _surface,
       onPrimary: Colors.white,
+      onSecondary: Colors.white,
       onSurface: Colors.white,
+      error: Color(0xFFEF4444),
+      onError: Colors.white,
     ),
     cardTheme: CardThemeData(
       color: _surface,
@@ -83,4 +86,5 @@ class AppTheme {
   static const amber = _amber;
   static const pink  = _pink;
   static const primary = _primary;
+  static const secondary = _secondary;
 }
