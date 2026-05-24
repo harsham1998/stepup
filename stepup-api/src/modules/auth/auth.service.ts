@@ -61,10 +61,15 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
   let userId = createData?.user?.id;
 
   if (!userId) {
+    // Supabase strips the leading '+' when storing phone numbers
+    const normalizedPhone = `91${phone}`;
     let page = 1;
     while (true) {
       const { data: list } = await supabase.auth.admin.listUsers({ page, perPage: 1000 });
-      const match = list?.users?.find((u) => u.phone === `+91${phone}`);
+      const match = list?.users?.find((u) => {
+        const stored = (u.phone ?? '').replace(/^\+/, '');
+        return stored === normalizedPhone;
+      });
       if (match) { userId = match.id; break; }
       if (!list?.users?.length || list.users.length < 1000) break;
       page++;
