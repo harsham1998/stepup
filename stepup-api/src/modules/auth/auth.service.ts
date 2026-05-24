@@ -42,25 +42,30 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
   }
   const supabase = getSupabase();
 
-  // Create or find the user
+  // Try to create user — if already exists, look them up instead
   const { data: createData, error: createError } = await supabase.auth.admin.createUser({
     phone: `+91${phone}`,
     phone_confirm: true,
   });
-  if (createError && createError.message !== 'A user with this phone number has already been registered') {
-    throw new Error(createError.message);
-  }
 
-  // Get user ID — either from createUser or look up by phone
   let userId = createData?.user?.id;
+
   if (!userId) {
-    const { data: list } = await supabase.auth.admin.listUsers();
-    const existing = list?.users?.find((u) => u.phone === `+91${phone}`);
-    if (!existing) throw new Error('User not found after OTP verification');
-    userId = existing.id;
+    // User already exists — find them by phone via admin listUsers
+    let found: string | undefined;
+    let page = 1;
+    while (!found) {
+      const { data: list } = await supabase.auth.admin.listUsers({ page, perPage: 1000 });
+      const match = list?.users?.find((u) => u.phone === `+91${phone}`);
+      if (match) { found = match.id; break; }
+      if (!list?.users?.length || list.users.length < 1000) break;
+      page++;
+    }
+    if (!found) throw new Error(createError?.message ?? 'User not found');
+    userId = found;
   }
 
-  // Create a session for the user
+  // Create a Supabase session for the user
   const { data: sessionData, error: sessionError } = await supabase.auth.admin.createSession(userId);
   if (sessionError) throw new Error(sessionError.message);
 
