@@ -77,12 +77,17 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
     if (!userId) throw new Error('User not found after OTP verification');
   }
 
-  // Set a server-derived password so we can get a session via signInWithPassword.
-  // The password is deterministic and secret — only this server can compute it.
+  // Use a synthetic email + server-derived password to create a Supabase session.
+  // This avoids requiring "Phone logins" to be enabled in Supabase dashboard.
+  const syntheticEmail = `phone_${userId}@auth.stepup.app`;
   const password = derivedPassword(userId);
-  await supabase.auth.admin.updateUserById(userId, { password });
+  await supabase.auth.admin.updateUserById(userId, {
+    email: syntheticEmail,
+    email_confirm: true,
+    password,
+  });
 
-  // Exchange phone + password for a Supabase session
+  // Exchange email + password for a Supabase session
   const tokenRes = await fetch(
     `${process.env.SUPABASE_URL}/auth/v1/token?grant_type=password`,
     {
@@ -92,7 +97,7 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
         'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
         'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
       },
-      body: JSON.stringify({ phone: `+91${phone}`, password }),
+      body: JSON.stringify({ email: syntheticEmail, password }),
     },
   );
   const tokenData = await tokenRes.json() as any;
