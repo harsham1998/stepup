@@ -1,4 +1,5 @@
 import axios from 'axios';
+import crypto from 'crypto';
 import { getSupabase } from '../../lib/supabase';
 
 function twilioClient() {
@@ -10,6 +11,14 @@ function twilioClient() {
   }
   const auth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
   return { auth, serviceSid };
+}
+
+// Derives a stable server-only password from the user ID.
+// Never exposed to the client — used purely to create Supabase sessions
+// for phone-only users without a native admin.createSession method.
+function derivedPassword(userId: string): string {
+  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  return crypto.createHmac('sha256', secret).update(userId).digest('hex');
 }
 
 export async function sendOtp(phone: string): Promise<{ success: boolean }> {
@@ -27,9 +36,9 @@ export async function sendOtp(phone: string): Promise<{ success: boolean }> {
 
 export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) {
   const { auth, serviceSid } = twilioClient();
-  let response;
+  let twilioRes;
   try {
-    response = await axios.post(
+    twilioRes = await axios.post(
       `https://verify.twilio.com/v2/Services/${serviceSid}/VerificationCheck`,
       new URLSearchParams({ To: `+91${phone}`, Code: otp }),
       { headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' } },
@@ -37,13 +46,14 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
   } catch (err: any) {
     throw new Error(err.response?.data?.message ?? 'Invalid OTP');
   }
-  if (response.data?.status !== 'approved') {
+  if (twilioRes.data?.status !== 'approved') {
     throw new Error('Invalid OTP');
   }
+
   const supabase = getSupabase();
 
-  // Try to create user — if already exists, look them up instead
-  const { data: createData, error: createError } = await supabase.auth.admin.createUser({
+  // Create user if new, otherwise find existing user by phone
+  const { data: createData } = await supabase.auth.admin.createUser({
     phone: `+91${phone}`,
     phone_confirm: true,
   });
@@ -51,34 +61,49 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
   let userId = createData?.user?.id;
 
   if (!userId) {
-    // User already exists — find them by phone via admin listUsers
-    let found: string | undefined;
     let page = 1;
-    while (!found) {
+    while (true) {
       const { data: list } = await supabase.auth.admin.listUsers({ page, perPage: 1000 });
       const match = list?.users?.find((u) => u.phone === `+91${phone}`);
-      if (match) { found = match.id; break; }
+      if (match) { userId = match.id; break; }
       if (!list?.users?.length || list.users.length < 1000) break;
       page++;
     }
-    if (!found) throw new Error(createError?.message ?? 'User not found');
-    userId = found;
+    if (!userId) throw new Error('User not found after OTP verification');
   }
 
-  // Create a Supabase session for the user
-  const { data: sessionData, error: sessionError } = await supabase.auth.admin.createSession(userId);
-  if (sessionError) throw new Error(sessionError.message);
+  // Set a server-derived password so we can get a session via signInWithPassword.
+  // The password is deterministic and secret — only this server can compute it.
+  const password = derivedPassword(userId);
+  await supabase.auth.admin.updateUserById(userId, { password });
 
-  // Check if user has completed onboarding (has a profile row)
+  // Exchange phone + password for a Supabase session
+  const tokenRes = await fetch(
+    `${process.env.SUPABASE_URL}/auth/v1/token?grant_type=password`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({ phone: `+91${phone}`, password }),
+    },
+  );
+  const tokenData = await tokenRes.json() as any;
+  if (!tokenData.access_token) {
+    throw new Error(tokenData.error_description ?? tokenData.msg ?? 'Failed to create session');
+  }
+
+  // Check if user has completed onboarding
   const { data: profile } = await supabase.from('users').select('id').eq('id', userId).maybeSingle();
-  const isNewUser = !profile;
 
   return {
-    user: sessionData.user,
-    isNewUser,
+    userId,
+    isNewUser: !profile,
     session: {
-      access_token: sessionData.session.access_token,
-      refresh_token: sessionData.session.refresh_token,
+      access_token: tokenData.access_token as string,
+      refresh_token: tokenData.refresh_token as string,
     },
   };
 }
