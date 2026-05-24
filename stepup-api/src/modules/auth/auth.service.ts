@@ -118,6 +118,16 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
   };
 }
 
+export async function getProfile(userId: string) {
+  const { data, error } = await getSupabase()
+    .from('users')
+    .select()
+    .eq('id', userId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
 export async function upsertProfile(userId: string, profile: {
   name: string;
   city: string;

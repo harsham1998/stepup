@@ -5,6 +5,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/api_client.dart';
 
+// Top-level entry points required by flutter_background_service iOS plugin.
+// These must be top-level (not class methods) and annotated for AOT / native access.
+@pragma('vm:entry-point')
+Future<bool> stepSyncOnIosBackground(ServiceInstance service) async => true;
+
+@pragma('vm:entry-point')
+void stepSyncOnStart(ServiceInstance service) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final url = prefs.getString('supabase_url') ?? '';
+    final anonKey = prefs.getString('supabase_anon_key') ?? '';
+    if (url.isNotEmpty && anonKey.isNotEmpty) {
+      await Supabase.initialize(url: url, anonKey: anonKey);
+    }
+  } catch (_) {}
+
+  Future.doWhile(() async {
+    await Future.delayed(const Duration(minutes: 15));
+    try {
+      await StepSyncService.instance.syncToServer();
+    } catch (_) {}
+    return true;
+  });
+}
+
+@pragma('vm:entry-point')
 class StepSyncService {
   static final instance = StepSyncService._();
   StepSyncService._();
@@ -41,48 +67,20 @@ class StepSyncService {
     });
   }
 
-  // Permissions must be requested on the UI thread before the background service
-  // starts syncing. Call StepSyncService.instance.requestPermissions() from a
-  // screen widget (e.g., HomeScreen initState) on first launch.
   static Future<void> initialiseBackgroundService() async {
     final service = FlutterBackgroundService();
     await service.configure(
       iosConfiguration: IosConfiguration(
         autoStart: true,
-        onForeground: _onStart,
-        onBackground: _onIosBackground,
+        onForeground: stepSyncOnStart,
+        onBackground: stepSyncOnIosBackground,
       ),
       androidConfiguration: AndroidConfiguration(
-        onStart: _onStart,
+        onStart: stepSyncOnStart,
         autoStart: true,
         isForegroundMode: false,
       ),
     );
     await service.startService();
-  }
-
-  @pragma('vm:entry-point')
-  static Future<bool> _onIosBackground(ServiceInstance service) async => true;
-
-  @pragma('vm:entry-point')
-  static void _onStart(ServiceInstance service) async {
-    // Initialize Supabase in the background isolate
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final url = prefs.getString('supabase_url') ?? '';
-      final anonKey = prefs.getString('supabase_anon_key') ?? '';
-      if (url.isNotEmpty && anonKey.isNotEmpty) {
-        await Supabase.initialize(url: url, anonKey: anonKey);
-      }
-    } catch (_) {}
-
-    // Sync every 15 minutes
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(minutes: 15));
-      try {
-        await StepSyncService.instance.syncToServer();
-      } catch (_) {}
-      return true;
-    });
   }
 }

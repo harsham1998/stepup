@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,12 +21,14 @@ void main() async {
 
   runApp(const ProviderScope(child: StepUpApp()));
 
-  // Init background service after app is running — don't block startup
-  Future.microtask(() async {
-    try {
-      await StepSyncService.initialiseBackgroundService();
-    } catch (e) {
-      debugPrint('Background service init skipped: $e');
-    }
-  });
+  // Init background service after app is running — skip in debug (native annotation not required)
+  if (!kDebugMode) {
+    Future.microtask(() async {
+      try {
+        await StepSyncService.initialiseBackgroundService();
+      } catch (e) {
+        debugPrint('Background service init skipped: $e');
+      }
+    });
+  }
 }

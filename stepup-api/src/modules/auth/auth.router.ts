@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { validateBody } from '../../gateway/middleware/validate';
-import { sendOtp, verifyOtp, upsertProfile } from './auth.service';
+import { authMiddleware } from '../../gateway/middleware/auth';
+import { sendOtp, verifyOtp, getProfile, upsertProfile } from './auth.service';
 
 export const authRouter = Router();
 
@@ -41,7 +42,18 @@ authRouter.post('/otp/verify', validateBody(verifyOtpSchema), async (req: Reques
   }
 });
 
-authRouter.put('/profile', validateBody(profileSchema), async (req: Request, res: Response) => {
+authRouter.get('/profile', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = (req.user as { id: string }).id;
+    const data = await getProfile(userId);
+    if (!data) return res.status(404).json({ error: 'Profile not found' });
+    res.json(data);
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+authRouter.put('/profile', authMiddleware, validateBody(profileSchema), async (req: Request, res: Response) => {
   try {
     const userId = (req.user as { id: string }).id;
     const result = await upsertProfile(userId, req.body);

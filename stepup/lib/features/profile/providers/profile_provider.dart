@@ -1,13 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/api_client.dart';
 
 final profileProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  final userId = Supabase.instance.client.auth.currentUser?.id;
-  if (userId == null) return {};
-  final data = await Supabase.instance.client
-      .from('users')
-      .select()
-      .eq('id', userId)
-      .single();
-  return data;
+  try {
+    final data = await ApiClient.instance.get('/auth/profile') as Map<String, dynamic>;
+    return data;
+  } catch (_) {
+    return {};
+  }
 });
