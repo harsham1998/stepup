@@ -11,6 +11,7 @@ import '../features/challenges/screens/challenge_detail_screen.dart';
 import '../features/leaderboard/screens/leaderboard_screen.dart';
 import '../features/wallet/screens/wallet_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
+import '../features/health/health_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -43,6 +44,7 @@ final router = GoRouter(
         GoRoute(path: '/leaderboard', builder: (context, _) => const LeaderboardScreen()),
         GoRoute(path: '/wallet',      builder: (context, _) => const WalletScreen()),
         GoRoute(path: '/profile',     builder: (context, _) => const ProfileScreen()),
+        GoRoute(path: '/health',      builder: (context, _) => const HealthScreen()),
       ],
     ),
   ],

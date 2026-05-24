@@ -38,7 +38,23 @@ class StepSyncService {
   final _health = Health();
 
   Future<bool> requestPermissions() async {
-    return _health.requestAuthorization([HealthDataType.STEPS]);
+    // Request all health types so the Health screen works immediately
+    try {
+      return await _health.requestAuthorization([
+        HealthDataType.STEPS,
+        HealthDataType.DISTANCE_WALKING_RUNNING,
+        HealthDataType.ACTIVE_ENERGY_BURNED,
+        HealthDataType.BASAL_ENERGY_BURNED,
+        HealthDataType.HEART_RATE,
+        HealthDataType.RESTING_HEART_RATE,
+        HealthDataType.EXERCISE_TIME,
+        HealthDataType.WORKOUT,
+        HealthDataType.FLIGHTS_CLIMBED,
+        HealthDataType.APPLE_STAND_TIME,
+      ]);
+    } catch (_) {
+      return _health.requestAuthorization([HealthDataType.STEPS]);
+    }
   }
 
   Future<int> getTodaySteps() async {

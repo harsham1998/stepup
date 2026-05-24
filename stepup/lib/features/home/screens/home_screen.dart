@@ -90,6 +90,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
                 const SizedBox(height: 10),
 
+                // Health shortcut card
+                GestureDetector(
+                  onTap: () => context.push('/health'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.07),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.2)),
+                    ),
+                    child: Row(children: [
+                      const Icon(Icons.favorite_rounded, color: Color(0xFFEF4444), size: 18),
+                      const SizedBox(width: 10),
+                      const Expanded(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text('Health & Activity',
+                              style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)),
+                          Text('Steps · Distance · Calories · Heart Rate · Workouts',
+                              style: TextStyle(color: Color(0xFF6B7280), fontSize: 10)),
+                        ]),
+                      ),
+                      const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFF374151), size: 12),
+                    ]),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
                 // Section header
                 Row(children: [
                   const Text('LIVE CHALLENGES',
