@@ -1,5 +1,13 @@
-import { getRedis } from '../../lib/redis';
 import { getSupabase } from '../../lib/supabase';
+
+function tryGetRedis() {
+  try {
+    const { getRedis } = require('../../lib/redis');
+    return getRedis();
+  } catch {
+    return null;
+  }
+}
 
 interface LeaderboardEntry {
   rank: number;
@@ -16,22 +24,27 @@ async function enrichWithProfiles(rankedIds: string[]): Promise<Record<string, {
 }
 
 async function parseRedisRanks(key: string, limit = 100): Promise<LeaderboardEntry[]> {
-  const redis = getRedis();
-  const raw = await redis.zrevrange(key, 0, limit - 1, 'WITHSCORES');
-  const ids: string[] = [];
-  const scores: Record<string, number> = {};
-  for (let i = 0; i < raw.length; i += 2) {
-    ids.push(raw[i]);
-    scores[raw[i]] = parseInt(raw[i + 1], 10);
+  const redis = tryGetRedis();
+  if (!redis) return [];
+  try {
+    const raw = await redis.zrevrange(key, 0, limit - 1, 'WITHSCORES');
+    const ids: string[] = [];
+    const scores: Record<string, number> = {};
+    for (let i = 0; i < raw.length; i += 2) {
+      ids.push(raw[i]);
+      scores[raw[i]] = parseInt(raw[i + 1], 10);
+    }
+    const profiles = await enrichWithProfiles(ids);
+    return ids.map((id, idx) => ({
+      rank: idx + 1,
+      user_id: id,
+      steps: scores[id],
+      name: profiles[id]?.name ?? 'Unknown',
+      city: profiles[id]?.city ?? '',
+    }));
+  } catch {
+    return [];
   }
-  const profiles = await enrichWithProfiles(ids);
-  return ids.map((id, idx) => ({
-    rank: idx + 1,
-    user_id: id,
-    steps: scores[id],
-    name: profiles[id]?.name ?? 'Unknown',
-    city: profiles[id]?.city ?? '',
-  }));
 }
 
 export async function getGlobalLeaderboard(limit = 100): Promise<LeaderboardEntry[]> {
@@ -58,12 +71,17 @@ export async function getFriendsLeaderboard(userId: string, limit = 50): Promise
 }
 
 export async function getUserRank(userId: string): Promise<{ rank: number; steps: number }> {
-  const today = new Date().toISOString().slice(0, 10);
-  const redis = getRedis();
-  const key = `leaderboard:global:${today}`;
-  const [rank, score] = await Promise.all([
-    redis.zrevrank(key, userId),
-    redis.zscore(key, userId),
-  ]);
-  return { rank: (rank ?? 0) + 1, steps: parseInt(score ?? '0', 10) };
+  const redis = tryGetRedis();
+  if (!redis) return { rank: 0, steps: 0 };
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const key = `leaderboard:global:${today}`;
+    const [rank, score] = await Promise.all([
+      redis.zrevrank(key, userId),
+      redis.zscore(key, userId),
+    ]);
+    return { rank: (rank ?? 0) + 1, steps: parseInt(score ?? '0', 10) };
+  } catch {
+    return { rank: 0, steps: 0 };
+  }
 }
