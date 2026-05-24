@@ -69,8 +69,13 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
   const { data: sessionData, error: sessionError } = await supabase.auth.admin.createSession(userId);
   if (sessionError) throw new Error(sessionError.message);
 
+  // Check if user has completed onboarding (has a profile row)
+  const { data: profile } = await supabase.from('users').select('id').eq('id', userId).maybeSingle();
+  const isNewUser = !profile;
+
   return {
     user: sessionData.user,
+    isNewUser,
     session: {
       access_token: sessionData.session.access_token,
       refresh_token: sessionData.session.refresh_token,
