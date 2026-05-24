@@ -24,7 +24,7 @@ void main() {
       expect(c.stepGoal, 10000);
       expect(c.entryFee, 5000);
       expect(c.prizePool, 45000);
-      expect(c.sponsorName, isNull);
+      expect(c.activityType, 'steps');
     });
 
     test('isPaid is true when entryFee > 0', () {

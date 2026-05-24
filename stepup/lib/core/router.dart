@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../features/auth/screens/splash_screen.dart';
@@ -14,6 +15,11 @@ import '../features/profile/screens/profile_screen.dart';
 final router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
+    // Web preview bypass: ?preview=1 in URL skips auth for visual testing
+    if (kIsWeb) {
+      final uri = Uri.base;
+      if (uri.queryParameters.containsKey('preview')) return null;
+    }
     final isLoggedIn = Supabase.instance.client.auth.currentSession != null;
     final isOnAuthRoute = state.matchedLocation == '/' ||
         state.matchedLocation == '/login' ||

@@ -91,8 +91,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(height: 10),
 
                 // Section header
-                const Text('ACTIVE CHALLENGES',
-                    style: TextStyle(color: Color(0xFF4B5563), fontSize: 9, letterSpacing: 0.8, fontWeight: FontWeight.w700)),
+                Row(children: [
+                  const Text('LIVE CHALLENGES',
+                      style: TextStyle(color: Color(0xFF4B5563), fontSize: 9, letterSpacing: 0.8, fontWeight: FontWeight.w700)),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => context.go('/challenges'),
+                    child: const Text('See all',
+                        style: TextStyle(color: Color(0xFF6366F1), fontSize: 10, fontWeight: FontWeight.w700)),
+                  ),
+                ]),
                 const SizedBox(height: 8),
 
                 // Active challenges
@@ -101,7 +109,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   error: (_, e) => const SizedBox(),
                   data: (challenges) => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: challenges.take(2).map((c) =>
+                    children: challenges.take(3).map((c) =>
                         ChallengeCard(
                           challenge: c,
                           onTap: () => context.push('/challenges/${c.id}'),

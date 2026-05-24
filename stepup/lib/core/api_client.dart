@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ApiClient {
@@ -12,18 +13,30 @@ class ApiClient {
 
   final _dio = Dio(BaseOptions(
     baseUrl: _baseUrl,
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10),
-  ))..interceptors.add(InterceptorsWrapper(
-    onRequest: (options, handler) {
-      final token = Supabase.instance.client.auth.currentSession?.accessToken;
-      if (token != null) options.headers['Authorization'] = 'Bearer $token';
-      handler.next(options);
-    },
-    onError: (error, handler) {
-      handler.next(error);
-    },
-  ));
+    connectTimeout: const Duration(seconds: 15),
+    receiveTimeout: const Duration(seconds: 15),
+  ))..interceptors.addAll([
+    InterceptorsWrapper(
+      onRequest: (options, handler) {
+        final token = Supabase.instance.client.auth.currentSession?.accessToken;
+        if (token != null) {
+          options.headers['Authorization'] = 'Bearer $token';
+        } else {
+          debugPrint('[API] WARNING: no session token for ${options.path}');
+        }
+        debugPrint('[API] --> ${options.method} ${options.path}');
+        handler.next(options);
+      },
+      onResponse: (response, handler) {
+        debugPrint('[API] <-- ${response.statusCode} ${response.requestOptions.path}');
+        handler.next(response);
+      },
+      onError: (error, handler) {
+        debugPrint('[API] ERR ${error.response?.statusCode} ${error.requestOptions.path}: ${error.message}');
+        handler.next(error);
+      },
+    ),
+  ]);
 
   Future<dynamic> get(String path, [Map<String, dynamic>? params]) async {
     final r = await _dio.get(path, queryParameters: params);
