@@ -1,0 +1,11 @@
+{
+  "name": "stepup-api",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd stepup-api && npm install && npm run build",
+    "start": "cd stepup-api && npm start"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
