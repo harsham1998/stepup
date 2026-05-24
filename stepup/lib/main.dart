@@ -1,36 +1,31 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
-import 'features/notifications/notification_service.dart';
 import 'features/steps/step_sync_service.dart';
-import 'firebase_options.dart';
+
+const _supabaseUrl = 'https://ypadjymopdbypuneqmnb.supabase.co';
+const _supabaseAnonKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlwYWRqeW1vcGRieXB1bmVxbW5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NTI1MTgsImV4cCI6MjA5NTEyODUxOH0.Z2Ka3K3nxUEmF6IcUiW-i5dzb8npdJ-LnpDTzGH5c6s';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  } catch (e) {
-    // Firebase not configured yet — set up via flutterfire configure
-    debugPrint('Firebase init skipped: $e');
-  }
-  const supabaseUrl = String.fromEnvironment('SUPABASE_URL', defaultValue: 'https://placeholder.supabase.co');
-  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'placeholder-anon-key');
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
-  );
-  // Persist credentials for background isolate (flutter_background_service)
+
+  await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
+
   final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('supabase_url', supabaseUrl);
-  await prefs.setString('supabase_anon_key', supabaseAnonKey);
-  try {
-    await NotificationService.initialise();
-  } catch (e) {
-    debugPrint('Notifications init skipped: $e');
-  }
-  await StepSyncService.initialiseBackgroundService();
+  await prefs.setString('supabase_url', _supabaseUrl);
+  await prefs.setString('supabase_anon_key', _supabaseAnonKey);
+
   runApp(const ProviderScope(child: StepUpApp()));
+
+  // Init background service after app is running — don't block startup
+  Future.microtask(() async {
+    try {
+      await StepSyncService.initialiseBackgroundService();
+    } catch (e) {
+      debugPrint('Background service init skipped: $e');
+    }
+  });
 }

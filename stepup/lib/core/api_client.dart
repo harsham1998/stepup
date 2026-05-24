@@ -7,7 +7,7 @@ class ApiClient {
 
   static const _baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:3000',
+    defaultValue: 'https://stepup-production-ebd2.up.railway.app',
   );
 
   final _dio = Dio(BaseOptions(

@@ -40,14 +40,37 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
   if (response.data?.status !== 'approved') {
     throw new Error('Invalid OTP');
   }
-  const { data, error } = await getSupabase().auth.admin.createUser({
+  const supabase = getSupabase();
+
+  // Create or find the user
+  const { data: createData, error: createError } = await supabase.auth.admin.createUser({
     phone: `+91${phone}`,
     phone_confirm: true,
   });
-  if (error && error.message !== 'A user with this phone number has already been registered') {
-    throw new Error(error.message);
+  if (createError && createError.message !== 'A user with this phone number has already been registered') {
+    throw new Error(createError.message);
   }
-  return data;
+
+  // Get user ID — either from createUser or look up by phone
+  let userId = createData?.user?.id;
+  if (!userId) {
+    const { data: list } = await supabase.auth.admin.listUsers();
+    const existing = list?.users?.find((u) => u.phone === `+91${phone}`);
+    if (!existing) throw new Error('User not found after OTP verification');
+    userId = existing.id;
+  }
+
+  // Create a session for the user
+  const { data: sessionData, error: sessionError } = await supabase.auth.admin.createSession(userId);
+  if (sessionError) throw new Error(sessionError.message);
+
+  return {
+    user: sessionData.user,
+    session: {
+      access_token: sessionData.session.access_token,
+      refresh_token: sessionData.session.refresh_token,
+    },
+  };
 }
 
 export async function upsertProfile(userId: string, profile: {
