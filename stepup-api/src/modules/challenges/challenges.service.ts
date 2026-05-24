@@ -2,7 +2,25 @@ import { getSupabase } from '../../lib/supabase';
 import { getRedis } from '../../lib/redis';
 import { ChallengeRow } from '../../types';
 
-export async function listChallenges(status?: string): Promise<ChallengeRow[]> {
+async function withParticipantCount(challenges: ChallengeRow[]) {
+  const ids = challenges.map(c => c.id);
+  if (ids.length === 0) return challenges;
+  const { data } = await getSupabase()
+    .from('challenge_participants')
+    .select('challenge_id')
+    .in('challenge_id', ids);
+  const counts: Record<string, number> = {};
+  for (const row of data ?? []) {
+    counts[row.challenge_id] = (counts[row.challenge_id] ?? 0) + 1;
+  }
+  return challenges.map(c => ({
+    ...c,
+    activity_type: (c as any).sponsor_name ?? 'steps',
+    participant_count: counts[c.id] ?? 0,
+  }));
+}
+
+export async function listChallenges(status?: string) {
   let query = getSupabase()
     .from('challenges')
     .select('*')
@@ -10,17 +28,18 @@ export async function listChallenges(status?: string): Promise<ChallengeRow[]> {
   if (status) query = query.eq('status', status);
   const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return (data ?? []) as ChallengeRow[];
+  return withParticipantCount((data ?? []) as ChallengeRow[]);
 }
 
-export async function getChallenge(id: string): Promise<ChallengeRow> {
+export async function getChallenge(id: string) {
   const { data, error } = await getSupabase()
     .from('challenges')
     .select('*')
     .eq('id', id)
     .single();
   if (error) throw new Error(error.message);
-  return data as ChallengeRow;
+  const [enriched] = await withParticipantCount([data as ChallengeRow]);
+  return enriched;
 }
 
 export async function joinChallenge(userId: string, challengeId: string) {
@@ -53,8 +72,10 @@ export async function joinChallenge(userId: string, challengeId: string) {
     throw new Error(joinErr.message);
   }
 
-  const redis = getRedis();
-  await redis.zadd(`leaderboard:challenge:${challengeId}`, 0, userId);
+  try {
+    const redis = getRedis();
+    await redis.zadd(`leaderboard:challenge:${challengeId}`, 0, userId);
+  } catch { /* Redis optional — leaderboard seeded asynchronously */ }
 
   return { joined: true, challenge_id: challengeId };
 }
