@@ -14,7 +14,7 @@ const withdrawSchema = z.object({
 walletRouter.get('/balance', async (req: Request, res: Response) => {
   try {
     const data = await getBalance(req.user!.id);
-    res.json(data);
+    res.json({ ...data, coin_balance: data.balance_paise });
   } catch (err: unknown) {
     res.status(500).json({ error: 'Internal server error' });
   }

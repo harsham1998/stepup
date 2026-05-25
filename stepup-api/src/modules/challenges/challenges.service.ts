@@ -15,9 +15,27 @@ async function withParticipantCount(challenges: ChallengeRow[]) {
   }
   return challenges.map(c => ({
     ...c,
-    activity_type: (c as any).sponsor_name ?? 'steps',
+    activity_type: c.type ?? 'steps',
     participant_count: counts[c.id] ?? 0,
   }));
+}
+
+export async function listMyChallenges(userId: string) {
+  const db = getSupabase();
+  const { data: participations, error: pErr } = await db
+    .from('challenge_participants')
+    .select('challenge_id')
+    .eq('user_id', userId);
+  if (pErr) throw new Error(pErr.message);
+  const ids = (participations ?? []).map((p: any) => p.challenge_id);
+  if (ids.length === 0) return [];
+  const { data, error } = await db
+    .from('challenges')
+    .select('*')
+    .in('id', ids)
+    .order('start_time', { ascending: true });
+  if (error) throw new Error(error.message);
+  return withParticipantCount((data ?? []) as ChallengeRow[]);
 }
 
 export async function listChallenges(status?: string) {
@@ -89,8 +107,9 @@ async function debitWalletForChallenge(
   const db = getSupabase();
   const { data: txns } = await db
     .from('wallet_transactions')
-    .select('type, amount')
-    .eq('user_id', userId);
+    .select('type, amount, status')
+    .eq('user_id', userId)
+    .neq('status', 'rejected');
 
   const balance = (txns ?? []).reduce((sum: number, t: { type: string; amount: number }) =>
     t.type === 'credit' ? sum + t.amount : sum - t.amount, 0);
