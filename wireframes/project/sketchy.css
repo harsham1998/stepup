@@ -1,0 +1,432 @@
+/* Sketchy wireframe vibe — handwritten, b&w with one accent */
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@500;600;700;800;900&display=swap');
+
+:root {
+  /* Athletic-wellness dark theme — punched for bold Nike-style type */
+  --ink: #f5f2e8;            /* off-white text */
+  --ink-2: #cfcab9;
+  --ink-3: #7a7a8a;
+  --paper: #0a0a14;          /* deeper black-navy */
+  --paper-2: #14141f;        /* card surface */
+  --paper-3: #1d1d2b;        /* elevated surface */
+  --grid: #2d2d44;
+  /* Accents — punchy + cohesive */
+  --matcha:    #d4ff3a;      /* volt lime — primary highlight */
+  --matcha-2:  #a8d420;
+  --ochre:     #ffb547;      /* warm amber */
+  --mint:      #5dd9a0;      /* fresh mint */
+  --clay:      #c97a4e;      /* warm tan (sparing) */
+  --plum:      #6b4a6e;
+  --moss:      #2d3a26;
+  --sage:      #6b8159;
+  --sage-deep: #4d6042;
+  --gradient-start: #15152a; /* deep navy-purple */
+  --gradient-end:   #0a0a14; /* near-black */
+  /* legacy aliases */
+  --accent:   var(--ochre);
+  --accent-2: var(--matcha);
+  --lime:     var(--matcha);
+  --pink:     var(--clay);
+  --blue:     var(--mint);
+  --purple:   var(--plum);
+  --orange:   var(--ochre);
+  --yellow:   var(--ochre);
+  --cyan:     var(--mint);
+  --good:     var(--mint);
+}
+
+.sketch {
+  font-family: 'Inter', 'Inter Tight', sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+.sketch h1, .sketch h2, .sketch h3, .sketch .hand {
+  font-family: 'Big Shoulders Display', 'Inter Tight', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+/* Nike-style hero numbers — italic condensed black */
+.display {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -1px;
+  line-height: 0.9;
+}
+.hand {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  line-height: 1;
+}
+
+/* Phone frame */
+.phone {
+  width: 300px;
+  height: 600px;
+  border: 2.5px solid var(--ink-3);
+  border-radius: 32px;
+  background: linear-gradient(160deg, var(--gradient-start), var(--paper) 50%, var(--gradient-end));
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 3px 4px 0 rgba(255,255,255,0.04);
+  font-family: 'Inter', 'Inter Tight', sans-serif;
+  color: var(--ink);
+}
+.phone::before {
+  /* speaker / notch */
+  content: '';
+  position: absolute;
+  top: 10px; left: 50%;
+  transform: translateX(-50%);
+  width: 60px; height: 6px;
+  border: 1.5px solid var(--ink-3);
+  border-radius: 6px;
+  background: var(--paper);
+  z-index: 5;
+}
+.phone-screen {
+  position: absolute;
+  inset: 26px 8px 8px 8px;
+  border: 1.5px solid var(--ink-3);
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(26, 21, 48, 0.4), transparent 40%, rgba(15, 26, 42, 0.5));
+  display: flex;
+  flex-direction: column;
+}
+.phone-status {
+  height: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 10px;
+  color: var(--ink-2);
+  border-bottom: 1px dashed var(--grid);
+  font-family: 'Inter', 'Inter Tight', sans-serif;
+}
+.phone-body {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  padding: 10px 14px;
+}
+
+/* Hand-drawn primitives */
+.box {
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  position: relative;
+}
+.box.dashed { border-style: dashed; border-color: rgba(255,255,255,0.12); }
+.box.thick { border-width: 2px; }
+.box.fill-1 { background: rgba(255,255,255,0.04); }
+.box.fill-accent { background: var(--ochre); color: #1a1a1a; border-color: var(--ochre); }
+.box.fill-yellow { background: var(--ochre); color: #1a1a1a; border-color: var(--ochre); }
+.box.fill-lime   { background: var(--matcha); color: #1a1a1a; border-color: var(--matcha); }
+.box.fill-pink   { background: var(--clay); color: var(--ink); border-color: var(--clay); }
+.box.fill-blue   { background: var(--mint); color: #0f0f1a; border-color: var(--mint); }
+.box.fill-purple { background: var(--plum); color: var(--ink); border-color: var(--plum); }
+.box.fill-cyan   { background: var(--mint); color: #0f0f1a; border-color: var(--mint); }
+.box.fill-orange { background: var(--clay); color: var(--ink); border-color: var(--clay); }
+.box.fill-ink { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.box.fill-gold { background: var(--ochre); color: #1a1a1a; border-color: var(--ochre); }
+.box.pop { box-shadow: 0 4px 18px rgba(0,0,0,0.4); }
+.box.pop-pink   { box-shadow: 0 0 0 1px var(--clay), 0 4px 18px rgba(214,138,94,0.25); }
+.box.pop-lime   { box-shadow: 0 0 0 1px var(--matcha), 0 4px 18px rgba(212,255,58,0.25); }
+.box.pop-blue   { box-shadow: 0 0 0 1px var(--mint), 0 4px 18px rgba(74,222,138,0.2); }
+.box.pop-purple { box-shadow: 0 0 0 1px var(--plum), 0 4px 18px rgba(107,74,110,0.3); }
+.box.pop-gold   { box-shadow: 0 0 0 1px var(--ochre), 0 4px 18px rgba(255,181,71,0.25); }
+
+/* slight wobble */
+.wobble  { transform: rotate(-0.4deg); }
+.wobble2 { transform: rotate(0.5deg); }
+.wobble3 { transform: rotate(-0.7deg); }
+
+/* thin divider — replaces sketchy squiggle */
+.squiggle {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* placeholder text bars */
+.bar {
+  display: inline-block;
+  height: 6px;
+  background: var(--ink-3);
+  opacity: 0.5;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+.bar.thick { height: 9px; }
+.bar.dark  { background: var(--ink); opacity: 0.8; }
+
+/* hatched fill */
+.hatch {
+  background-image: repeating-linear-gradient(
+    45deg, transparent, transparent 3px, var(--ink-3) 3px, var(--ink-3) 3.5px
+  );
+  opacity: 0.5;
+}
+
+/* dotted underline */
+.note {
+  font-family: 'Big Shoulders Display', sans-serif;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* annotation arrow / sticky note (canvas level, outside phone) */
+.sticky {
+  font-family: 'Big Shoulders Display', sans-serif;
+  color: var(--ink);
+  background: var(--accent-2);
+  padding: 4px 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  display: inline-block;
+  transform: rotate(-2deg);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+  font-size: 15px;
+}
+
+/* bottom tab bar */
+.tabbar {
+  display: flex;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  background: rgba(10, 10, 20, 0.6);
+  backdrop-filter: blur(12px);
+  height: 48px;
+}
+.tabbar .tab .ic { font-family: 'Big Shoulders Display', sans-serif; font-weight: 800; }
+.tabbar .tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--ink-3);
+  font-family: 'Inter', 'Inter Tight', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  gap: 3px;
+  border-right: none;
+}
+.tabbar .tab:last-child { border-right: none; }
+.tabbar .tab.active { color: var(--matcha); font-weight: 700; }
+.tabbar .tab .ic {
+  width: 18px; height: 18px;
+  border: none;
+  display: grid; place-items: center;
+  font-size: 14px;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 800;
+}
+.tabbar .tab.active .ic { color: var(--matcha); }
+
+/* button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  font-family: 'Inter', 'Inter Tight', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.btn.primary { background: var(--ink); color: var(--paper); }
+.btn.accent  { background: var(--ochre); color: #1a1a1a; }
+.btn.ghost   { background: transparent; border: 1.5px solid rgba(255,255,255,0.18); padding: 12.5px 18px; }
+.btn.full    { width: 100%; }
+
+/* circle */
+.circ {
+  border: 1.5px solid var(--ink-3);
+  border-radius: 50%;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+/* utility */
+.row { display: flex; }
+.col { display: flex; flex-direction: column; }
+.gap-2 { gap: 6px; }
+.gap-3 { gap: 10px; }
+.gap-4 { gap: 14px; }
+.center { align-items: center; justify-content: center; }
+.between { justify-content: space-between; }
+.middle { align-items: center; }
+.grow { flex: 1; }
+.muted { color: var(--ink-3); }
+.tiny  { font-size: 10px; }
+.sm    { font-size: 12px; }
+.md    { font-size: 14px; }
+.lg    { font-size: 18px; }
+.xl    { font-size: 24px; }
+.xxl   { font-size: 36px; }
+.b     { font-weight: 700; }
+.tac   { text-align: center; }
+
+/* OTP boxes */
+.otp-cell {
+  width: 36px; height: 44px;
+  border: 1.5px solid var(--ink-3);
+  border-radius: 8px;
+  background: var(--paper-2);
+  display: grid; place-items: center;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 24px; font-weight: 700;
+  color: var(--ink);
+}
+.otp-cell.filled { border-color: var(--ochre); background: rgba(255,181,71,0.08); }
+.otp-cell.active { border-color: var(--matcha); background: rgba(212,255,58,0.08); }
+
+/* social button */
+.social-btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--ink-3);
+  border-radius: 28px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font-family: 'Inter', 'Inter Tight', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  width: 100%;
+}
+.social-btn .glyph {
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  display: grid; place-items: center;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 14px;
+  background: var(--paper-3);
+  color: var(--ink);
+}
+
+/* annotation labels on artboards (outside phone) */
+.callout {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+/* chips */
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'Inter', 'Inter Tight', sans-serif; font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.chip.lime   { background: var(--matcha); color: #1a1a1a; border-color: var(--matcha); }
+.chip.pink   { background: var(--clay); color: var(--ink); border-color: var(--clay); }
+.chip.blue   { background: var(--mint); color: #0f0f1a; border-color: var(--mint); }
+.chip.purple { background: var(--plum); color: var(--ink); border-color: var(--plum); }
+.chip.cyan   { background: var(--mint); color: #0f0f1a; border-color: var(--mint); }
+.chip.yellow { background: var(--ochre); color: #1a1a1a; border-color: var(--ochre); }
+.chip.ink    { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip.gold   { background: var(--ochre); color: #1a1a1a; border-color: var(--ochre); }
+
+/* star burst sticker — for "new" / "hot" callouts */
+.burst {
+  display: inline-grid; place-items: center;
+  font-family: 'Big Shoulders Display', sans-serif; font-weight: 700;
+  width: 44px; height: 44px;
+  color: var(--ink); font-size: 13px; line-height: 1;
+  background:
+    conic-gradient(from 0deg, var(--lime) 0 10%, transparent 10% 20%,
+                              var(--lime) 20% 30%, transparent 30% 40%,
+                              var(--lime) 40% 50%, transparent 50% 60%,
+                              var(--lime) 60% 70%, transparent 70% 80%,
+                              var(--lime) 80% 90%, transparent 90% 100%);
+  border-radius: 50%;
+  text-align: center;
+  transform: rotate(-12deg);
+}
+.burst.pink {
+  background:
+    conic-gradient(from 0deg, var(--pink) 0 10%, transparent 10% 20%,
+                              var(--pink) 20% 30%, transparent 30% 40%,
+                              var(--pink) 40% 50%, transparent 50% 60%,
+                              var(--pink) 60% 70%, transparent 70% 80%,
+                              var(--pink) 80% 90%, transparent 90% 100%);
+  color: #fff;
+}
+
+/* dotted grid bg — paper feel */
+.dotted-bg {
+  background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.18) 1px, transparent 0);
+  background-size: 14px 14px;
+}
+
+/* halftone-ish dots */
+.halftone {
+  background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0);
+  background-size: 6px 6px;
+  opacity: 0.7;
+}
+
+/* gradient pill (wellness — sage to clay) */
+.gradient-pill {
+  background: linear-gradient(90deg, var(--sage-deep), var(--clay));
+  color: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: 'Inter', 'Inter Tight', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* tape strip (corner accent) */
+.tape {
+  position: absolute;
+  width: 56px; height: 16px;
+  background: rgba(255,210,63,0.85);
+  border-left: 1px dashed rgba(0,0,0,0.25);
+  border-right: 1px dashed rgba(0,0,0,0.25);
+  transform: rotate(-8deg);
+  top: -4px; left: 10px;
+}
+
+/* solid highlight block — replaces highlighter-pen style for legibility on dark bg */
+.marker {
+  background: var(--matcha);
+  color: #0a0a14;
+  padding: 0 6px;
+  border-radius: 3px;
+}
+.marker.pink   { background: var(--clay); color: #fff; }
+.marker.yellow { background: var(--ochre); color: #0a0a14; }
+.marker.cyan   { background: var(--mint); color: #0a0a14; }
+.marker.gold   { background: var(--ochre); color: #0a0a14; }
+
+/* btn color variants */
+.btn.lime   { background: var(--matcha); color: #1a1a1a; border-color: var(--matcha); }
+.btn.pink   { background: var(--clay); color: var(--ink); border-color: var(--clay); }
+.btn.blue   { background: var(--mint); color: #0f0f1a; border-color: var(--mint); }
+.btn.purple { background: var(--plum); color: var(--ink); border-color: var(--plum); }
+.btn.gold   { background: var(--ochre); color: #1a1a1a; border-color: var(--ochre); }

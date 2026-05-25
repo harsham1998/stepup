@@ -134,12 +134,12 @@ class _MissionRow extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: mission.completed
-            ? AppTheme.voltLime.withOpacity(0.08)
+            ? AppTheme.voltLime.withValues(alpha: 0.08)
             : AppTheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: mission.completed
-              ? AppTheme.voltLime.withOpacity(0.4)
+              ? AppTheme.voltLime.withValues(alpha: 0.4)
               : AppTheme.border,
         ),
       ),
@@ -149,8 +149,8 @@ class _MissionRow extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(
             color: mission.completed
-                ? AppTheme.voltLime.withOpacity(0.15)
-                : Colors.white.withOpacity(0.06),
+                ? AppTheme.voltLime.withValues(alpha: 0.15)
+                : Colors.white.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
@@ -179,7 +179,7 @@ class _MissionRow extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: mission.progressPct,
                         minHeight: 4,
-                        backgroundColor: Colors.white.withOpacity(0.08),
+                        backgroundColor: Colors.white.withValues(alpha: 0.08),
                         valueColor: AlwaysStoppedAnimation(
                           mission.completed
                               ? AppTheme.voltLime

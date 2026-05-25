@@ -1,0 +1,2 @@
+[      50ms] [LOG] [API] --> GET /challenges/cccccccc-0000-4000-8000-000000000006 @ http://localhost:8080/main.dart.js:29339
+[    1912ms] [LOG] [API] <-- 200 /challenges/cccccccc-0000-4000-8000-000000000006 @ http://localhost:8080/main.dart.js:29339

@@ -10,6 +10,9 @@ import '../features/challenges/screens/challenges_screen.dart';
 import '../features/challenges/screens/challenge_detail_screen.dart';
 import '../features/challenges/screens/custom_challenge_screen.dart';
 import '../features/challenges/screens/invite_friends_screen.dart';
+import '../features/challenges/screens/challenge_checkin_screen.dart';
+import '../features/challenges/screens/consistency_calendar_screen.dart';
+import '../features/challenges/screens/upgrade_prompt_screen.dart';
 import '../features/leaderboard/screens/leaderboard_screen.dart';
 import '../features/league/screens/league_hub_screen.dart';
 import '../features/league/screens/league_standings_screen.dart';
@@ -17,11 +20,18 @@ import '../features/coins/screens/coins_screen.dart';
 import '../features/rewards/screens/rewards_screen.dart';
 import '../features/battlepass/screens/battlepass_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
+import '../features/profile/screens/reputation_screen.dart';
+import '../features/profile/screens/xp_level_screen.dart';
+import '../features/profile/screens/achievements_screen.dart';
 import '../features/subscriptions/screens/subscription_screen.dart';
 import '../features/missions/screens/missions_screen.dart';
 import '../features/rivals/screens/rivals_screen.dart';
+import '../features/rivals/screens/battle_detail_screen.dart';
 import '../features/community/screens/community_screen.dart';
 import '../features/streaks/screens/streak_screen.dart';
+import '../features/activities/screens/activities_screen.dart';
+import '../features/activities/screens/log_session_screen.dart';
+import '../features/notifications/screens/notifications_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -45,22 +55,42 @@ final router = GoRouter(
       builder: (_, state, child) => AppShell(child: child, location: state.matchedLocation),
       routes: [
         GoRoute(path: '/home',           builder: (_, __) => const HomeScreen()),
+
+        // Challenges
         GoRoute(path: '/challenges',     builder: (_, __) => const ChallengesScreen()),
-        GoRoute(path: '/challenges/:id', builder: (_, s) => ChallengeDetailScreen(id: s.pathParameters['id']!)),
         GoRoute(path: '/challenges/custom/new', builder: (_, __) => const CustomChallengeScreen()),
         GoRoute(path: '/challenges/custom/:code/invite', builder: (_, s) => InviteFriendsScreen(challengeId: s.pathParameters['code']!)),
+        GoRoute(path: '/challenges/upgrade', builder: (_, __) => const UpgradePromptScreen()),
+        GoRoute(path: '/challenges/:id', builder: (_, s) => ChallengeDetailScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/challenges/:id/checkin', builder: (_, s) => ChallengeCheckinScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/consistency', builder: (_, __) => const ConsistencyCalendarScreen()),
+
+        // Leaderboard
         GoRoute(path: '/leaderboard',    builder: (_, __) => const LeaderboardScreen()),
         GoRoute(path: '/leaderboard/league', builder: (_, __) => const LeagueHubScreen()),
         GoRoute(path: '/leaderboard/standings', builder: (_, __) => const LeagueStandingsScreen()),
+
+        // Coins
         GoRoute(path: '/coins',          builder: (_, __) => const CoinsScreen()),
         GoRoute(path: '/coins/rewards',  builder: (_, __) => const RewardsScreen()),
         GoRoute(path: '/coins/battlepass', builder: (_, __) => const BattlePassScreen()),
+
+        // Profile
         GoRoute(path: '/profile',        builder: (_, __) => const ProfileScreen()),
         GoRoute(path: '/profile/subscription', builder: (_, __) => const SubscriptionScreen()),
+        GoRoute(path: '/profile/reputation', builder: (_, __) => const ReputationScreen()),
+        GoRoute(path: '/profile/xp',     builder: (_, __) => const XpLevelScreen()),
+        GoRoute(path: '/profile/achievements', builder: (_, __) => const AchievementsScreen()),
+
+        // Other
         GoRoute(path: '/missions',       builder: (_, __) => const MissionsScreen()),
         GoRoute(path: '/rivals',         builder: (_, __) => const RivalsScreen()),
+        GoRoute(path: '/rivals/battle/:id', builder: (_, s) => BattleDetailScreen(battleId: s.pathParameters['id']!)),
         GoRoute(path: '/community',      builder: (_, __) => const CommunityScreen()),
         GoRoute(path: '/streaks',        builder: (_, __) => const StreakScreen()),
+        GoRoute(path: '/activities',     builder: (_, __) => const ActivitiesScreen()),
+        GoRoute(path: '/activities/log', builder: (_, s) => LogSessionScreen(initialType: s.uri.queryParameters['type'])),
+        GoRoute(path: '/notifications',  builder: (_, __) => const NotificationsScreen()),
       ],
     ),
   ],

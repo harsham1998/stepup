@@ -1,0 +1,2 @@
+[     104ms] [LOG] [API] --> GET /wallet/balance @ http://localhost:8080/main.dart.js:29339
+[    1594ms] [LOG] [API] <-- 200 /wallet/balance @ http://localhost:8080/main.dart.js:29339

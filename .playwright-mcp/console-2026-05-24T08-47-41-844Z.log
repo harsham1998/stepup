@@ -1,0 +1,4 @@
+[     290ms] [LOG] Background service init skipped: FlutterBackgroundService is currently supported for Android and iOS Platform only. @ http://localhost:8080/main.dart.js:29339
+[     701ms] [LOG] [API] --> GET /challenges @ http://localhost:8080/main.dart.js:29339
+[    1096ms] [WARNING] Could not find a set of Noto fonts to display all missing characters. Please add a font asset for the missing characters. See: https://docs.flutter.dev/cookbook/design/fonts @ http://localhost:8080/main.dart.js:31529
+[    2618ms] [LOG] [API] <-- 200 /challenges @ http://localhost:8080/main.dart.js:29339

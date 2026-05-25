@@ -1,0 +1,109 @@
+[  181111ms] [LOG] Background service init skipped: FlutterBackgroundService is currently supported for Android and iOS Platform only. @ http://localhost:8080/main.dart.js:29339
+[  181256ms] [LOG] [API] --> GET /challenges @ http://localhost:8080/main.dart.js:29339
+[  181406ms] [WARNING] Could not find a set of Noto fonts to display all missing characters. Please add a font asset for the missing characters. See: https://docs.flutter.dev/cookbook/design/fonts @ http://localhost:8080/main.dart.js:31529
+[  182712ms] [LOG] [API] <-- 200 /challenges @ http://localhost:8080/main.dart.js:29339
+[  228721ms] TypeError: Cannot read properties of undefined (reading 'toString')
+    at axU.qP (http://localhost:8080/main.dart.js:33975:3)
+    at axY.$1 (http://localhost:8080/main.dart.js:34014:28)
+    at axV.$1 (http://localhost:8080/main.dart.js:34011:35)
+    at arY.$1 (http://localhost:8080/main.dart.js:33796:41)
+    at a_1.q0 (http://localhost:8080/main.dart.js:42150:32)
+    at azg.$1 (http://localhost:8080/main.dart.js:42167:12)
+    at aPT (http://localhost:8080/main.dart.js:7267:29)
+    at HTMLElement.<anonymous> (http://localhost:8080/main.dart.js:7258:43)
+    at eval (eval at <anonymous> (eval at evaluate (:302:30)), <anonymous>:6:38)
+    at Array.forEach (<anonymous>)
+[  228721ms] TypeError: Cannot read properties of undefined (reading 'toString')
+    at axU.qP (http://localhost:8080/main.dart.js:33975:3)
+    at ay0.$1 (http://localhost:8080/main.dart.js:34048:30)
+    at axV.$1 (http://localhost:8080/main.dart.js:34011:35)
+    at arY.$1 (http://localhost:8080/main.dart.js:33796:41)
+    at a_1.q0 (http://localhost:8080/main.dart.js:42150:32)
+    at azg.$1 (http://localhost:8080/main.dart.js:42167:12)
+    at aPT (http://localhost:8080/main.dart.js:7267:29)
+    at http://localhost:8080/main.dart.js:7258:43
+    at eval (eval at <anonymous> (eval at evaluate (:302:30)), <anonymous>:6:38)
+    at Array.forEach (<anonymous>)
+[  266435ms] [LOG] [API] --> GET /leaderboard/global @ http://localhost:8080/main.dart.js:29339
+[  266435ms] [LOG] [API] --> GET /leaderboard/friends @ http://localhost:8080/main.dart.js:29339
+[  266435ms] [LOG] [API] --> GET /leaderboard/city/all @ http://localhost:8080/main.dart.js:29339
+[  268010ms] [LOG] [API] --> GET /wallet/balance @ http://localhost:8080/main.dart.js:29339
+[  268263ms] [LOG] [API] <-- 200 /leaderboard/city/all @ http://localhost:8080/main.dart.js:29339
+[  268445ms] [LOG] [API] <-- 200 /leaderboard/global @ http://localhost:8080/main.dart.js:29339
+[  268627ms] [LOG] [API] <-- 200 /leaderboard/friends @ http://localhost:8080/main.dart.js:29339
+[  269232ms] [LOG] [API] <-- 200 /wallet/balance @ http://localhost:8080/main.dart.js:29339
+[  273652ms] [LOG] [API] --> GET /wallet/transactions @ http://localhost:8080/main.dart.js:29339
+[  274899ms] [LOG] [API] <-- 200 /wallet/transactions @ http://localhost:8080/main.dart.js:29339
+[  275160ms] [LOG] [API] --> GET /auth/profile @ http://localhost:8080/main.dart.js:29339
+[  275948ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://stepup-production-ebd2.up.railway.app/auth/profile:0
+[  275951ms] [LOG] [API] ERR 404 /auth/profile: This exception was thrown because the response has a status code of 404 and RequestOptions.validateStatus was configured to throw for this status code. @ http://localhost:8080/main.dart.js:29339
+[  275951ms] [LOG] The status code of 404 has the following meaning: "Client error - the request contains bad syntax or cannot be fulfilled" @ http://localhost:8080/main.dart.js:29339
+[  275951ms] [LOG] Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status @ http://localhost:8080/main.dart.js:29339
+[  275951ms] [LOG] In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code. @ http://localhost:8080/main.dart.js:29339
+[  275951ms] [LOG]  @ http://localhost:8080/main.dart.js:29339
+[47103167ms] [ERROR] Failed to load resource: net::ERR_NETWORK_CHANGED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[47103618ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[47133358ms] [ERROR] Failed to load resource: net::ERR_NETWORK_CHANGED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[47133367ms] Error
+    at Object.f (http://localhost:8080/main.dart.js:3737:20)
+    at http://localhost:8080/main.dart.js:90759:9
+    at aDa.a (http://localhost:8080/main.dart.js:5093:63)
+    at aDa.$2 (http://localhost:8080/main.dart.js:41042:14)
+    at aC9.$2 (http://localhost:8080/main.dart.js:41039:16)
+    at a_1.tA (http://localhost:8080/main.dart.js:42152:34)
+    at lh.atM (http://localhost:8080/main.dart.js:41285:18)
+    at av0.$0 (http://localhost:8080/main.dart.js:41453:37)
+    at Object.u8 (http://localhost:8080/main.dart.js:5206:78)
+    at af.fk (http://localhost:8080/main.dart.js:41369:3)
+[51733147ms] [ERROR] Failed to load resource: net::ERR_NETWORK_CHANGED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[57032107ms] [ERROR] Failed to load resource: net::ERR_NETWORK_CHANGED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[57032109ms] Error
+    at Object.f (http://localhost:8080/main.dart.js:3737:20)
+    at http://localhost:8080/main.dart.js:90759:9
+    at aDa.a (http://localhost:8080/main.dart.js:5093:63)
+    at aDa.$2 (http://localhost:8080/main.dart.js:41042:14)
+    at aC9.$2 (http://localhost:8080/main.dart.js:41039:16)
+    at a_1.tA (http://localhost:8080/main.dart.js:42152:34)
+    at lh.atM (http://localhost:8080/main.dart.js:41285:18)
+    at av0.$0 (http://localhost:8080/main.dart.js:41453:37)
+    at Object.u8 (http://localhost:8080/main.dart.js:5206:78)
+    at af.fk (http://localhost:8080/main.dart.js:41369:3)
+[60693100ms] [ERROR] Failed to load resource: net::ERR_NETWORK_CHANGED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[60699319ms] [ERROR] Failed to load resource: net::ERR_NETWORK_CHANGED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[61644135ms] [ERROR] Failed to load resource: net::ERR_NETWORK_CHANGED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[61644136ms] Error
+    at Object.f (http://localhost:8080/main.dart.js:3737:20)
+    at http://localhost:8080/main.dart.js:90759:9
+    at aDa.a (http://localhost:8080/main.dart.js:5093:63)
+    at aDa.$2 (http://localhost:8080/main.dart.js:41042:14)
+    at aC9.$2 (http://localhost:8080/main.dart.js:41039:16)
+    at a_1.tA (http://localhost:8080/main.dart.js:42152:34)
+    at lh.atM (http://localhost:8080/main.dart.js:41285:18)
+    at av0.$0 (http://localhost:8080/main.dart.js:41453:37)
+    at Object.u8 (http://localhost:8080/main.dart.js:5206:78)
+    at af.fk (http://localhost:8080/main.dart.js:41369:3)
+[61644185ms] [ERROR] Failed to load resource: net::ERR_NAME_NOT_RESOLVED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[62593962ms] [ERROR] Failed to load resource: net::ERR_NETWORK_CHANGED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[62593964ms] Error
+    at Object.f (http://localhost:8080/main.dart.js:3737:20)
+    at http://localhost:8080/main.dart.js:90759:9
+    at aDa.a (http://localhost:8080/main.dart.js:5093:63)
+    at aDa.$2 (http://localhost:8080/main.dart.js:41042:14)
+    at aC9.$2 (http://localhost:8080/main.dart.js:41039:16)
+    at a_1.tA (http://localhost:8080/main.dart.js:42152:34)
+    at lh.atM (http://localhost:8080/main.dart.js:41285:18)
+    at av0.$0 (http://localhost:8080/main.dart.js:41453:37)
+    at Object.u8 (http://localhost:8080/main.dart.js:5206:78)
+    at af.fk (http://localhost:8080/main.dart.js:41369:3)
+[63657087ms] [ERROR] Failed to load resource: net::ERR_NETWORK_CHANGED @ https://ypadjymopdbypuneqmnb.supabase.co/auth/v1/token?grant_type=refresh_token:0
+[63657089ms] Error
+    at Object.f (http://localhost:8080/main.dart.js:3737:20)
+    at http://localhost:8080/main.dart.js:90759:9
+    at aDa.a (http://localhost:8080/main.dart.js:5093:63)
+    at aDa.$2 (http://localhost:8080/main.dart.js:41042:14)
+    at aC9.$2 (http://localhost:8080/main.dart.js:41039:16)
+    at a_1.tA (http://localhost:8080/main.dart.js:42152:34)
+    at lh.atM (http://localhost:8080/main.dart.js:41285:18)
+    at av0.$0 (http://localhost:8080/main.dart.js:41453:37)
+    at Object.u8 (http://localhost:8080/main.dart.js:5206:78)
+    at af.fk (http://localhost:8080/main.dart.js:41369:3)

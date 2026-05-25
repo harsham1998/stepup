@@ -89,9 +89,12 @@ class ProfileScreen extends ConsumerWidget {
                           style: AppTheme.label(13, color: Colors.white)
                               .copyWith(fontWeight: FontWeight.w700),
                         ),
-                        Text('See all',
-                            style: AppTheme.label(12,
-                                color: AppTheme.voltLime)),
+                        GestureDetector(
+                          onTap: () => context.push('/profile/achievements'),
+                          child: Text('See all',
+                              style: AppTheme.label(12,
+                                  color: AppTheme.voltLime)),
+                        ),
                       ]),
                   const SizedBox(height: 12),
                   SizedBox(
@@ -112,12 +115,22 @@ class ProfileScreen extends ConsumerWidget {
                   _MenuItem(
                     label: 'Activity history',
                     icon: Icons.history_rounded,
-                    onTap: () {},
+                    onTap: () => context.push('/activities'),
                   ),
                   _MenuItem(
                     label: 'Achievements',
                     icon: Icons.emoji_events_rounded,
-                    onTap: () {},
+                    onTap: () => context.push('/profile/achievements'),
+                  ),
+                  _MenuItem(
+                    label: 'Reputation',
+                    icon: Icons.shield_rounded,
+                    onTap: () => context.push('/profile/reputation'),
+                  ),
+                  _MenuItem(
+                    label: 'Level & XP',
+                    icon: Icons.bolt_rounded,
+                    onTap: () => context.push('/profile/xp'),
                   ),
                   _MenuItem(
                     label: 'Friends · 14',
@@ -132,7 +145,7 @@ class ProfileScreen extends ConsumerWidget {
                   _MenuItem(
                     label: 'Notifications',
                     icon: Icons.notifications_none_rounded,
-                    onTap: () {},
+                    onTap: () => context.push('/notifications'),
                   ),
                   _MenuItem(
                     label: 'Help & support',
