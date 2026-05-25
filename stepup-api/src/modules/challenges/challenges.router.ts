@@ -1,7 +1,17 @@
 import { Router, Request, Response } from 'express';
-import { listChallenges, getChallenge, joinChallenge } from './challenges.service';
+import { listChallenges, getChallenge, joinChallenge, listMyChallenges } from './challenges.service';
 
 export const challengesRouter = Router();
+
+challengesRouter.get('/mine', async (req: Request, res: Response) => {
+  try {
+    const data = await listMyChallenges(req.user!.id);
+    res.json(data);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Internal error';
+    res.status(500).json({ error: msg });
+  }
+});
 
 challengesRouter.get('/', async (req: Request, res: Response) => {
   try {
@@ -29,7 +39,9 @@ challengesRouter.post('/:id/join', async (req: Request, res: Response) => {
     res.json(result);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Internal error';
-    const status = msg.includes('balance') || msg.includes('full') || msg.includes('Already') ? 400 : 500;
+    let status = 500;
+    if (msg.includes('Already')) status = 409;
+    else if (msg.includes('balance') || msg.includes('full')) status = 400;
     res.status(status).json({ error: msg });
   }
 });
