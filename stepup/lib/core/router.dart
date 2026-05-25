@@ -28,10 +28,15 @@ import '../features/missions/screens/missions_screen.dart';
 import '../features/rivals/screens/rivals_screen.dart';
 import '../features/rivals/screens/battle_detail_screen.dart';
 import '../features/community/screens/community_screen.dart';
+import '../features/community/screens/create_post_screen.dart';
 import '../features/streaks/screens/streak_screen.dart';
 import '../features/activities/screens/activities_screen.dart';
 import '../features/activities/screens/log_session_screen.dart';
+import '../features/activities/screens/stats_grid_screen.dart';
+import '../features/activities/screens/activity_feed_screen.dart';
+import '../features/activities/screens/workout_detail_screen.dart';
 import '../features/notifications/screens/notifications_screen.dart';
+import '../features/devices/screens/devices_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -81,14 +86,27 @@ final router = GoRouter(
         GoRoute(path: '/profile/reputation', builder: (_, __) => const ReputationScreen()),
         GoRoute(path: '/profile/xp',     builder: (_, __) => const XpLevelScreen()),
         GoRoute(path: '/profile/achievements', builder: (_, __) => const AchievementsScreen()),
+        GoRoute(path: '/profile/devices', builder: (_, __) => const DevicesScreen()),
 
         // Other
         GoRoute(path: '/missions',       builder: (_, __) => const MissionsScreen()),
         GoRoute(path: '/rivals',         builder: (_, __) => const RivalsScreen()),
         GoRoute(path: '/rivals/battle/:id', builder: (_, s) => BattleDetailScreen(battleId: s.pathParameters['id']!)),
-        GoRoute(path: '/community',      builder: (_, __) => const CommunityScreen()),
+        GoRoute(
+          path: '/community',
+          builder: (_, __) => const CommunityScreen(),
+          routes: [
+            GoRoute(
+              path: 'create',
+              builder: (_, __) => const CreatePostScreen(),
+            ),
+          ],
+        ),
         GoRoute(path: '/streaks',        builder: (_, __) => const StreakScreen()),
         GoRoute(path: '/activities',     builder: (_, __) => const ActivitiesScreen()),
+        GoRoute(path: '/activities/stats', builder: (_, __) => const StatsGridScreen()),
+        GoRoute(path: '/activities/feed', builder: (_, __) => const ActivityFeedScreen()),
+        GoRoute(path: '/activities/workout', builder: (_, __) => const WorkoutDetailScreen()),
         GoRoute(path: '/activities/log', builder: (_, s) => LogSessionScreen(initialType: s.uri.queryParameters['type'])),
         GoRoute(path: '/notifications',  builder: (_, __) => const NotificationsScreen()),
       ],

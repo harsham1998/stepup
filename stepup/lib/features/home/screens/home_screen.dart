@@ -1,15 +1,22 @@
-import 'dart:math' show pi;
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../challenges/providers/challenges_provider.dart';
-import '../../steps/step_sync_service.dart';
 import '../../wallet/providers/wallet_provider.dart';
+import '../../profile/providers/profile_provider.dart';
 import '../../league/providers/league_provider.dart';
-import '../../missions/providers/missions_provider.dart';
-import '../providers/home_provider.dart';
-import '../../../shared/models/mission.dart';
-import '../../../shared/widgets/challenge_card.dart';
+import '../../activities/providers/health_data_provider.dart';
+import '../../missions/providers/health_missions_provider.dart';
+import '../../community/providers/community_provider.dart';
+import '../../rivals/providers/rivals_provider.dart';
+import '../../streaks/providers/streak_provider.dart';
+import '../../steps/step_sync_service.dart';
+import '../../../shared/models/community_post.dart';
+import '../../../shared/models/challenge.dart';
+import '../../../shared/models/league_status.dart';
+import '../../../shared/models/rival.dart';
 import '../../../core/theme.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -22,459 +29,1425 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async {
-      try {
-        await StepSyncService.instance.requestPermissions();
-      } catch (_) {}
-    });
+    _requestHealthPermissions();
   }
 
-  String _formattedDate() {
-    final now = DateTime.now();
-    const days = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday'
-    ];
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return '${days[now.weekday - 1]} · ${months[now.month - 1]} ${now.day}';
+  Future<void> _requestHealthPermissions() async {
+    try {
+      await StepSyncService.instance.requestPermissions();
+    } catch (_) {}
+    if (!mounted) return;
+    // Re-fetch health data now that permissions are granted
+    ref.invalidate(healthDaySummaryProvider);
+    ref.invalidate(heartRateProvider);  // invalidates all family instances
+    ref.invalidate(healthMissionsProvider);
   }
 
   @override
   Widget build(BuildContext context) {
-    final stepsAsync = ref.watch(dailyStepsProvider);
-    final walletAsync = ref.watch(walletBalanceProvider);
-    final challengesAsync = ref.watch(activeChallengesProvider);
-    final leagueAsync = ref.watch(leagueStatusProvider);
-    final missionsAsync = ref.watch(dailyMissionsProvider);
+    final now = DateTime.now();
+    // Normalize to midnight — stable FutureProvider.family cache key across rebuilds
+    final today = DateTime(now.year, now.month, now.day);
+    final profileAsync   = ref.watch(profileProvider);
+    final summaryAsync   = ref.watch(healthDaySummaryProvider(today));
+    final heartRateAsync = ref.watch(heartRateProvider(today));
+    final streakAsync    = ref.watch(streakStatusProvider);
+    final missionsAsync  = ref.watch(healthMissionsProvider);
+    final challengesAsync = ref.watch(myChallengesProvider);
+    final leagueAsync    = ref.watch(leagueStatusProvider);
+    final standingsAsync = ref.watch(leagueStandingsProvider);
+    final battlesAsync   = ref.watch(battlesProvider);
+    final walletAsync    = ref.watch(walletBalanceProvider);
+    final communityAsync = ref.watch(communityFeedProvider);
+
+    final name = profileAsync.whenOrNull(
+      data: (p) { final n = p['name'] as String? ?? ''; return n.isNotEmpty ? n.split(' ').first : 'You'; },
+    ) ?? 'You';
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'Y';
+
+    final summary = summaryAsync.whenOrNull(data: (s) => s);
+    final steps = summary?.steps ?? 0;
+    final distKm = summary?.distanceKm ?? 0.0;
+    final kcal = summary?.calories ?? 0;
+    final activeMins = summary?.activeMins ?? 0;
+    final bpm = heartRateAsync.whenOrNull(data: (h) => h) ?? 0;
+    final streakDays = streakAsync.whenOrNull(data: (s) => s.streakDays) ?? 0;
+    const stepGoal = 10000;
+    final stepPct = (steps / stepGoal).clamp(0.0, 1.0);
+
+    final activeChallenges = challengesAsync.whenOrNull(
+      data: (list) => list.where((c) => c.isLive).toList(),
+    ) ?? [];
+
+    final league = leagueAsync.whenOrNull(data: (l) => l);
+    final standings = standingsAsync.whenOrNull(data: (s) => s);
+
+    final activeBattle = battlesAsync.whenOrNull(
+      data: (list) => list.where((b) => b.status == 'active').isNotEmpty
+          ? list.firstWhere((b) => b.status == 'active')
+          : null,
+    );
+
+    final coins = walletAsync.whenOrNull(
+      data: (w) => (w['coin_balance'] as num?)?.toInt() ?? 0,
+    ) ?? 0;
+
+    // date string
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    final dateStr = '${days[now.weekday-1]} · ${months[now.month-1]} ${now.day}';
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // Header row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _formattedDate(),
-                              style:
-                                  AppTheme.label(11, color: AppTheme.ink3),
-                            ),
-                            stepsAsync.when(
-                              loading: () =>
-                                  Text('StepUp', style: AppTheme.bigNum(24)),
-                              error: (_, __) =>
-                                  Text('StepUp', style: AppTheme.bigNum(24)),
-                              data: (_) => Text('Hey there 👋',
-                                  style: AppTheme.bigNum(24)),
-                            ),
-                          ]),
-                      Row(children: [
-                        // streak chip
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppTheme.surface,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: AppTheme.border),
-                          ),
-                          child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Text('🔥',
-                                    style: TextStyle(fontSize: 12)),
-                                const SizedBox(width: 4),
-                                Text('0d',
-                                    style: AppTheme.label(12,
-                                        color: AppTheme.ink2)),
-                              ]),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(
-                              Icons.notifications_none_rounded,
-                              color: Colors.white,
-                              size: 22),
-                          onPressed: () {},
-                        ),
-                      ]),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
+        child: RefreshIndicator(
+          color: AppTheme.voltLime,
+          backgroundColor: AppTheme.surface,
+          onRefresh: () async {
+            ref.invalidate(healthDaySummaryProvider);
+            ref.invalidate(heartRateProvider);
+            ref.invalidate(healthMissionsProvider);
+            ref.invalidate(myChallengesProvider);
+            ref.invalidate(leagueStatusProvider);
+            ref.invalidate(leagueStandingsProvider);
+            ref.invalidate(battlesProvider);
+            ref.invalidate(walletBalanceProvider);
+            ref.invalidate(communityFeedProvider);
+            ref.invalidate(streakStatusProvider);
+            // Wait briefly for at least the health summary to start fetching
+            await Future.delayed(const Duration(milliseconds: 400));
+          },
+          child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+          children: [
 
-                  // Step ring hero
-                  stepsAsync.when(
-                    loading: () =>
-                        const _StepRingCard(steps: 0, goal: 10000),
-                    error: (_, __) =>
-                        const _StepRingCard(steps: 0, goal: 10000),
-                    data: (steps) =>
-                        _StepRingCard(steps: steps, goal: 10000),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Distance / Kcal / Min chips row
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    _InfoChip(label: '5.4 Km'),
-                    const SizedBox(width: 8),
-                    _InfoChip(label: '412 Kcal'),
-                    const SizedBox(width: 8),
-                    _InfoChip(label: '52 Min'),
-                  ]),
-                  const SizedBox(height: 16),
-
-                  // Stats strip: league | streak | coins
-                  Row(children: [
-                    leagueAsync.when(
-                      loading: () => _StatChip(
-                          label: 'League',
-                          value: '—',
-                          color: AppTheme.amber),
-                      error: (_, __) => _StatChip(
-                          label: 'League',
-                          value: 'Bronze',
-                          color: AppTheme.amber),
-                      data: (l) => _StatChip(
-                        label: l.label,
-                        value: '#${l.rankInTier}',
-                        color: _parseColor(l.colorHex),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    walletAsync.when(
-                      loading: () => _StatChip(
-                          label: 'Streak',
-                          value: '🔥 0',
-                          color: AppTheme.voltLime),
-                      error: (_, __) => _StatChip(
-                          label: 'Streak',
-                          value: '🔥 0',
-                          color: AppTheme.voltLime),
-                      data: (_) => _StatChip(
-                          label: 'Streak',
-                          value: '🔥 0',
-                          color: AppTheme.voltLime),
-                    ),
-                    const SizedBox(width: 10),
-                    walletAsync.when(
-                      loading: () => _StatChip(
-                          label: 'Coins',
-                          value: '0¢',
-                          color: AppTheme.amber),
-                      error: (_, __) => _StatChip(
-                          label: 'Coins',
-                          value: '0¢',
-                          color: AppTheme.amber),
-                      data: (w) => _StatChip(
-                        label: 'Coins',
-                        value: '${w['coin_balance'] ?? 0}¢',
-                        color: AppTheme.amber,
-                      ),
-                    ),
-                  ]),
-                  const SizedBox(height: 24),
-
-                  // Daily missions strip
-                  missionsAsync.when(
-                    loading: () => const SizedBox(),
-                    error: (_, __) => const SizedBox(),
-                    data: (missions) => missions.isEmpty
-                        ? const SizedBox()
-                        : _MissionsStrip(missions: missions),
-                  ),
-
-                  // Challenges header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'LIVE CHALLENGES',
-                        style: AppTheme.label(10, color: AppTheme.ink3)
-                            .copyWith(
-                                letterSpacing: 1.2,
-                                fontWeight: FontWeight.w700),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.go('/challenges'),
-                        child: Text('See all',
-                            style: AppTheme.label(11,
-                                color: AppTheme.voltLime)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Active challenges
-                  challengesAsync.when(
-                    loading: () => const SizedBox(),
-                    error: (_, __) => const SizedBox(),
-                    data: (challenges) => Column(
-                      children: challenges
-                          .take(3)
-                          .map((c) => ChallengeCard(
-                                challenge: c,
-                                onTap: () =>
-                                    context.push('/challenges/${c.id}'),
-                              ))
-                          .toList(),
+            // ── Header ────────────────────────────────────────────────
+            Row(children: [
+              // Avatar
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.amber.withValues(alpha: 0.9),
+                ),
+                child: Center(
+                  child: Text(initial,
+                    style: GoogleFonts.bigShouldersDisplay(
+                      fontSize: 22, fontWeight: FontWeight.w900,
+                      color: AppTheme.bg,
+                    )),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(dateStr, style: AppTheme.label(11, color: AppTheme.ink2)),
+                Text('Hey, $name',
+                  style: GoogleFonts.bigShouldersDisplay(
+                    fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white)),
+              ]),
+              const Spacer(),
+              // Bell
+              GestureDetector(
+                onTap: () => context.push('/notifications'),
+                child: Stack(children: [
+                  const Icon(Icons.notifications_outlined, color: Colors.white, size: 26),
+                  Positioned(
+                    right: 0, top: 0,
+                    child: Container(
+                      width: 8, height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFEF4444), shape: BoxShape.circle),
                     ),
                   ),
                 ]),
               ),
+              const SizedBox(width: 16),
+              GestureDetector(
+                onTap: () => context.push('/activities'),
+                child: const Icon(Icons.qr_code_scanner_rounded,
+                    color: Colors.white, size: 24),
+              ),
+            ]),
+            const SizedBox(height: 16),
+
+            // ── Steps Hero Card ───────────────────────────────────────
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              decoration: BoxDecoration(
+                color: AppTheme.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                // Streak + goal %
+                Row(children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.voltLime,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.star_rounded, size: 12, color: AppTheme.bg),
+                      const SizedBox(width: 4),
+                      Text('${streakDays}D STREAK',
+                        style: GoogleFonts.bigShouldersDisplay(
+                          fontSize: 12, fontWeight: FontWeight.w900, color: AppTheme.bg)),
+                    ]),
+                  ),
+                  const Spacer(),
+                  Text('${(stepPct * 100).round()}% of goal',
+                    style: AppTheme.label(12, color: AppTheme.ink2)),
+                ]),
+                const SizedBox(height: 8),
+                // Big steps number
+                GestureDetector(
+                  onTap: () => context.push('/activities'),
+                  child: Text(
+                    _fmtNum(steps),
+                    style: GoogleFonts.bigShouldersDisplay(
+                      fontSize: 64, fontWeight: FontWeight.w900,
+                      color: AppTheme.voltLime, height: 0.95,
+                    ),
+                  ),
+                ),
+                Text('STEPS  ·  ${distKm.toStringAsFixed(1)} KM',
+                  style: AppTheme.label(11, color: AppTheme.ink2)
+                    .copyWith(letterSpacing: 0.5, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                // Progress bar
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    value: stepPct,
+                    minHeight: 4,
+                    backgroundColor: Colors.white.withValues(alpha: 0.07),
+                    valueColor: const AlwaysStoppedAnimation(AppTheme.voltLime),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                // 4 stats
+                Row(children: [
+                  _StatCell(icon: Icons.bolt_rounded, value: distKm.toStringAsFixed(1), label: 'KM'),
+                  _StatDivider(),
+                  _StatCell(icon: Icons.favorite_border_rounded, value: '$kcal', label: 'KCAL'),
+                  _StatDivider(),
+                  _StatCell(icon: Icons.access_time_rounded, value: '$activeMins', label: 'MIN'),
+                  _StatDivider(),
+                  _StatCell(
+                    icon: Icons.monitor_heart_outlined,
+                    value: bpm > 0 ? '$bpm' : '--',
+                    label: 'BPM',
+                  ),
+                ]),
+              ]),
+            ),
+            const SizedBox(height: 24),
+
+            // ── Daily Missions ────────────────────────────────────────
+            _SectionRow(
+              title: 'Daily Missions',
+              badge: missionsAsync.whenOrNull(
+                data: (m) => '${m.where((x) => x.completed).length} / ${m.length}',
+              ) ?? '– / 5',
+              onSeeAll: () => context.push('/missions'),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 160,
+              child: missionsAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator(
+                    color: AppTheme.voltLime, strokeWidth: 2)),
+                error: (_, err) => const SizedBox(),
+                data: (missions) => ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: missions.length,
+                  itemBuilder: (_, i) => _MissionCard(mission: missions[i]),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // ── Active Challenges ─────────────────────────────────────
+            _SectionRow(
+              title: 'Active Challenges',
+              badge: activeChallenges.isNotEmpty
+                  ? '${activeChallenges.length} LIVE' : null,
+              badgeColor: const Color(0xFFEF4444),
+              onSeeAll: () => context.push('/challenges'),
+            ),
+            const SizedBox(height: 12),
+            challengesAsync.when(
+              loading: () => const SizedBox(height: 140,
+                  child: Center(child: CircularProgressIndicator(
+                      color: AppTheme.voltLime, strokeWidth: 2))),
+              error: (_, err) => const SizedBox(),
+              data: (challenges) {
+                final live = challenges.where((c) => c.isLive).toList();
+                if (live.isEmpty) {
+                  return _EmptyCard(
+                    message: 'No active challenges',
+                    action: 'Browse challenges →',
+                    onTap: () => context.push('/challenges'),
+                  );
+                }
+                return _ChallengesCarousel(challenges: live);
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // ── League ────────────────────────────────────────────────
+            _SectionRow(
+              title: 'League',
+              badge: league != null ? 'SEASON ${league.season}' : null,
+              onSeeAll: () => context.push('/leaderboard/league'),
+            ),
+            const SizedBox(height: 12),
+            leagueAsync.when(
+              loading: () => const SizedBox(height: 100,
+                  child: Center(child: CircularProgressIndicator(
+                      color: AppTheme.voltLime, strokeWidth: 2))),
+              error: (_, err) => const SizedBox(),
+              data: (league) => _LeagueCard(
+                  league: league, standings: standings, userName: name),
+            ),
+            const SizedBox(height: 24),
+
+            // ── Live Battle ───────────────────────────────────────────
+            if (activeBattle != null) ...[
+              _SectionRow(
+                title: 'Live Battle',
+                badge: _battleTimer(activeBattle),
+                onSeeAll: () => context.push('/rivals'),
+              ),
+              const SizedBox(height: 12),
+              _BattleCard(battle: activeBattle, userName: name),
+              const SizedBox(height: 24),
+            ],
+
+            // ── Shortcuts ─────────────────────────────────────────────
+            Text('Shortcuts', style: GoogleFonts.bigShouldersDisplay(
+              fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+            const SizedBox(height: 12),
+            Row(children: [
+              _Shortcut(icon: Icons.add_rounded, label: 'Log',
+                  onTap: () => context.push('/activities/log')),
+              const SizedBox(width: 12),
+              _Shortcut(icon: Icons.emoji_events_outlined, label: 'Join',
+                  onTap: () => context.push('/challenges')),
+              const SizedBox(width: 12),
+              _Shortcut(icon: Icons.sports_kabaddi_rounded, label: 'Rival',
+                  onTap: () => context.push('/rivals')),
+              const SizedBox(width: 12),
+              _Shortcut(icon: Icons.monetization_on_outlined, label: 'Redeem',
+                  onTap: () => context.push('/coins/rewards')),
+            ]),
+            const SizedBox(height: 16),
+
+            // ── Coins / Battle Pass Banner ────────────────────────────
+            GestureDetector(
+              onTap: () => context.push('/coins/battlepass'),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: Row(children: [
+                  Container(
+                    width: 36, height: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppTheme.amber.withValues(alpha: 0.15),
+                    ),
+                    child: const Center(
+                      child: Icon(Icons.monetization_on_rounded,
+                          color: AppTheme.amber, size: 20),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(_fmtCoins(coins),
+                      style: GoogleFonts.bigShouldersDisplay(
+                        fontSize: 22, fontWeight: FontWeight.w900,
+                        color: AppTheme.amber)),
+                    Text('≈ ₹${(coins / 100).toStringAsFixed(0)} in rewards',
+                      style: AppTheme.label(11, color: AppTheme.ink2)),
+                  ]),
+                  const Spacer(),
+                  if (league != null)
+                    Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                      Text('S${league.season} · T${league.rankInTier} / ${league.totalInTier}',
+                        style: AppTheme.label(11, color: AppTheme.voltLime)
+                          .copyWith(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        width: 80,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(2),
+                          child: LinearProgressIndicator(
+                            value: league.xpProgress.clamp(0.0, 1.0),
+                            minHeight: 3,
+                            backgroundColor: Colors.white.withValues(alpha: 0.07),
+                            valueColor: const AlwaysStoppedAnimation(AppTheme.voltLime),
+                          ),
+                        ),
+                      ),
+                    ]),
+                ]),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // ── Community ─────────────────────────────────────────────
+            Row(children: [
+              Expanded(child: _SectionRow(
+                title: 'Community',
+                onSeeAll: () => context.push('/community'),
+              )),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () async {
+                  await context.push('/community/create');
+                  ref.invalidate(communityFeedProvider);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.voltLime,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(Icons.add_rounded, size: 14, color: Color(0xFF050510)),
+                    const SizedBox(width: 4),
+                    Text('Post',
+                        style: AppTheme.label(12, color: AppTheme.bg)
+                            .copyWith(fontWeight: FontWeight.w800)),
+                  ]),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 12),
+            communityAsync.when(
+              loading: () => const SizedBox(height: 60,
+                  child: Center(child: CircularProgressIndicator(
+                      color: AppTheme.voltLime, strokeWidth: 2))),
+              error: (_, err) => const SizedBox(),
+              data: (allPosts) {
+                if (allPosts.isEmpty) return const SizedBox();
+                // Stories row (unique authors)
+                final authors = <String, CommunityPost>{};
+                for (final p in allPosts) {
+                  if (!authors.containsKey(p.userId)) authors[p.userId] = p;
+                }
+                return Column(children: [
+                  // Stories
+                  SizedBox(
+                    height: 80,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _StoryBubble(label: 'You', initial: name[0], isYou: true),
+                        ...authors.values.take(5).map((p) =>
+                          _StoryBubble(
+                            label: p.userName.split(' ').first,
+                            initial: p.userName.isNotEmpty ? p.userName[0].toUpperCase() : '?',
+                            isYou: false,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Feed posts
+                  ...allPosts.take(3).map((p) => _CommunityPostCard(post: p)),
+                ]);
+              },
             ),
           ],
+        ),
+        ),
+      ),
+    );
+  }
+
+  String _battleTimer(Battle battle) {
+    if (battle.endTime == null) return '${battle.durationDays}D';
+    final remaining = battle.endTime!.difference(DateTime.now());
+    if (remaining.isNegative) return 'DONE';
+    final d = remaining.inDays;
+    final h = remaining.inHours.remainder(24);
+    return d > 0 ? '${d}D ${h}H' : '${h}H';
+  }
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+String _fmtNum(int n) {
+  if (n >= 1000) {
+    final s = n.toString();
+    return '${s.substring(0, s.length - 3)},${s.substring(s.length - 3)}';
+  }
+  return n.toString();
+}
+
+String _fmtCoins(int c) {
+  if (c >= 1000) return '${(c / 1000).toStringAsFixed(c % 1000 == 0 ? 0 : 1)}K ¢';
+  return '$c ¢';
+}
+
+// ── Shared section header ────────────────────────────────────────────────────
+
+class _SectionRow extends StatelessWidget {
+  final String title;
+  final String? badge;
+  final Color? badgeColor;
+  final VoidCallback onSeeAll;
+  const _SectionRow({
+    required this.title,
+    this.badge,
+    this.badgeColor,
+    required this.onSeeAll,
+  });
+
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        Text(title, style: GoogleFonts.bigShouldersDisplay(
+          fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+        if (badge != null) ...[
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+            decoration: BoxDecoration(
+              color: (badgeColor ?? AppTheme.voltLime).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(badge!,
+              style: GoogleFonts.bigShouldersDisplay(
+                fontSize: 11, fontWeight: FontWeight.w900,
+                color: badgeColor ?? AppTheme.voltLime)),
+          ),
+        ],
+        const Spacer(),
+        GestureDetector(
+          onTap: onSeeAll,
+          child: Row(children: [
+            Text('See all', style: AppTheme.label(12, color: AppTheme.ink2)),
+            const SizedBox(width: 3),
+            const Icon(Icons.arrow_forward_rounded, color: AppTheme.ink2, size: 14),
+          ]),
+        ),
+      ]);
+}
+
+// ── Stat cell ────────────────────────────────────────────────────────────────
+
+class _StatCell extends StatelessWidget {
+  final IconData icon;
+  final String value, label;
+  const _StatCell({required this.icon, required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: Column(children: [
+          Icon(icon, color: AppTheme.ink2, size: 16),
+          const SizedBox(height: 4),
+          Text(value,
+            style: GoogleFonts.bigShouldersDisplay(
+              fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
+          Text(label,
+            style: AppTheme.label(9, color: AppTheme.ink2)
+              .copyWith(letterSpacing: 0.4, fontWeight: FontWeight.w600)),
+        ]),
+      );
+}
+
+class _StatDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 1, height: 36,
+    margin: const EdgeInsets.symmetric(horizontal: 4),
+    color: Colors.white.withValues(alpha: 0.06),
+  );
+}
+
+// ── Mission card (horizontal scroll square) ──────────────────────────────────
+
+class _MissionCard extends StatelessWidget {
+  final HealthMission mission;
+  const _MissionCard({required this.mission});
+
+  static const _photos = {
+    'walk':    'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=296&h=320&q=75',
+    'gym':     'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=296&h=320&q=75',
+    'droplet': 'https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&w=296&h=320&q=75',
+    'yoga':    'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=296&h=320&q=75',
+    'moon':    'https://images.unsplash.com/photo-1541480601022-2308c0f02487?auto=format&fit=crop&w=296&h=320&q=75',
+  };
+
+  static const _icons = {
+    'walk':    Icons.directions_walk_rounded,
+    'gym':     Icons.fitness_center_rounded,
+    'yoga':    Icons.self_improvement_rounded,
+    'droplet': Icons.water_drop_rounded,
+    'moon':    Icons.bedtime_rounded,
+  };
+
+  static const _labels = {
+    'walk':    'Walk',
+    'gym':     'Gym',
+    'yoga':    'Active',
+    'droplet': 'Hydrate',
+    'moon':    'Sleep',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final done = mission.completed;
+    final pct = (mission.progressPct * 100).round();
+    final photoUrl = _photos[mission.activity] ?? _photos['walk']!;
+    final icon = _icons[mission.activity] ?? Icons.directions_walk_rounded;
+    final label = _labels[mission.activity] ?? mission.activity;
+
+    return GestureDetector(
+      onTap: () => context.push('/missions'),
+      child: Container(
+        width: 148,
+        height: 160,
+        margin: const EdgeInsets.only(right: 10),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+
+              // ── Photo ────────────────────────────────────────────
+              Image.network(
+                photoUrl,
+                fit: BoxFit.cover,
+                color: Colors.black.withValues(alpha: done ? 0.78 : 0.44),
+                colorBlendMode: BlendMode.darken,
+                errorBuilder: (_, e, st) => ColoredBox(color: AppTheme.surface),
+              ),
+
+              // ── Diagonal gradient: dark bottom-left, open top-right ──
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    stops: const [0.25, 0.9],
+                    colors: [
+                      Colors.transparent,
+                      const Color(0xFF050510).withValues(alpha: 0.65),
+                    ],
+                  ),
+                ),
+              ),
+              // Bottom-to-top fade for content legibility
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    stops: [0.0, 0.55],
+                    colors: [Color(0xFF050510), Colors.transparent],
+                  ),
+                ),
+              ),
+
+              // ── Done: lime border overlay ─────────────────────────
+              if (done)
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppTheme.voltLime.withValues(alpha: 0.28),
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+
+              // ── Top-left: "✓ Done" badge (completed only) ─────────
+              if (done)
+                Positioned(
+                  top: 9, left: 9,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppTheme.voltLime,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text('✓  Done',
+                      style: GoogleFonts.bigShouldersDisplay(
+                        fontSize: 10, fontWeight: FontWeight.w900,
+                        color: AppTheme.bg, letterSpacing: 0.3,
+                      )),
+                  ),
+                ),
+
+              // ── Top-right: % floating glass chip ─────────────────
+              Positioned(
+                top: 9, right: 9,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(7, 3, 7, 4),
+                      decoration: BoxDecoration(
+                        color: done
+                            ? AppTheme.voltLime.withValues(alpha: 0.15)
+                            : Colors.black.withValues(alpha: 0.45),
+                        border: Border.all(
+                          color: done
+                              ? AppTheme.voltLime.withValues(alpha: 0.2)
+                              : Colors.white.withValues(alpha: 0.1),
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('$pct%',
+                            style: GoogleFonts.bigShouldersDisplay(
+                              fontSize: 16, fontWeight: FontWeight.w900,
+                              height: 1.0,
+                              color: done ? AppTheme.voltLime : AppTheme.amber,
+                            )),
+                          Text('done',
+                            style: GoogleFonts.inter(
+                              fontSize: 6, letterSpacing: 0.5,
+                              color: done
+                                  ? AppTheme.voltLime.withValues(alpha: 0.55)
+                                  : Colors.white38,
+                            )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // ── Bottom: icon badge + label + name + bar ───────────
+              Positioned(
+                bottom: 0, left: 0, right: 0,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(9, 0, 9, 9),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Container(
+                          width: 28, height: 28,
+                          decoration: BoxDecoration(
+                            color: done
+                                ? AppTheme.voltLime.withValues(alpha: 0.12)
+                                : Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(icon, size: 15,
+                              color: done ? AppTheme.voltLime : Colors.white),
+                        ),
+                        const SizedBox(width: 7),
+                        Text(label.toUpperCase(),
+                          style: GoogleFonts.inter(
+                            fontSize: 7, fontWeight: FontWeight.w600,
+                            letterSpacing: 1.5,
+                            color: Colors.white38,
+                          )),
+                      ]),
+                      const SizedBox(height: 6),
+                      Text(mission.title,
+                        style: GoogleFonts.bigShouldersDisplay(
+                          fontSize: 14, fontWeight: FontWeight.w900,
+                          height: 1.15,
+                          color: done
+                              ? AppTheme.voltLime.withValues(alpha: 0.8)
+                              : Colors.white,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 5),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(99),
+                        child: LinearProgressIndicator(
+                          value: mission.progressPct,
+                          minHeight: 2,
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                          valueColor: AlwaysStoppedAnimation(
+                              done ? AppTheme.voltLime : AppTheme.amber),
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        done ? 'Complete' : mission.progressLabel,
+                        style: GoogleFonts.inter(
+                          fontSize: 7,
+                          color: done
+                              ? AppTheme.voltLime.withValues(alpha: 0.5)
+                              : Colors.white38,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-Color _parseColor(String hex) {
-  try {
-    return Color(int.parse(hex.replaceFirst('#', '0xFF')));
-  } catch (_) {
-    return AppTheme.amber;
-  }
+// ── Challenges carousel ──────────────────────────────────────────────────────
+
+class _ChallengesCarousel extends StatefulWidget {
+  final List<Challenge> challenges;
+  const _ChallengesCarousel({required this.challenges});
+  @override
+  State<_ChallengesCarousel> createState() => _ChallengesCarouselState();
 }
 
-class _StepRingCard extends StatelessWidget {
-  final int steps, goal;
-  const _StepRingCard({required this.steps, required this.goal});
+class _ChallengesCarouselState extends State<_ChallengesCarousel> {
+  int _page = 0;
 
   @override
   Widget build(BuildContext context) {
-    final pct = (steps / goal).clamp(0.0, 1.0);
-    final remaining = goal - steps;
-    return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+    return Column(children: [
       SizedBox(
-        width: 130,
-        height: 130,
-        child: CustomPaint(
-          painter: _RingPainter(pct, AppTheme.voltLime),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+        height: 160,
+        child: PageView.builder(
+          itemCount: widget.challenges.length,
+          onPageChanged: (i) => setState(() => _page = i),
+          itemBuilder: (_, i) =>
+              _ChallengeCard(challenge: widget.challenges[i]),
+        ),
+      ),
+      if (widget.challenges.length > 1) ...[
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(widget.challenges.length, (i) => Container(
+            width: i == _page ? 16 : 5,
+            height: 5,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: i == _page ? AppTheme.voltLime : Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          )),
+        ),
+      ],
+    ]);
+  }
+}
+
+class _ChallengeCard extends StatelessWidget {
+  final Challenge challenge;
+  const _ChallengeCard({required this.challenge});
+
+  static String _imageUrl(String activityType) {
+    const urls = <String, String>{
+      'running': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800&q=80',
+      'gym':     'https://images.unsplash.com/photo-1583454110851-a10b4872a14c?auto=format&fit=crop&w=800&q=80',
+      'cycling': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80',
+      'outdoor': 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=800&q=80',
+      'steps':   'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80',
+      'walking': 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80',
+    };
+    return urls[activityType.toLowerCase()] ?? urls['steps']!;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final days = challenge.endTime.difference(challenge.startTime).inDays.clamp(1, 9999);
+    final daysPassed = DateTime.now().difference(challenge.startTime).inDays.clamp(0, days);
+    final pct = (daysPassed / days).clamp(0.0, 1.0);
+    final cfg = challenge.activity;
+
+    return GestureDetector(
+      onTap: () => context.push('/challenges/${challenge.id}'),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(14),
+          child: SizedBox(
+            height: 160,
+            width: double.infinity,
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                Text(_fmt(steps), style: AppTheme.bigNum(28)),
-                Text('steps', style: AppTheme.label(11)),
+                Container(color: cfg.colorA.withValues(alpha: 0.2)),
+                Image.network(
+                  _imageUrl(challenge.activityType),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, error, stack) => const SizedBox(),
+                ),
+                Container(color: Colors.black.withValues(alpha: 0.45)),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: const [0.3, 1.0],
+                      colors: [Colors.transparent, cfg.colorA.withValues(alpha: 0.5)],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: cfg.colorA.withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(cfg.label.toUpperCase(),
+                            style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w900,
+                              color: Colors.white, letterSpacing: 0.4)),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppTheme.voltLime,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text('${(pct * 100).round()}% DONE',
+                            style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w900,
+                              color: AppTheme.bg, letterSpacing: 0.4)),
+                        ),
+                      ]),
+                      const Spacer(),
+                      Text(challenge.title,
+                        style: GoogleFonts.bigShouldersDisplay(
+                          fontSize: 19, fontWeight: FontWeight.w900,
+                          color: Colors.white, fontStyle: FontStyle.italic),
+                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text('${challenge.participantCount} athletes  ·  ${challenge.goalLabel}',
+                        style: GoogleFonts.inter(fontSize: 11,
+                          color: Colors.white.withValues(alpha: 0.65))),
+                      const SizedBox(height: 8),
+                      Row(children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(3),
+                            child: LinearProgressIndicator(
+                              value: pct,
+                              minHeight: 4,
+                              backgroundColor: Colors.white.withValues(alpha: 0.15),
+                              valueColor: const AlwaysStoppedAnimation(AppTheme.voltLime),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text('Day $daysPassed/$days',
+                          style: GoogleFonts.inter(fontSize: 10,
+                            color: Colors.white.withValues(alpha: 0.6))),
+                        const SizedBox(width: 8),
+                        Text(challenge.prizePoolCoins,
+                          style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w800,
+                            color: AppTheme.amber)),
+                      ]),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ),
-      const SizedBox(width: 20),
-      Expanded(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(
-            'TODAY',
-            style: AppTheme.label(9, color: AppTheme.ink3)
-                .copyWith(letterSpacing: 1.4, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            remaining > 0
-                ? '${_fmt(remaining)} more to goal'
-                : 'Goal reached!',
-            style: AppTheme.label(13,
-                color: remaining > 0 ? AppTheme.ink2 : AppTheme.voltLime),
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: pct,
-              minHeight: 4,
-              backgroundColor: Colors.white.withValues(alpha: 0.08),
-              valueColor:
-                  const AlwaysStoppedAnimation(AppTheme.voltLime),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text('Goal: ${_fmt(goal)} steps',
-              style: AppTheme.label(11, color: AppTheme.ink3)),
-        ]),
-      ),
-    ]);
+    );
   }
-
-  String _fmt(int n) => n
-      .toString()
-      .replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
 }
 
-class _RingPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-  const _RingPainter(this.progress, this.color);
+// ── League card ──────────────────────────────────────────────────────────────
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final c = Offset(size.width / 2, size.height / 2);
-    final r = size.width / 2 - 8;
-    final bg = Paint()
-      ..color = Colors.white.withValues(alpha: 0.08)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 8
-      ..strokeCap = StrokeCap.round;
-    canvas.drawCircle(c, r, bg);
-    if (progress > 0) {
-      final fg = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 8
-        ..strokeCap = StrokeCap.round;
-      canvas.drawArc(
-        Rect.fromCircle(center: c, radius: r),
-        -pi / 2,
-        2 * pi * progress,
-        false,
-        fg,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_RingPainter old) => old.progress != progress;
-}
-
-class _StatChip extends StatelessWidget {
-  final String label, value;
-  final Color color;
-  const _StatChip(
-      {required this.label, required this.value, required this.color});
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-        child: Column(children: [
-          Text(value, style: AppTheme.bigNum(16, color: color)),
-          const SizedBox(height: 2),
-          Text(label, style: AppTheme.label(10, color: AppTheme.ink3)),
-        ]),
-      );
-}
-
-class _InfoChip extends StatelessWidget {
-  final String label;
-  const _InfoChip({required this.label});
-
-  @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.border),
-        ),
-        child: Text(label, style: AppTheme.label(12, color: AppTheme.ink2)),
-      );
-}
-
-class _MissionsStrip extends StatelessWidget {
-  final List<Mission> missions;
-  const _MissionsStrip({required this.missions});
+class _LeagueCard extends StatelessWidget {
+  final LeagueStatus league;
+  final Map<String, dynamic>? standings;
+  final String userName;
+  const _LeagueCard({required this.league, this.standings, required this.userName});
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(
-          'DAILY MISSIONS',
-          style: AppTheme.label(10, color: AppTheme.ink3).copyWith(
-              letterSpacing: 1.2, fontWeight: FontWeight.w700),
-        ),
-        GestureDetector(
-          onTap: () => context.push('/missions'),
-          child: Text('View all',
-              style: AppTheme.label(11, color: AppTheme.voltLime)),
-        ),
-      ]),
-      const SizedBox(height: 10),
-      Row(
-        children: missions
-            .take(3)
-            .map((m) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: _MissionPill(mission: m),
-                  ),
-                ))
-            .toList(),
-      ),
-      const SizedBox(height: 20),
-    ]);
-  }
-}
+    final leagueColor = _hexColor(league.colorHex);
+    final nearby = standings?['nearby'] as List? ?? [];
 
-class _MissionPill extends StatelessWidget {
-  final Mission mission;
-  const _MissionPill({required this.mission});
+    // Find promote zone threshold
+    final promoteAt = (standings?['promote_at'] as num?)?.toInt() ?? 0;
 
-  @override
-  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: mission.completed
-            ? AppTheme.voltLime.withValues(alpha: 0.1)
-            : AppTheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: mission.completed
-              ? AppTheme.voltLime.withValues(alpha: 0.4)
-              : AppTheme.border,
-        ),
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.border),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(
-          mission.title,
-          style: AppTheme.label(10,
-              color: mission.completed ? AppTheme.voltLime : Colors.white),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+      child: Column(children: [
+        // Header row
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+          child: Row(children: [
+            // League badge
+            Container(
+              width: 48, height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: leagueColor.withValues(alpha: 0.15),
+                border: Border.all(color: leagueColor.withValues(alpha: 0.5), width: 2),
+              ),
+              child: Center(
+                child: Text(league.label[0].toUpperCase(),
+                  style: GoogleFonts.bigShouldersDisplay(
+                    fontSize: 22, fontWeight: FontWeight.w900,
+                    color: leagueColor)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(league.label.toUpperCase(),
+                style: GoogleFonts.bigShouldersDisplay(
+                  fontSize: 20, fontWeight: FontWeight.w900,
+                  color: leagueColor)),
+              Text('Rank ${league.rankInTier} of ${_fmtNum(league.totalInTier)}  ·  ${league.xp} XP',
+                style: AppTheme.label(11, color: AppTheme.ink2)),
+            ]),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => context.push('/leaderboard/standings'),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                Text('NEXT', style: AppTheme.label(9, color: AppTheme.ink2)
+                  .copyWith(letterSpacing: 0.4)),
+                const SizedBox(height: 2),
+                Text(
+                  _nextTier(league),
+                  style: GoogleFonts.bigShouldersDisplay(
+                    fontSize: 13, fontWeight: FontWeight.w900,
+                    color: AppTheme.voltLime)),
+              ]),
+            ),
+          ]),
         ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(3),
-          child: LinearProgressIndicator(
-            value: mission.progressPct,
-            minHeight: 3,
-            backgroundColor: Colors.white.withValues(alpha: 0.08),
-            valueColor: AlwaysStoppedAnimation(
-                mission.completed ? AppTheme.voltLime : AppTheme.amber),
-          ),
-        ),
+
+        // Standings rows
+        if (nearby.isNotEmpty) ...[
+          Divider(color: AppTheme.border, height: 1),
+          ...nearby.take(5).map((row) {
+            final rank = (row['rank'] as num).toInt();
+            final isYou = row['is_me'] as bool? ?? false;
+            final uname = row['name'] as String? ?? 'Unknown';
+            final xp = (row['xp'] as num? ?? 0).toInt();
+            final showZone = promoteAt > 0 && rank == promoteAt + 1;
+
+            return Column(children: [
+              if (showZone)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(children: [
+                    Expanded(child: Container(height: 1,
+                        color: AppTheme.voltLime.withValues(alpha: 0.3))),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Text('PROMOTE ZONE',
+                        style: AppTheme.label(9, color: AppTheme.voltLime)
+                          .copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.8)),
+                    ),
+                    Expanded(child: Container(height: 1,
+                        color: AppTheme.voltLime.withValues(alpha: 0.3))),
+                  ]),
+                ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
+                color: isYou
+                    ? AppTheme.voltLime.withValues(alpha: 0.05)
+                    : Colors.transparent,
+                child: Row(children: [
+                  SizedBox(
+                    width: 36,
+                    child: Text('#$rank',
+                      style: GoogleFonts.bigShouldersDisplay(
+                        fontSize: 14, fontWeight: FontWeight.w900,
+                        color: isYou ? AppTheme.voltLime : AppTheme.ink2)),
+                  ),
+                  Container(
+                    width: 26, height: 26,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isYou
+                          ? AppTheme.voltLime.withValues(alpha: 0.2)
+                          : Colors.white.withValues(alpha: 0.07),
+                    ),
+                    child: Center(
+                      child: Text(
+                        uname.isNotEmpty ? uname[0].toUpperCase() : '?',
+                        style: GoogleFonts.bigShouldersDisplay(
+                          fontSize: 13, fontWeight: FontWeight.w900,
+                          color: isYou ? AppTheme.voltLime : Colors.white)),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(isYou ? 'You' : uname,
+                      style: AppTheme.label(13,
+                        color: isYou ? Colors.white : AppTheme.ink2)
+                          .copyWith(fontWeight: isYou ? FontWeight.w700 : FontWeight.w400)),
+                  ),
+                  Text('${_fmtNum(xp)} XP',
+                    style: AppTheme.label(12, color: AppTheme.ink2)
+                      .copyWith(fontWeight: FontWeight.w600)),
+                ]),
+              ),
+            ]);
+          }),
+        ],
         const SizedBox(height: 4),
-        Text('+${mission.coinReward}¢',
-            style: AppTheme.label(9, color: AppTheme.amber)),
       ]),
     );
   }
+
+  String _nextTier(LeagueStatus l) {
+    final ladder = l.tierLadder;
+    final idx = ladder.indexWhere((t) => t.isCurrent);
+    if (idx >= 0 && idx < ladder.length - 1) return ladder[idx + 1].label.toUpperCase();
+    return 'MAX';
+  }
+}
+
+Color _hexColor(String hex) {
+  final h = hex.replaceAll('#', '');
+  if (h.length == 6) return Color(int.parse('FF$h', radix: 16));
+  return AppTheme.voltLime;
+}
+
+// ── Battle card ──────────────────────────────────────────────────────────────
+
+class _BattleCard extends StatelessWidget {
+  final Battle battle;
+  final String userName;
+  const _BattleCard({required this.battle, required this.userName});
+
+  @override
+  Widget build(BuildContext context) {
+    final total = battle.challengerSteps + battle.opponentSteps;
+    final mySteps = battle.challengerSteps;
+    final oppSteps = battle.opponentSteps;
+    final myPct = total > 0 ? mySteps / total : 0.5;
+    final leading = mySteps >= oppSteps;
+    final diff = (mySteps - oppSteps).abs();
+
+    return GestureDetector(
+      onTap: () => context.push('/rivals/battle/${battle.id}'),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.voltLime.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+              color: AppTheme.voltLime.withValues(alpha: 0.3), width: 1.5),
+        ),
+        child: Column(children: [
+          // Players row
+          Row(children: [
+            // You
+            Expanded(child: Column(children: [
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.voltLime.withValues(alpha: 0.2),
+                  border: Border.all(
+                      color: AppTheme.voltLime.withValues(alpha: 0.6), width: 2),
+                ),
+                child: Center(child: Text(battle.challengerName[0].toUpperCase(),
+                  style: GoogleFonts.bigShouldersDisplay(
+                    fontSize: 20, fontWeight: FontWeight.w900,
+                    color: AppTheme.voltLime))),
+              ),
+              const SizedBox(height: 4),
+              Text('You', style: AppTheme.label(11, color: AppTheme.ink2)),
+              Text(_fmtK(mySteps),
+                style: GoogleFonts.bigShouldersDisplay(
+                  fontSize: 22, fontWeight: FontWeight.w900,
+                  color: AppTheme.voltLime)),
+            ])),
+            // VS
+            Column(children: [
+              const Icon(Icons.compare_arrows_rounded, color: AppTheme.amber, size: 22),
+              Text('VS', style: AppTheme.label(9, color: AppTheme.ink2)
+                .copyWith(fontWeight: FontWeight.w800, letterSpacing: 1)),
+            ]),
+            // Opponent
+            Expanded(child: Column(children: [
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
+                child: Center(child: Text(battle.opponentName[0].toUpperCase(),
+                  style: GoogleFonts.bigShouldersDisplay(
+                    fontSize: 20, fontWeight: FontWeight.w900,
+                    color: Colors.white))),
+              ),
+              const SizedBox(height: 4),
+              Text(battle.opponentName.split(' ').first,
+                style: AppTheme.label(11, color: AppTheme.ink2)),
+              Text(_fmtK(oppSteps),
+                style: GoogleFonts.bigShouldersDisplay(
+                  fontSize: 22, fontWeight: FontWeight.w900,
+                  color: Colors.white)),
+            ])),
+          ]),
+          const SizedBox(height: 12),
+          // Progress bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: myPct.clamp(0.0, 1.0),
+              minHeight: 6,
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
+              valueColor: const AlwaysStoppedAnimation(AppTheme.voltLime),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            leading
+                ? 'You lead by +${_fmtK(diff).replaceAll('K', 'K ')} steps  ·  finish strong'
+                : 'Behind by ${_fmtK(diff).replaceAll('K', 'K ')} steps  ·  push harder',
+            style: AppTheme.label(11, color: AppTheme.ink2),
+            textAlign: TextAlign.center,
+          ),
+        ]),
+      ),
+    );
+  }
+
+  String _fmtK(int n) {
+    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
+    return n.toString();
+  }
+}
+
+// ── Shortcut button ──────────────────────────────────────────────────────────
+
+class _Shortcut extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _Shortcut({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: GestureDetector(
+          onTap: onTap,
+          child: Column(children: [
+            Container(
+              width: 52, height: 52,
+              decoration: BoxDecoration(
+                color: AppTheme.surface,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Icon(icon, color: Colors.white, size: 22),
+            ),
+            const SizedBox(height: 5),
+            Text(label, style: AppTheme.label(11, color: AppTheme.ink2)
+              .copyWith(fontWeight: FontWeight.w600)),
+          ]),
+        ),
+      );
+}
+
+// ── Community ────────────────────────────────────────────────────────────────
+
+class _StoryBubble extends StatelessWidget {
+  final String label, initial;
+  final bool isYou;
+  const _StoryBubble({required this.label, required this.initial, required this.isYou});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 68,
+        margin: const EdgeInsets.only(right: 10),
+        child: Column(children: [
+          Stack(children: [
+            Container(
+              width: 52, height: 52,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isYou
+                    ? AppTheme.amber.withValues(alpha: 0.2)
+                    : Colors.white.withValues(alpha: 0.07),
+                border: Border.all(
+                  color: isYou
+                      ? AppTheme.voltLime
+                      : Colors.white.withValues(alpha: 0.15),
+                  width: 2,
+                ),
+              ),
+              child: Center(
+                child: Text(initial,
+                  style: GoogleFonts.bigShouldersDisplay(
+                    fontSize: 22, fontWeight: FontWeight.w900,
+                    color: isYou ? AppTheme.amber : Colors.white)),
+              ),
+            ),
+            if (isYou)
+              Positioned(
+                bottom: 0, right: 0,
+                child: Container(
+                  width: 18, height: 18,
+                  decoration: const BoxDecoration(
+                    color: AppTheme.voltLime, shape: BoxShape.circle),
+                  child: const Icon(Icons.add_rounded, size: 12, color: AppTheme.bg),
+                ),
+              ),
+          ]),
+          const SizedBox(height: 5),
+          Text(label,
+            style: AppTheme.label(10, color: AppTheme.ink2)
+              .copyWith(fontWeight: FontWeight.w600),
+            overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+        ]),
+      );
+}
+
+class _CommunityPostCard extends StatelessWidget {
+  final CommunityPost post;
+  const _CommunityPostCard({required this.post});
+
+  @override
+  Widget build(BuildContext context) {
+    final league = post.userLeague ?? 'free';
+    final leagueLabel = league[0].toUpperCase() + league.substring(1).toUpperCase();
+    final timeAgo = _ago(post.createdAt);
+
+    return GestureDetector(
+      onTap: () => context.push('/community'),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.border),
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          // Author row
+          Row(children: [
+            Container(
+              width: 34, height: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+              child: Center(
+                child: Text(
+                  post.userName.isNotEmpty ? post.userName[0].toUpperCase() : '?',
+                  style: GoogleFonts.bigShouldersDisplay(
+                    fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white)),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Text(post.userName, style: GoogleFonts.inter(
+                  fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white)),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: _leagueColor(league).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(leagueLabel,
+                    style: GoogleFonts.inter(
+                      fontSize: 9, fontWeight: FontWeight.w800,
+                      color: _leagueColor(league))),
+                ),
+              ]),
+              Text(timeAgo, style: AppTheme.label(10, color: AppTheme.ink2)),
+            ]),
+            const Spacer(),
+            Icon(Icons.bookmark_border_rounded, color: AppTheme.ink3, size: 18),
+          ]),
+          const SizedBox(height: 10),
+          // Content
+          Text(post.content,
+            style: GoogleFonts.inter(
+              fontSize: 13, color: Colors.white.withValues(alpha: 0.88), height: 1.4),
+            maxLines: 3, overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 10),
+          // Actions
+          Row(children: [
+            Icon(Icons.favorite_border_rounded, color: AppTheme.ink2, size: 15),
+            const SizedBox(width: 4),
+            Text('${post.likes}', style: AppTheme.label(11, color: AppTheme.ink2)),
+            const SizedBox(width: 14),
+            Icon(Icons.chat_bubble_outline_rounded, color: AppTheme.ink2, size: 14),
+            const SizedBox(width: 4),
+            Text('0', style: AppTheme.label(11, color: AppTheme.ink2)),
+            const SizedBox(width: 14),
+            Icon(Icons.share_outlined, color: AppTheme.ink2, size: 14),
+            const SizedBox(width: 4),
+            Text('0', style: AppTheme.label(11, color: AppTheme.ink2)),
+          ]),
+        ]),
+      ),
+    );
+  }
+
+  String _ago(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m';
+    if (diff.inHours < 24) return '${diff.inHours}h';
+    return '${diff.inDays}d';
+  }
+
+  Color _leagueColor(String league) {
+    switch (league.toLowerCase()) {
+      case 'gold': return AppTheme.amber;
+      case 'platinum': return const Color(0xFF94A3B8);
+      case 'diamond': return const Color(0xFF67E8F9);
+      case 'silver': return const Color(0xFFCBD5E1);
+      default: return AppTheme.ink2;
+    }
+  }
+}
+
+// ── Empty state card ─────────────────────────────────────────────────────────
+
+class _EmptyCard extends StatelessWidget {
+  final String message, action;
+  final VoidCallback onTap;
+  const _EmptyCard({required this.message, required this.action, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppTheme.border),
+          ),
+          child: Column(children: [
+            Text(message, style: AppTheme.label(13, color: AppTheme.ink2)),
+            const SizedBox(height: 6),
+            Text(action, style: AppTheme.label(12, color: AppTheme.voltLime)
+              .copyWith(fontWeight: FontWeight.w700)),
+          ]),
+        ),
+      );
 }
