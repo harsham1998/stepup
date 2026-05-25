@@ -47,9 +47,39 @@ async function parseRedisRanks(key: string, limit = 100): Promise<LeaderboardEnt
   }
 }
 
+// Falls back to leaderboard_snapshots (Supabase) when Redis has no data.
+async function getGlobalFromSnapshots(limit = 100): Promise<LeaderboardEntry[]> {
+  const { data } = await getSupabase()
+    .from('leaderboard_snapshots')
+    .select('user_id, rank, steps, users(name, city)')
+    .eq('scope', 'global')
+    .order('snapped_at', { ascending: false });
+
+  // Deduplicate: keep the most recent snapshot per user
+  const seen = new Set<string>();
+  const deduped = (data ?? []).filter((row: any) => {
+    if (seen.has(row.user_id)) return false;
+    seen.add(row.user_id);
+    return true;
+  });
+
+  return deduped
+    .sort((a: any, b: any) => a.rank - b.rank)
+    .slice(0, limit)
+    .map((row: any, idx: number) => ({
+      rank: idx + 1,
+      user_id: row.user_id,
+      steps: row.steps,
+      name: (row.users as any)?.name ?? 'Unknown',
+      city: (row.users as any)?.city ?? '',
+    }));
+}
+
 export async function getGlobalLeaderboard(limit = 100): Promise<LeaderboardEntry[]> {
   const today = new Date().toISOString().slice(0, 10);
-  return parseRedisRanks(`leaderboard:global:${today}`, limit);
+  const redisEntries = await parseRedisRanks(`leaderboard:global:${today}`, limit);
+  if (redisEntries.length > 0) return redisEntries;
+  return getGlobalFromSnapshots(limit);
 }
 
 export async function getCityLeaderboard(city: string, limit = 100): Promise<LeaderboardEntry[]> {
@@ -72,16 +102,27 @@ export async function getFriendsLeaderboard(userId: string, limit = 50): Promise
 
 export async function getUserRank(userId: string): Promise<{ rank: number; steps: number }> {
   const redis = tryGetRedis();
-  if (!redis) return { rank: 0, steps: 0 };
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    const key = `leaderboard:global:${today}`;
-    const [rank, score] = await Promise.all([
-      redis.zrevrank(key, userId),
-      redis.zscore(key, userId),
-    ]);
-    return { rank: (rank ?? 0) + 1, steps: parseInt(score ?? '0', 10) };
-  } catch {
-    return { rank: 0, steps: 0 };
+  if (redis) {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const key = `leaderboard:global:${today}`;
+      const [rank, score] = await Promise.all([
+        redis.zrevrank(key, userId),
+        redis.zscore(key, userId),
+      ]);
+      if (rank !== null) {
+        return { rank: (rank ?? 0) + 1, steps: parseInt(score ?? '0', 10) };
+      }
+    } catch {}
   }
+  // Fall back to snapshot data
+  const { data } = await getSupabase()
+    .from('leaderboard_snapshots')
+    .select('rank, steps')
+    .eq('user_id', userId)
+    .eq('scope', 'global')
+    .order('snapped_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return { rank: data?.rank ?? 0, steps: data?.steps ?? 0 };
 }
