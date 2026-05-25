@@ -13,11 +13,23 @@ communityRouter.get('/feed', async (req: Request, res: Response) => {
   }
 });
 
+// Canonical create-post endpoint
+communityRouter.post('/posts', async (req: Request, res: Response) => {
+  try {
+    const { type = 'flex', content, visibility = 'everyone', media_urls = [], metadata = {} } = req.body;
+    if (!content) return res.status(400).json({ error: 'content required' });
+    res.json(await createPost(req.user!.id, type, content, visibility, media_urls, metadata));
+  } catch (err: unknown) {
+    res.status(400).json({ error: err instanceof Error ? err.message : 'Internal error' });
+  }
+});
+
+// Legacy endpoint — kept for backwards compat
 communityRouter.post('/flex', async (req: Request, res: Response) => {
   try {
-    const { type = 'flex', content, metadata = {} } = req.body;
+    const { type = 'flex', content, visibility = 'everyone', media_urls = [], metadata = {} } = req.body;
     if (!content) return res.status(400).json({ error: 'content required' });
-    res.json(await createPost(req.user!.id, type, content, metadata));
+    res.json(await createPost(req.user!.id, type, content, visibility, media_urls, metadata));
   } catch (err: unknown) {
     res.status(400).json({ error: err instanceof Error ? err.message : 'Internal error' });
   }
