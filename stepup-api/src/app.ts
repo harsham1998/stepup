@@ -20,6 +20,10 @@ import { battlepassRouter } from './modules/battlepass/battlepass.router';
 import { subscriptionsRouter } from './modules/subscriptions/subscriptions.router';
 import { communityRouter } from './modules/community/community.router';
 import { streaksRouter } from './modules/streaks/streaks.router';
+import { activitiesRouter } from './modules/activities/activities.router';
+import { notificationsRouter } from './modules/notifications/notifications.router';
+import { achievementsRouter } from './modules/achievements/achievements.router';
+import { levelsRouter } from './modules/steps/levels.router';
 
 export function createApp() {
   const app = express();
@@ -51,6 +55,10 @@ export function createApp() {
   app.use('/subscriptions', subscriptionsRouter);
   app.use('/community', communityRouter);
   app.use('/streaks', streaksRouter);
+  app.use('/activities', activitiesRouter);
+  app.use('/notifications', notificationsRouter);
+  app.use('/achievements', achievementsRouter);
+  app.use('/xp', levelsRouter);
 
   app.use(errorHandler);
   return app;
