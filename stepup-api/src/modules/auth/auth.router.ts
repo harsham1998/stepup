@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { validateBody } from '../../gateway/middleware/validate';
 import { authMiddleware } from '../../gateway/middleware/auth';
-import { sendOtp, verifyOtp, getProfile, upsertProfile } from './auth.service';
+import { sendOtp, verifyOtp, getProfile, getProfileSummary, upsertProfile, updateAvatar } from './auth.service';
 
 export const authRouter = Router();
 
@@ -20,6 +20,11 @@ const profileSchema = z.object({
   city: z.string().min(1).max(100),
   language: z.enum(['english', 'hindi', 'telugu', 'tamil', 'kannada']),
   goal_tier: z.enum(['casual', 'active', 'champion', 'elite']),
+  avatar_url: z.string().url().optional(),
+});
+
+const avatarSchema = z.object({
+  avatar_url: z.string().url(),
 });
 
 authRouter.post('/otp/send', validateBody(sendOtpSchema), async (req: Request, res: Response) => {
@@ -53,6 +58,18 @@ authRouter.get('/profile', authMiddleware, async (req: Request, res: Response) =
   }
 });
 
+// Full profile summary: user fields + missions, rivals, week steps, challenges, achievements
+authRouter.get('/profile/summary', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = (req.user as { id: string }).id;
+    const data = await getProfileSummary(userId);
+    if (!data) return res.status(404).json({ error: 'Profile not found' });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Failed to fetch profile summary' });
+  }
+});
+
 authRouter.put('/profile', authMiddleware, validateBody(profileSchema), async (req: Request, res: Response) => {
   try {
     const userId = (req.user as { id: string }).id;
@@ -60,5 +77,16 @@ authRouter.put('/profile', authMiddleware, validateBody(profileSchema), async (r
     res.json(result);
   } catch {
     res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+// Called after Flutter uploads the image directly to Supabase Storage — just saves the public URL
+authRouter.patch('/profile/avatar', authMiddleware, validateBody(avatarSchema), async (req: Request, res: Response) => {
+  try {
+    const userId = (req.user as { id: string }).id;
+    const result = await updateAvatar(userId, req.body.avatar_url);
+    res.json(result);
+  } catch {
+    res.status(500).json({ error: 'Failed to update avatar' });
   }
 });
