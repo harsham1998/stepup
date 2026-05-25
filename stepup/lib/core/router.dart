@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
@@ -8,15 +9,25 @@ import '../features/auth/screens/onboarding_screen.dart';
 import '../features/home/screens/home_screen.dart';
 import '../features/challenges/screens/challenges_screen.dart';
 import '../features/challenges/screens/challenge_detail_screen.dart';
+import '../features/challenges/screens/custom_challenge_screen.dart';
+import '../features/challenges/screens/invite_friends_screen.dart';
 import '../features/leaderboard/screens/leaderboard_screen.dart';
-import '../features/wallet/screens/wallet_screen.dart';
+import '../features/league/screens/league_hub_screen.dart';
+import '../features/league/screens/league_standings_screen.dart';
+import '../features/coins/screens/coins_screen.dart';
+import '../features/rewards/screens/rewards_screen.dart';
+import '../features/battlepass/screens/battlepass_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
-import '../features/health/health_screen.dart';
+import '../features/subscriptions/screens/subscription_screen.dart';
+import '../features/missions/screens/missions_screen.dart';
+import '../features/rivals/screens/rivals_screen.dart';
+import '../features/community/screens/community_screen.dart';
+import '../features/streaks/screens/streak_screen.dart';
+import '../core/theme.dart';
 
 final router = GoRouter(
   initialLocation: '/',
   redirect: (context, state) {
-    // Web preview bypass: ?preview=1 in URL skips auth for visual testing
     if (kIsWeb) {
       final uri = Uri.base;
       if (uri.queryParameters.containsKey('preview')) return null;
@@ -29,54 +40,62 @@ final router = GoRouter(
     return null;
   },
   routes: [
-    GoRoute(path: '/',        builder: (context, _) => const SplashScreen()),
-    GoRoute(path: '/login',   builder: (context, _) => const LoginScreen()),
-    GoRoute(path: '/onboard', builder: (context, _) => const OnboardingScreen()),
+    GoRoute(path: '/',        builder: (_, __) => const SplashScreen()),
+    GoRoute(path: '/login',   builder: (_, __) => const LoginScreen()),
+    GoRoute(path: '/onboard', builder: (_, __) => const OnboardingScreen()),
     ShellRoute(
-      builder: (context, state, child) => AppShell(child: child),
+      builder: (_, state, child) => AppShell(child: child, location: state.matchedLocation),
       routes: [
-        GoRoute(path: '/home',        builder: (context, _) => const HomeScreen()),
-        GoRoute(path: '/challenges',  builder: (context, _) => const ChallengesScreen()),
-        GoRoute(
-          path: '/challenges/:id',
-          builder: (_, state) => ChallengeDetailScreen(id: state.pathParameters['id']!),
-        ),
-        GoRoute(path: '/leaderboard', builder: (context, _) => const LeaderboardScreen()),
-        GoRoute(path: '/wallet',      builder: (context, _) => const WalletScreen()),
-        GoRoute(path: '/profile',     builder: (context, _) => const ProfileScreen()),
-        GoRoute(path: '/health',      builder: (context, _) => const HealthScreen()),
+        GoRoute(path: '/home',           builder: (_, __) => const HomeScreen()),
+        GoRoute(path: '/challenges',     builder: (_, __) => const ChallengesScreen()),
+        GoRoute(path: '/challenges/:id', builder: (_, s) => ChallengeDetailScreen(id: s.pathParameters['id']!)),
+        GoRoute(path: '/challenges/custom/new', builder: (_, __) => const CustomChallengeScreen()),
+        GoRoute(path: '/challenges/custom/:code/invite', builder: (_, s) => InviteFriendsScreen(challengeId: s.pathParameters['code']!)),
+        GoRoute(path: '/leaderboard',    builder: (_, __) => const LeaderboardScreen()),
+        GoRoute(path: '/leaderboard/league', builder: (_, __) => const LeagueHubScreen()),
+        GoRoute(path: '/leaderboard/standings', builder: (_, __) => const LeagueStandingsScreen()),
+        GoRoute(path: '/coins',          builder: (_, __) => const CoinsScreen()),
+        GoRoute(path: '/coins/rewards',  builder: (_, __) => const RewardsScreen()),
+        GoRoute(path: '/coins/battlepass', builder: (_, __) => const BattlePassScreen()),
+        GoRoute(path: '/profile',        builder: (_, __) => const ProfileScreen()),
+        GoRoute(path: '/profile/subscription', builder: (_, __) => const SubscriptionScreen()),
+        GoRoute(path: '/missions',       builder: (_, __) => const MissionsScreen()),
+        GoRoute(path: '/rivals',         builder: (_, __) => const RivalsScreen()),
+        GoRoute(path: '/community',      builder: (_, __) => const CommunityScreen()),
+        GoRoute(path: '/streaks',        builder: (_, __) => const StreakScreen()),
       ],
     ),
   ],
 );
 
-class AppShell extends StatefulWidget {
+class AppShell extends StatelessWidget {
   final Widget child;
-  const AppShell({required this.child, super.key});
+  final String location;
+  const AppShell({required this.child, required this.location, super.key});
 
-  @override
-  State<AppShell> createState() => _AppShellState();
-}
-
-class _AppShellState extends State<AppShell> {
-  int _currentIndex = 0;
-  final _tabs = ['/home', '/challenges', '/leaderboard', '/wallet', '/profile'];
+  int get _index {
+    if (location.startsWith('/challenges')) return 1;
+    if (location.startsWith('/leaderboard')) return 2;
+    if (location.startsWith('/coins')) return 3;
+    if (location.startsWith('/profile')) return 4;
+    return 0;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: widget.child,
+      body: child,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: _index,
         onTap: (i) {
-          setState(() => _currentIndex = i);
-          context.go(_tabs[i]);
+          const routes = ['/home', '/challenges', '/leaderboard', '/coins', '/profile'];
+          context.go(routes[i]);
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.sports_martial_arts), label: 'Battle'),
-          BottomNavigationBarItem(icon: Icon(Icons.emoji_events_rounded), label: 'Rank'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'Wallet'),
+          BottomNavigationBarItem(icon: Icon(Icons.emoji_events_outlined), label: 'Chal'),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart_rounded), label: 'Lead'),
+          BottomNavigationBarItem(icon: Icon(Icons.monetization_on_outlined), label: 'Coins'),
           BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Me'),
         ],
       ),
