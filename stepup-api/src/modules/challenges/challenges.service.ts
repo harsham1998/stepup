@@ -2,6 +2,19 @@ import { getSupabase } from '../../lib/supabase';
 import { getRedis } from '../../lib/redis';
 import { ChallengeRow } from '../../types';
 
+const _VALID_ACTIVITY_TYPES = new Set(['steps', 'walking', 'running', 'gym', 'outdoor', 'cycling']);
+
+// Derive UI cadence from challenge duration so the frontend tab filter works
+function _getCadence(startTime: string, endTime: string): string {
+  const days = Math.round(
+    (new Date(endTime).getTime() - new Date(startTime).getTime()) / 86_400_000,
+  );
+  if (days <= 1) return 'daily';
+  if (days <= 7) return 'weekly';
+  if (days <= 31) return 'monthly';
+  return 'seasonal';
+}
+
 async function withParticipantCount(challenges: ChallengeRow[]) {
   const ids = challenges.map(c => c.id);
   if (ids.length === 0) return challenges;
@@ -15,7 +28,10 @@ async function withParticipantCount(challenges: ChallengeRow[]) {
   }
   return challenges.map(c => ({
     ...c,
-    activity_type: c.type ?? 'steps',
+    // Override type with cadence key so Flutter tab filter works
+    type: _getCadence(c.start_time, c.end_time),
+    // Use sponsor_name column to store activity type without schema change
+    activity_type: _VALID_ACTIVITY_TYPES.has(c.sponsor_name ?? '') ? c.sponsor_name! : 'steps',
     participant_count: counts[c.id] ?? 0,
   }));
 }
