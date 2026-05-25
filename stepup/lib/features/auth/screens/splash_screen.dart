@@ -1,3 +1,4 @@
+import 'dart:math' show pi;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,42 +15,128 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 1800), () {
+    Future.microtask(() {
       if (!mounted) return;
       final isLoggedIn = ref.read(isLoggedInProvider);
-      context.go(isLoggedIn ? '/home' : '/login');
+      if (isLoggedIn) {
+        Future.delayed(const Duration(milliseconds: 1200), () {
+          if (mounted) context.go('/home');
+        });
+      }
     });
+  }
+
+  void _onTap() {
+    final isLoggedIn = ref.read(isLoggedInProvider);
+    context.go(isLoggedIn ? '/home' : '/login');
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0A14),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 72, height: 72,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                  begin: Alignment.topLeft, end: Alignment.bottomRight,
+    return GestureDetector(
+      onTap: _onTap,
+      child: Scaffold(
+        backgroundColor: AppTheme.bg,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              children: [
+                const Spacer(),
+                // Logo mark with arrow
+                SizedBox(
+                  width: 90,
+                  height: 90,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CustomPaint(
+                        size: const Size(90, 90),
+                        painter: _LogoPainter(),
+                      ),
+                      Text('↑', style: AppTheme.bigNum(38, color: AppTheme.voltLime)),
+                    ],
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(22),
-                boxShadow: [BoxShadow(color: AppTheme.primary.withValues(alpha: 0.5), blurRadius: 24)],
-              ),
-              child: const Icon(Icons.bolt, color: Colors.white, size: 36),
+                const SizedBox(height: 24),
+                // StepUp title
+                RichText(
+                  text: TextSpan(
+                    style: AppTheme.bigNum(56),
+                    children: const [
+                      TextSpan(text: 'Step'),
+                      TextSpan(
+                        text: 'Up',
+                        style: TextStyle(color: AppTheme.voltLime),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Walk · compete · cash in',
+                  style: AppTheme.label(13, color: AppTheme.ink2),
+                ),
+                const Spacer(),
+                Text(
+                  'Tap anywhere to begin',
+                  style: AppTheme.label(12, color: AppTheme.ink3),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  width: 60,
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: AppTheme.voltLime,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'V 1.0  ·  India',
+                  style: AppTheme.label(11, color: AppTheme.ink3),
+                ),
+                const SizedBox(height: 24),
+              ],
             ),
-            const SizedBox(height: 16),
-            const Text('StepUp',
-                style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
-            const SizedBox(height: 6),
-            const Text('Walk · Compete · Win',
-                style: TextStyle(color: Color(0xFF7C83F7), fontSize: 13, letterSpacing: 0.5)),
-          ],
+          ),
         ),
       ),
     );
   }
+}
+
+class _LogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final r = size.width / 2 - 2;
+
+    // Outer volt-lime circle
+    canvas.drawCircle(
+      Offset(cx, cy),
+      r,
+      Paint()
+        ..color = AppTheme.voltLime
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2,
+    );
+
+    // Inner amber arc (bottom-left quarter)
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(cx, cy), radius: r * 0.55),
+      pi * 0.75,
+      pi,
+      false,
+      Paint()
+        ..color = AppTheme.amber
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_) => false;
 }

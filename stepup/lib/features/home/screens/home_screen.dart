@@ -29,6 +29,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
+  String _formattedDate() {
+    final now = DateTime.now();
+    const days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    return '${days[now.weekday - 1]} · ${months[now.month - 1]} ${now.day}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final stepsAsync = ref.watch(dailyStepsProvider);
@@ -50,31 +78,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text('Good morning,', style: AppTheme.label(12)),
-                        Text('StepUp', style: AppTheme.bigNum(26)),
-                      ]),
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _formattedDate(),
+                              style:
+                                  AppTheme.label(11, color: AppTheme.ink3),
+                            ),
+                            stepsAsync.when(
+                              loading: () =>
+                                  Text('StepUp', style: AppTheme.bigNum(24)),
+                              error: (_, __) =>
+                                  Text('StepUp', style: AppTheme.bigNum(24)),
+                              data: (_) => Text('Hey there 👋',
+                                  style: AppTheme.bigNum(24)),
+                            ),
+                          ]),
                       Row(children: [
-                        IconButton(
-                          icon: const Icon(Icons.notifications_none_rounded,
-                              color: Colors.white, size: 22),
-                          onPressed: () {},
-                        ),
-                        const SizedBox(width: 4),
+                        // streak chip
                         Container(
-                          width: 36,
-                          height: 36,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppTheme.voltLime.withOpacity(0.15),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color: AppTheme.voltLime.withOpacity(0.4)),
+                            color: AppTheme.surface,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppTheme.border),
                           ),
-                          child: Center(
-                            child: Text('S',
-                                style: AppTheme.bigNum(16,
-                                    color: AppTheme.voltLime)),
-                          ),
+                          child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('🔥',
+                                    style: TextStyle(fontSize: 12)),
+                                const SizedBox(width: 4),
+                                Text('0d',
+                                    style: AppTheme.label(12,
+                                        color: AppTheme.ink2)),
+                              ]),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(
+                              Icons.notifications_none_rounded,
+                              color: Colors.white,
+                              size: 22),
+                          onPressed: () {},
                         ),
                       ]),
                     ],
@@ -83,12 +131,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                   // Step ring hero
                   stepsAsync.when(
-                    loading: () => const _StepRingCard(steps: 0, goal: 10000),
+                    loading: () =>
+                        const _StepRingCard(steps: 0, goal: 10000),
                     error: (_, __) =>
                         const _StepRingCard(steps: 0, goal: 10000),
                     data: (steps) =>
                         _StepRingCard(steps: steps, goal: 10000),
                   ),
+                  const SizedBox(height: 10),
+
+                  // Distance / Kcal / Min chips row
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    _InfoChip(label: '5.4 Km'),
+                    const SizedBox(width: 8),
+                    _InfoChip(label: '412 Kcal'),
+                    const SizedBox(width: 8),
+                    _InfoChip(label: '52 Min'),
+                  ]),
                   const SizedBox(height: 16),
 
                   // Stats strip: league | streak | coins
@@ -235,8 +294,8 @@ class _StepRingCard extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(
             'TODAY',
-            style: AppTheme.label(9, color: AppTheme.ink3).copyWith(
-                letterSpacing: 1.4, fontWeight: FontWeight.w700),
+            style: AppTheme.label(9, color: AppTheme.ink3)
+                .copyWith(letterSpacing: 1.4, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           Text(
@@ -252,7 +311,7 @@ class _StepRingCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: pct,
               minHeight: 4,
-              backgroundColor: Colors.white.withOpacity(0.08),
+              backgroundColor: Colors.white.withValues(alpha: 0.08),
               valueColor:
                   const AlwaysStoppedAnimation(AppTheme.voltLime),
             ),
@@ -267,8 +326,8 @@ class _StepRingCard extends StatelessWidget {
 
   String _fmt(int n) => n
       .toString()
-      .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (m) => '${m[1]},');
+      .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
 }
 
 class _RingPainter extends CustomPainter {
@@ -281,7 +340,7 @@ class _RingPainter extends CustomPainter {
     final c = Offset(size.width / 2, size.height / 2);
     final r = size.width / 2 - 8;
     final bg = Paint()
-      ..color = Colors.white.withOpacity(0.08)
+      ..color = Colors.white.withValues(alpha: 0.08)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8
       ..strokeCap = StrokeCap.round;
@@ -319,6 +378,22 @@ class _StatChip extends StatelessWidget {
           const SizedBox(height: 2),
           Text(label, style: AppTheme.label(10, color: AppTheme.ink3)),
         ]),
+      );
+}
+
+class _InfoChip extends StatelessWidget {
+  final String label;
+  const _InfoChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.border),
+        ),
+        child: Text(label, style: AppTheme.label(12, color: AppTheme.ink2)),
       );
 }
 
@@ -368,12 +443,12 @@ class _MissionPill extends StatelessWidget {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: mission.completed
-            ? AppTheme.voltLime.withOpacity(0.1)
+            ? AppTheme.voltLime.withValues(alpha: 0.1)
             : AppTheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: mission.completed
-              ? AppTheme.voltLime.withOpacity(0.4)
+              ? AppTheme.voltLime.withValues(alpha: 0.4)
               : AppTheme.border,
         ),
       ),
@@ -391,7 +466,7 @@ class _MissionPill extends StatelessWidget {
           child: LinearProgressIndicator(
             value: mission.progressPct,
             minHeight: 3,
-            backgroundColor: Colors.white.withOpacity(0.08),
+            backgroundColor: Colors.white.withValues(alpha: 0.08),
             valueColor: AlwaysStoppedAnimation(
                 mission.completed ? AppTheme.voltLime : AppTheme.amber),
           ),

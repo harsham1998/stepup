@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../league/providers/league_provider.dart';
 import '../../subscriptions/providers/subscription_provider.dart';
 import '../providers/profile_provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../../shared/models/league_status.dart';
 import '../../../core/theme.dart';
 
@@ -22,15 +23,14 @@ class ProfileScreen extends ConsumerWidget {
         child: CustomScrollView(
           slivers: [
             SliverPadding(
-              padding:
-                  const EdgeInsets.fromLTRB(20, 16, 20, 40),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  // Title row
                   Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Profile', style: AppTheme.bigNum(28)),
+                      Text('Me', style: AppTheme.bigNum(32)),
                       IconButton(
                         icon: const Icon(Icons.settings_rounded,
                             color: AppTheme.ink3),
@@ -40,114 +40,125 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // Avatar + name + league row
+                  // Avatar + name + sub row
                   profileAsync.when(
-                    loading: () =>
-                        const _ProfileHeroSkeleton(),
-                    error: (_, __) =>
-                        const _ProfileHeroSkeleton(),
+                    loading: () => const _ProfileHeroSkeleton(),
+                    error: (_, __) => const _ProfileHeroSkeleton(),
                     data: (profile) => _ProfileHero(
                       profile: profile,
                       leagueAsync: leagueAsync,
+                      subAsync: subAsync,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Stats row: Streak | Challenges | Coins
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppTheme.border),
+                    ),
+                    child: Row(children: [
+                      _StatBox(label: 'Streak', value: '0'),
+                      _Divider(),
+                      _StatBox(label: 'Challenges', value: '0'),
+                      _Divider(),
+                      subAsync.when(
+                        loading: () =>
+                            _StatBox(label: 'Coins', value: '0'),
+                        error: (_, __) =>
+                            _StatBox(label: 'Coins', value: '0'),
+                        data: (_) => _StatBox(label: 'Coins', value: '0'),
+                      ),
+                    ]),
+                  ),
+                  const SizedBox(height: 20),
+
+                  Divider(
+                      color: AppTheme.border, thickness: 1, height: 1),
+                  const SizedBox(height: 20),
+
+                  // Recent badges section
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Recent badges',
+                          style: AppTheme.label(13, color: Colors.white)
+                              .copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        Text('See all',
+                            style: AppTheme.label(12,
+                                color: AppTheme.voltLime)),
+                      ]),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 72,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _BadgeCard(emoji: '🔥', label: '7-day streak'),
+                        _BadgeCard(emoji: '👟', label: 'First 10k'),
+                        _BadgeCard(emoji: '🏆', label: 'Winner'),
+                        _BadgeCard(emoji: '⚡', label: 'Speed run'),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 24),
 
-                  // Subscription banner
-                  subAsync.when(
-                    loading: () => const SizedBox(),
-                    error: (_, __) => const SizedBox(),
-                    data: (sub) => sub.isPaid
-                        ? _SubBadge(plan: sub.planSlug)
-                        : _UpgradePrompt(
-                            onTap: () => context.push(
-                                '/profile/subscription')),
+                  // Settings menu
+                  _MenuItem(
+                    label: 'Activity history',
+                    icon: Icons.history_rounded,
+                    onTap: () {},
                   ),
-                  const SizedBox(height: 20),
-
-                  // Quick nav grid
-                  Text(
-                    'FEATURES',
-                    style: AppTheme.label(10,
-                            color: AppTheme.ink3)
-                        .copyWith(
-                            letterSpacing: 1.2,
-                            fontWeight: FontWeight.w700),
+                  _MenuItem(
+                    label: 'Achievements',
+                    icon: Icons.emoji_events_rounded,
+                    onTap: () {},
                   ),
-                  const SizedBox(height: 12),
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics:
-                        const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 2.5,
-                    children: [
-                      _NavTile(
-                        'League',
-                        Icons.military_tech_rounded,
-                        AppTheme.amber,
-                        () => context
-                            .push('/leaderboard/league'),
-                      ),
-                      _NavTile(
-                        'Missions',
-                        Icons.task_alt_rounded,
-                        AppTheme.voltLime,
-                        () => context.push('/missions'),
-                      ),
-                      _NavTile(
-                        'Rivals',
-                        Icons.sports_kabaddi_rounded,
-                        const Color(0xFFEF4444),
-                        () => context.push('/rivals'),
-                      ),
-                      _NavTile(
-                        'Streak',
-                        Icons.local_fire_department_rounded,
-                        const Color(0xFFFF6B35),
-                        () => context.push('/streaks'),
-                      ),
-                      _NavTile(
-                        'Community',
-                        Icons.people_rounded,
-                        const Color(0xFF8B5CF6),
-                        () => context.push('/community'),
-                      ),
-                      _NavTile(
-                        'Subscription',
-                        Icons.star_rounded,
-                        AppTheme.amber,
-                        () => context
-                            .push('/profile/subscription'),
-                      ),
-                    ],
+                  _MenuItem(
+                    label: 'Friends · 14',
+                    icon: Icons.people_rounded,
+                    onTap: () => context.push('/community'),
                   ),
-                  const SizedBox(height: 20),
-
+                  _MenuItem(
+                    label: 'Plan & billing',
+                    icon: Icons.credit_card_rounded,
+                    onTap: () => context.push('/profile/subscription'),
+                  ),
+                  _MenuItem(
+                    label: 'Notifications',
+                    icon: Icons.notifications_none_rounded,
+                    onTap: () {},
+                  ),
+                  _MenuItem(
+                    label: 'Help & support',
+                    icon: Icons.help_outline_rounded,
+                    onTap: () {},
+                  ),
+                  const SizedBox(height: 8),
                   // Sign out
                   GestureDetector(
-                    onTap: () => context.go('/login'),
+                    onTap: () async {
+                      await ref.read(authServiceProvider).signOut();
+                      if (context.mounted) context.go('/login');
+                    },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
                         color: AppTheme.surface,
-                        borderRadius:
-                            BorderRadius.circular(12),
-                        border:
-                            Border.all(color: AppTheme.border),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.border),
                       ),
                       child: Center(
                         child: Text(
                           'Sign Out',
                           style: AppTheme.label(14,
-                                  color: const Color(
-                                      0xFFEF4444))
-                              .copyWith(
-                                  fontWeight:
-                                      FontWeight.w600),
+                                  color: const Color(0xFFEF4444))
+                              .copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -165,68 +176,80 @@ class ProfileScreen extends ConsumerWidget {
 class _ProfileHero extends StatelessWidget {
   final Map<String, dynamic> profile;
   final AsyncValue<LeagueStatus> leagueAsync;
-  const _ProfileHero(
-      {required this.profile, required this.leagueAsync});
+  final AsyncValue<dynamic> subAsync;
+  const _ProfileHero({
+    required this.profile,
+    required this.leagueAsync,
+    required this.subAsync,
+  });
 
   @override
   Widget build(BuildContext context) {
     final name = profile['name'] as String? ?? 'StepUp User';
-    final city = profile['city'] as String? ?? '';
-    return Row(children: [
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Container(
-        width: 64,
-        height: 64,
+        width: 56,
+        height: 56,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppTheme.voltLime.withOpacity(0.15),
+          color: AppTheme.voltLime.withValues(alpha: 0.12),
           border: Border.all(
-              color: AppTheme.voltLime.withOpacity(0.4),
-              width: 2),
+              color: AppTheme.voltLime.withValues(alpha: 0.5), width: 2),
         ),
         child: Center(
           child: Text(
             name.isNotEmpty ? name[0].toUpperCase() : 'S',
-            style: AppTheme.bigNum(28, color: AppTheme.voltLime),
+            style: AppTheme.bigNum(24, color: AppTheme.voltLime),
           ),
         ),
       ),
-      const SizedBox(width: 16),
+      const SizedBox(width: 14),
       Expanded(
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(name, style: AppTheme.bigNum(22)),
-              if (city.isNotEmpty)
-                Text(city, style: AppTheme.label(13)),
-              const SizedBox(height: 4),
-              leagueAsync.when(
-                loading: () => const SizedBox(),
-                error: (_, __) => const SizedBox(),
-                data: (league) => Row(children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppTheme.amber.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      league.label,
-                      style: AppTheme.label(11,
-                              color: AppTheme.amber)
-                          .copyWith(
-                              fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text('Rank #${league.rankInTier}',
-                      style: AppTheme.label(12)),
-                ]),
-              ),
-            ]),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(name, style: AppTheme.bigNum(22)),
+          const SizedBox(height: 4),
+          Text(
+            'Joined Apr 2024 · India',
+            style: AppTheme.label(12, color: AppTheme.ink2),
+          ),
+          const SizedBox(height: 6),
+          subAsync.when(
+            loading: () => const SizedBox(),
+            error: (_, __) => _SubChip(label: 'Free'),
+            data: (sub) {
+              final isPaid = sub?.isPaid as bool? ?? false;
+              final plan = sub?.planSlug as String? ?? 'free';
+              return _SubChip(
+                  label: isPaid
+                      ? '${plan[0].toUpperCase()}${plan.substring(1)}'
+                      : 'Free');
+            },
+          ),
+        ]),
       ),
     ]);
   }
+}
+
+class _SubChip extends StatelessWidget {
+  final String label;
+  const _SubChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        decoration: BoxDecoration(
+          color: AppTheme.voltLime.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+              color: AppTheme.voltLime.withValues(alpha: 0.3)),
+        ),
+        child: Text(
+          label,
+          style: AppTheme.label(11, color: AppTheme.voltLime)
+              .copyWith(fontWeight: FontWeight.w700),
+        ),
+      );
 }
 
 class _ProfileHeroSkeleton extends StatelessWidget {
@@ -235,108 +258,103 @@ class _ProfileHeroSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(children: [
         Container(
-          width: 64,
-          height: 64,
+          width: 56,
+          height: 56,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: AppTheme.surface,
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 14),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-              width: 120, height: 20, color: AppTheme.surface),
+          Container(width: 120, height: 20, color: AppTheme.surface),
           const SizedBox(height: 6),
-          Container(
-              width: 80, height: 14, color: AppTheme.surface),
+          Container(width: 80, height: 14, color: AppTheme.surface),
         ]),
       ]);
 }
 
-class _SubBadge extends StatelessWidget {
-  final String plan;
-  const _SubBadge({required this.plan});
+class _StatBox extends StatelessWidget {
+  final String label, value;
+  const _StatBox({required this.label, required this.value});
 
   @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(
-            horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: AppTheme.voltLime.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-              color: AppTheme.voltLime.withOpacity(0.3)),
-        ),
-        child: Row(children: [
-          const Icon(Icons.star_rounded,
-              color: AppTheme.voltLime, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            '${plan[0].toUpperCase()}${plan.substring(1)} Plan',
-            style: AppTheme.label(13, color: AppTheme.voltLime)
-                .copyWith(fontWeight: FontWeight.w700),
-          ),
+  Widget build(BuildContext context) => Expanded(
+        child: Column(children: [
+          Text(value, style: AppTheme.bigNum(20)),
+          const SizedBox(height: 2),
+          Text(label, style: AppTheme.label(11, color: AppTheme.ink3)),
         ]),
       );
 }
 
-class _UpgradePrompt extends StatelessWidget {
-  final VoidCallback onTap;
-  const _UpgradePrompt({required this.onTap});
+class _Divider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 1, height: 32, color: AppTheme.border);
+}
+
+class _BadgeCard extends StatelessWidget {
+  final String emoji, label;
+  const _BadgeCard({required this.emoji, required this.label});
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppTheme.amber.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-                color: AppTheme.amber.withOpacity(0.25)),
-          ),
-          child: Row(children: [
-            const Icon(Icons.bolt_rounded,
-                color: AppTheme.amber),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Upgrade to Beginner — earn coins, unlock Gold league',
-                style: AppTheme.label(13),
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios_rounded,
-                color: AppTheme.amber, size: 14),
-          ]),
+  Widget build(BuildContext context) => Container(
+        width: 80,
+        margin: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.border),
         ),
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 22)),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: AppTheme.label(9, color: AppTheme.ink2),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ]),
       );
 }
 
-class _NavTile extends StatelessWidget {
+class _MenuItem extends StatelessWidget {
   final String label;
   final IconData icon;
-  final Color color;
   final VoidCallback onTap;
-  const _NavTile(this.label, this.icon, this.color, this.onTap);
+  const _MenuItem(
+      {required this.label, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) => GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          margin: const EdgeInsets.only(bottom: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.2)),
+            color: AppTheme.surface,
+            border: Border(
+                bottom: BorderSide(
+                    color: AppTheme.border.withValues(alpha: 0.5))),
           ),
           child: Row(children: [
-            Icon(icon, color: color, size: 18),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: AppTheme.label(13, color: Colors.white)
-                  .copyWith(fontWeight: FontWeight.w600),
+            Icon(icon, color: AppTheme.ink2, size: 18),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: AppTheme.label(14, color: Colors.white)
+                    .copyWith(fontWeight: FontWeight.w500),
+              ),
             ),
+            const Icon(Icons.arrow_forward_ios_rounded,
+                color: AppTheme.ink3, size: 13),
           ]),
         ),
       );
