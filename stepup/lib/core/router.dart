@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../features/auth/screens/splash_screen.dart';
 import '../features/auth/screens/login_screen.dart';
@@ -23,7 +22,6 @@ import '../features/missions/screens/missions_screen.dart';
 import '../features/rivals/screens/rivals_screen.dart';
 import '../features/community/screens/community_screen.dart';
 import '../features/streaks/screens/streak_screen.dart';
-import '../core/theme.dart';
 
 final router = GoRouter(
   initialLocation: '/',
