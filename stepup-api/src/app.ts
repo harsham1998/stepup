@@ -43,8 +43,8 @@ export function createApp() {
   app.use(authMiddleware);
   app.use(rateLimitMiddleware);
   app.use('/steps', stepsRouter);
-  app.use('/challenges', challengesRouter);
   app.use('/challenges/custom', customChallengesRouter);
+  app.use('/challenges', challengesRouter);
   app.use('/leaderboard', leaderboardRouter);
   app.use('/wallet', walletRouter);
   app.use('/leagues', leaguesRouter);
