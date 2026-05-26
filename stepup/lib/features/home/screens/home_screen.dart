@@ -66,11 +66,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final xpLevel = xpLevelAsync.whenOrNull(data: (x) => x);
 
     final name = profileAsync.whenOrNull(
-      data: (p) { final n = (p as Map<String, dynamic>)['name'] as String? ?? ''; return n.isNotEmpty ? n.trim().split(' ').first : 'You'; },
+      data: (p) { final n = p['name'] as String? ?? ''; return n.isNotEmpty ? n.trim().split(' ').first : 'You'; },
     ) ?? 'You';
     final initial = name.isNotEmpty ? name[0].toUpperCase() : 'Y';
     final profileAvatarUrl = profileAsync.whenOrNull(
-      data: (p) => (p as Map<String, dynamic>)['avatar_url'] as String?,
+      data: (p) => p['avatar_url'] as String?,
     );
 
     final summary = summaryAsync.whenOrNull(data: (s) => s);
