@@ -94,3 +94,56 @@ class ActivityConfig {
   final String emoji, label;
   const ActivityConfig(this.base, this.colorA, this.colorB, this.emoji, this.label);
 }
+
+class ChallengeProgress {
+  final bool joined;
+  final int current;
+  final int goal;
+  final double percent;
+  final int totalDays;
+  final int daysPassed;
+  final int daysLeft;
+  final int dailyGoal;
+  final bool completedToday;
+  final List<bool> dailyCheckins;
+  final int? rank;
+  final int totalParticipants;
+  final String activityType;
+  final int prizePool;
+
+  const ChallengeProgress({
+    required this.joined,
+    required this.current,
+    required this.goal,
+    required this.percent,
+    required this.totalDays,
+    required this.daysPassed,
+    required this.daysLeft,
+    required this.dailyGoal,
+    required this.completedToday,
+    required this.dailyCheckins,
+    required this.rank,
+    required this.totalParticipants,
+    required this.activityType,
+    required this.prizePool,
+  });
+
+  factory ChallengeProgress.fromJson(Map<String, dynamic> j) => ChallengeProgress(
+        joined: j['joined'] as bool,
+        current: (j['current'] as num).toInt(),
+        goal: (j['goal'] as num).toInt(),
+        percent: (j['percent'] as num).toDouble(),
+        totalDays: (j['totalDays'] as num).toInt(),
+        daysPassed: (j['daysPassed'] as num).toInt(),
+        daysLeft: (j['daysLeft'] as num).toInt(),
+        dailyGoal: (j['dailyGoal'] as num).toInt(),
+        completedToday: j['completedToday'] as bool,
+        dailyCheckins: (j['dailyCheckins'] as List).map((e) => e as bool).toList(),
+        rank: (j['rank'] as num?)?.toInt(),
+        totalParticipants: (j['totalParticipants'] as num).toInt(),
+        activityType: (j['activityType'] as String?) ?? 'steps',
+        prizePool: (j['prizePool'] as num).toInt(),
+      );
+
+  String get prizePoolCoins => '${prizePool ~/ 100}¢';
+}
