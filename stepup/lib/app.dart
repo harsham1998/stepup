@@ -35,7 +35,7 @@ class _StepUpAppState extends ConsumerState<StepUpApp> {
       debugShowCheckedModeBanner: false,
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(context).copyWith(
-          textScaler: const TextScaler.linear(1.15),
+          textScaler: const TextScaler.linear(1.25),
         ),
         child: child!,
       ),
