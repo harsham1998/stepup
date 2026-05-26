@@ -22,3 +22,10 @@ final challengeProgressProvider = FutureProvider.family<ChallengeProgress?, Stri
   if (data['joined'] == false) return null;
   return ChallengeProgress.fromJson(data);
 });
+
+final challengeLeaderboardProvider =
+    FutureProvider.family<ChallengeLeaderboard, String>((ref, id) async {
+  final data = await ApiClient.instance.get('/challenges/$id/leaderboard')
+      as Map<String, dynamic>;
+  return ChallengeLeaderboard.fromJson(data);
+});
