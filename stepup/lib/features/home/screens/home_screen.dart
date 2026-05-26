@@ -7,7 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../challenges/providers/challenges_provider.dart';
 import '../../wallet/providers/wallet_provider.dart';
 import '../../profile/providers/profile_provider.dart';
+import '../../profile/providers/xp_level_provider.dart';
 import '../../league/providers/league_provider.dart';
+import '../../../shared/models/xp_level.dart';
 import '../../activities/providers/health_data_provider.dart';
 import '../../missions/providers/health_missions_provider.dart';
 import '../../community/providers/community_provider.dart';
@@ -60,11 +62,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final battlesAsync   = ref.watch(battlesProvider);
     final walletAsync    = ref.watch(walletBalanceProvider);
     final communityAsync = ref.watch(communityFeedProvider);
+    final xpLevelAsync = ref.watch(xpLevelProvider);
+    final xpLevel = xpLevelAsync.whenOrNull(data: (x) => x);
 
     final name = profileAsync.whenOrNull(
-      data: (p) { final n = (p as Map<String, dynamic>)['name'] as String? ?? ''; return n.isNotEmpty ? n.split(' ').first : 'You'; },
+      data: (p) { final n = (p as Map<String, dynamic>)['name'] as String? ?? ''; return n.isNotEmpty ? n.trim().split(' ').first : 'You'; },
     ) ?? 'You';
     final initial = name.isNotEmpty ? name[0].toUpperCase() : 'Y';
+    final profileAvatarUrl = profileAsync.whenOrNull(
+      data: (p) => (p as Map<String, dynamic>)['avatar_url'] as String?,
+    );
 
     final summary = summaryAsync.whenOrNull(data: (s) => s);
     final steps = summary?.steps ?? 0;
@@ -122,20 +129,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             // ── Header ────────────────────────────────────────────────
             Row(children: [
-              // Avatar
-              Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppTheme.amber.withValues(alpha: 0.9),
-                ),
-                child: Center(
-                  child: Text(initial,
-                    style: GoogleFonts.bigShouldersDisplay(
-                      fontSize: 22, fontWeight: FontWeight.w900,
-                      color: AppTheme.bg,
-                    )),
-                ),
+              // Avatar — photo if available, initial letter fallback
+              GestureDetector(
+                onTap: () => context.push('/profile'),
+                child: Builder(builder: (_) {
+                  final avatarUrl = ref.watch(avatarUploadProvider).url ?? profileAvatarUrl;
+                  return CircleAvatar(
+                    radius: 22,
+                    backgroundColor: AppTheme.amber.withValues(alpha: 0.9),
+                    backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                    child: avatarUrl == null
+                        ? Text(initial,
+                            style: GoogleFonts.bigShouldersDisplay(
+                              fontSize: 20, fontWeight: FontWeight.w900,
+                              color: AppTheme.bg))
+                        : null,
+                  );
+                }),
               ),
               const SizedBox(width: 12),
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -191,6 +201,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 kcal: kcal,
                 activeMins: activeMins,
                 bpm: bpm,
+                xpLevel: xpLevel,
               )
             else
               Container(
@@ -510,6 +521,7 @@ class _XpHeroCard extends StatefulWidget {
   final LeagueStatus league;
   final int streakDays, steps, kcal, activeMins, bpm;
   final double distKm;
+  final XpLevel? xpLevel;
 
   const _XpHeroCard({
     required this.league,
@@ -519,6 +531,7 @@ class _XpHeroCard extends StatefulWidget {
     required this.kcal,
     required this.activeMins,
     required this.bpm,
+    this.xpLevel,
   });
 
   @override
@@ -619,6 +632,16 @@ class _XpHeroCardState extends State<_XpHeroCard> {
                               )),
                           ]),
                         ),
+                        if (widget.xpLevel != null) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            'LV ${widget.xpLevel!.level} · ${widget.xpLevel!.title.toUpperCase()}',
+                            style: GoogleFonts.inter(
+                              fontSize: 9, fontWeight: FontWeight.w700,
+                              letterSpacing: 0.8, color: AppTheme.ink2,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

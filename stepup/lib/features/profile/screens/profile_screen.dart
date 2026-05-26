@@ -6,6 +6,10 @@ import '../../auth/providers/auth_provider.dart';
 import '../../league/providers/league_provider.dart';
 import '../../subscriptions/providers/subscription_provider.dart';
 import '../providers/profile_provider.dart';
+import '../providers/xp_level_provider.dart';
+import '../providers/reputation_provider.dart';
+import '../../../shared/models/xp_level.dart';
+import '../../../shared/models/reputation.dart';
 import '../../../core/theme.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -16,6 +20,8 @@ class ProfileScreen extends ConsumerWidget {
     final summaryAsync = ref.watch(profileSummaryProvider);
     final leagueAsync = ref.watch(leagueStatusProvider);
     final subAsync = ref.watch(mySubscriptionProvider);
+    final xpAsync = ref.watch(xpLevelProvider);
+    final repAsync = ref.watch(reputationProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
@@ -26,11 +32,15 @@ class ProfileScreen extends ConsumerWidget {
             summary: const {},
             leagueAsync: leagueAsync,
             subAsync: subAsync,
+            xpAsync: xpAsync,
+            repAsync: repAsync,
           ),
           data: (summary) => _ProfileBody(
             summary: summary,
             leagueAsync: leagueAsync,
             subAsync: subAsync,
+            xpAsync: xpAsync,
+            repAsync: repAsync,
           ),
         ),
       ),
@@ -46,11 +56,15 @@ class _ProfileBody extends ConsumerWidget {
   final Map<String, dynamic> summary;
   final AsyncValue<dynamic> leagueAsync;
   final AsyncValue<dynamic> subAsync;
+  final AsyncValue<XpLevel> xpAsync;
+  final AsyncValue<Reputation> repAsync;
 
   const _ProfileBody({
     required this.summary,
     required this.leagueAsync,
     required this.subAsync,
+    required this.xpAsync,
+    required this.repAsync,
   });
 
   @override
@@ -73,6 +87,9 @@ class _ProfileBody extends ConsumerWidget {
 
     final joinedLabel = _joinedLabel(createdAt);
     final city = (summary['city'] as String? ?? '').trim();
+
+    final realLevel = xpAsync.whenOrNull(data: (x) => x.level);
+    final repScore = repAsync.whenOrNull(data: (r) => r.score);
 
     // Streak ring: cap at 30-day cycle
     final streakProgress = (streakDays % 30) / 30.0;
@@ -117,6 +134,7 @@ class _ProfileBody extends ConsumerWidget {
                 xp: xp,
                 subAsync: subAsync,
                 leagueAsync: leagueAsync,
+                realLevel: realLevel,
               ),
               const SizedBox(height: 16),
 
@@ -142,8 +160,8 @@ class _ProfileBody extends ConsumerWidget {
                   iconBg: const Color(0xFF0F2A0F),
                   iconColor: AppTheme.voltLime,
                   label: 'Fitness Reputation',
-                  value: '$xp',
-                  valueSuffix: ' XP',
+                  value: repScore != null ? '$repScore' : '—',
+                  valueSuffix: repScore != null ? ' / 900' : '',
                   onTap: () => context.push('/profile/reputation'),
                 ),
                 _MenuRow(
@@ -151,7 +169,7 @@ class _ProfileBody extends ConsumerWidget {
                   iconBg: const Color(0xFF1A0F2A),
                   iconColor: const Color(0xFFA78BFA),
                   label: 'XP & Level',
-                  value: 'LV ${_xpToLevel(xp)}',
+                  value: realLevel != null ? 'LV $realLevel' : 'LV ${_xpToLevel(xp)}',
                   onTap: () => context.push('/profile/xp'),
                 ),
                 _MenuRow(
@@ -312,6 +330,7 @@ class _AvatarHeader extends ConsumerWidget {
   final int xp;
   final AsyncValue<dynamic> subAsync;
   final AsyncValue<dynamic> leagueAsync;
+  final int? realLevel;
 
   const _AvatarHeader({
     required this.name,
@@ -325,6 +344,7 @@ class _AvatarHeader extends ConsumerWidget {
     required this.xp,
     required this.subAsync,
     required this.leagueAsync,
+    this.realLevel,
   });
 
   @override
@@ -424,7 +444,7 @@ class _AvatarHeader extends ConsumerWidget {
                   },
                 ),
                 _Chip(label: _leagueLabel(league), color: AppTheme.amber),
-                _Chip(label: 'LV ${_xpToLevel(xp)}', color: const Color(0xFFA78BFA)),
+                _Chip(label: 'LV ${realLevel ?? _xpToLevel(xp)}', color: const Color(0xFFA78BFA)),
               ]),
             ],
           ),
