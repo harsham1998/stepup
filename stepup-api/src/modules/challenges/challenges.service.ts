@@ -1,8 +1,43 @@
 import { getSupabase } from '../../lib/supabase';
 import { getRedis } from '../../lib/redis';
-import { ChallengeRow } from '../../types';
+import { ChallengeRow, ChallengeMissionRow, MissionProgress } from '../../types';
 
 const _VALID_ACTIVITY_TYPES = new Set(['steps', 'walking', 'running', 'gym', 'outdoor', 'cycling']);
+
+function parsePrizeTiers(
+  prizePool: number,
+  prizeDist: { platform_fee_percent: number; tiers: Array<{ top_percent: number; share_percent: number }> },
+): Array<{ top_percent: number; label: string; coins: number }> {
+  const net = prizePool * (1 - prizeDist.platform_fee_percent / 100);
+  return prizeDist.tiers.map(t => ({
+    top_percent: t.top_percent,
+    label: t.top_percent <= 1 ? '1st place' : t.top_percent <= 3 ? 'Top 3' : `Top ${t.top_percent}%`,
+    coins: Math.floor((net * t.share_percent) / 100 / 100), // paise → coins (÷100)
+  }));
+}
+
+async function fetchChallengeMissions(challengeId: string): Promise<ChallengeMissionRow[]> {
+  const { data, error } = await getSupabase()
+    .from('challenge_missions')
+    .select(`
+      id, challenge_id, mission_id, bonus_xp,
+      missions ( id, title, description, type, target, unit, xp_reward )
+    `)
+    .eq('challenge_id', challengeId);
+  if (error) return [];
+  return (data ?? []).map((row: any) => ({
+    id: row.id,
+    challenge_id: row.challenge_id,
+    mission_id: row.mission_id,
+    bonus_xp: row.bonus_xp,
+    title: row.missions.title,
+    description: row.missions.description,
+    type: row.missions.type,
+    target: row.missions.target,
+    unit: row.missions.unit,
+    xp_reward: row.missions.xp_reward,
+  }));
+}
 
 // Derive UI cadence from challenge duration so the frontend tab filter works
 function _getCadence(startTime: string, endTime: string): string {
@@ -73,7 +108,13 @@ export async function getChallenge(id: string) {
     .single();
   if (error) throw new Error(error.message);
   const [enriched] = await withParticipantCount([data as ChallengeRow]);
-  return enriched;
+  const missions = await fetchChallengeMissions(id);
+  const prizeTiers = parsePrizeTiers(enriched.prize_pool, enriched.prize_distribution);
+  return {
+    ...enriched,
+    missions,
+    prize_tiers: prizeTiers,
+  };
 }
 
 export async function joinChallenge(userId: string, challengeId: string) {
@@ -114,13 +155,33 @@ export async function joinChallenge(userId: string, challengeId: string) {
     await debitWalletForChallenge(userId, challenge.entry_fee, challengeId, idempotencyKey);
   }
 
+  // Snapshot display info so leaderboard names don't break after profile edits
+  const { data: userRow } = await db
+    .from('users')
+    .select('name, avatar_url')
+    .eq('id', userId)
+    .maybeSingle();
+
   const { error: joinErr } = await db
     .from('challenge_participants')
     .upsert(
-      { challenge_id: challengeId, user_id: userId },
+      {
+        challenge_id: challengeId,
+        user_id: userId,
+        display_name: (userRow?.name as string | null) ?? 'Athlete',
+        avatar_url: (userRow?.avatar_url as string | null) ?? null,
+      },
       { onConflict: 'challenge_id,user_id', ignoreDuplicates: true },
     );
   if (joinErr) throw new Error(joinErr.message);
+
+  // Initialise XP row so leaderboard can sort by XP too
+  await db
+    .from('challenge_participant_xp')
+    .upsert(
+      { challenge_id: challengeId, user_id: userId, xp_earned: 0 },
+      { onConflict: 'challenge_id,user_id', ignoreDuplicates: true },
+    );
 
   try {
     const redis = getRedis();
@@ -199,6 +260,7 @@ export async function getChallengeProgress(userId: string, challengeId: string) 
 
   const isStepBased = ['steps', 'walking', 'running'].includes(activityType);
 
+  let stepMap: Record<string, number> = {};
   if (isStepBased) {
     const { data: stepRows } = await db
       .from('user_daily_steps')
@@ -208,7 +270,6 @@ export async function getChallengeProgress(userId: string, challengeId: string) 
       .lte('date', clampedEndDate)
       .order('date', { ascending: true });
 
-    const stepMap: Record<string, number> = {};
     for (const row of stepRows ?? []) stepMap[row.date] = row.total_steps;
     current = Object.values(stepMap).reduce((s, v) => s + v, 0);
 
@@ -261,6 +322,30 @@ export async function getChallengeProgress(userId: string, challengeId: string) 
     }
   } catch { /* Redis optional */ }
 
+  // --- Mission progress for linked challenge missions ---
+  const challengeMissions = await fetchChallengeMissions(challengeId);
+  const missionProgress: MissionProgress[] = [];
+
+  if (challengeMissions.length > 0) {
+    const todayDate2 = new Date().toISOString().slice(0, 10);
+    const todaySteps = isStepBased ? (stepMap[todayDate2] ?? 0) : 0;
+
+    for (const m of challengeMissions) {
+      const progressCurrent = m.type === 'daily' ? todaySteps : current;
+      const isCompleted = progressCurrent >= m.target;
+      missionProgress.push({
+        mission_id: m.mission_id,
+        title: m.title,
+        target: m.target,
+        current: progressCurrent,
+        unit: m.unit,
+        completed: isCompleted,
+        xp_earned: isCompleted ? m.xp_reward + m.bonus_xp : 0,
+        total_xp: m.xp_reward + m.bonus_xp,
+      });
+    }
+  }
+
   return {
     joined: true,
     current,
@@ -276,5 +361,6 @@ export async function getChallengeProgress(userId: string, challengeId: string) 
     totalParticipants,
     activityType,
     prizePool: challenge.prize_pool,
+    mission_progress: missionProgress,
   };
 }
