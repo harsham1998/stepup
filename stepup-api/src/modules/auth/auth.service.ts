@@ -13,9 +13,6 @@ function twilioClient() {
   return { auth, serviceSid };
 }
 
-// Derives a stable server-only password from the user ID.
-// Never exposed to the client — used purely to create Supabase sessions
-// for phone-only users without a native admin.createSession method.
 function derivedPassword(userId: string): string {
   const secret = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   return crypto.createHmac('sha256', secret).update(userId).digest('hex');
@@ -52,7 +49,6 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
 
   const supabase = getSupabase();
 
-  // Create user if new, otherwise find existing user by phone
   const { data: createData } = await supabase.auth.admin.createUser({
     phone: `+91${phone}`,
     phone_confirm: true,
@@ -61,7 +57,6 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
   let userId = createData?.user?.id;
 
   if (!userId) {
-    // Supabase strips the leading '+' when storing phone numbers
     const normalizedPhone = `91${phone}`;
     let page = 1;
     while (true) {
@@ -77,8 +72,6 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
     if (!userId) throw new Error('User not found after OTP verification');
   }
 
-  // Use a synthetic email + server-derived password to create a Supabase session.
-  // This avoids requiring "Phone logins" to be enabled in Supabase dashboard.
   const syntheticEmail = `phone_${userId}@auth.stepup.app`;
   const password = derivedPassword(userId);
   await supabase.auth.admin.updateUserById(userId, {
@@ -87,7 +80,6 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
     password,
   });
 
-  // Exchange email + password for a Supabase session
   const tokenRes = await fetch(
     `${process.env.SUPABASE_URL}/auth/v1/token?grant_type=password`,
     {
@@ -105,12 +97,17 @@ export async function verifyOtp({ phone, otp }: { phone: string; otp: string }) 
     throw new Error(tokenData.error_description ?? tokenData.msg ?? 'Failed to create session');
   }
 
-  // Check if user has completed onboarding
-  const { data: profile } = await supabase.from('users').select('id').eq('id', userId).maybeSingle();
+  // Check onboarding completion status
+  const { data: profile } = await supabase
+    .from('users')
+    .select('id, onboarding_completed')
+    .eq('id', userId)
+    .maybeSingle();
 
   return {
     userId,
     isNewUser: !profile,
+    onboardingCompleted: profile?.onboarding_completed ?? false,
     session: {
       access_token: tokenData.access_token as string,
       refresh_token: tokenData.refresh_token as string,
@@ -128,13 +125,13 @@ export async function getProfile(userId: string) {
   return data;
 }
 
+// Full profile summary for the profile screen
 export async function getProfileSummary(userId: string) {
   const db = getSupabase();
   const today = new Date().toISOString().slice(0, 10);
 
-  // Monday of current week
   const now = new Date();
-  const dayOfWeek = now.getDay(); // 0=Sun
+  const dayOfWeek = now.getDay();
   const diffToMonday = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
   const monday = new Date(now);
   monday.setDate(now.getDate() + diffToMonday);
@@ -160,7 +157,6 @@ export async function getProfileSummary(userId: string) {
   const totalMissions = missionsRes.data?.length ?? 0;
   const completedMissions = (progressRes.data ?? []).filter(m => m.completed).length;
 
-  // Build a full Mon–Sun array (today's ring is partial)
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
@@ -179,27 +175,67 @@ export async function getProfileSummary(userId: string) {
   };
 }
 
+// All editable fields + phone/email from auth for the edit screen
+export async function getEditProfile(userId: string) {
+  const supabase = getSupabase();
+  const [profileRes, authUserRes] = await Promise.all([
+    supabase.from('users').select('*').eq('id', userId).maybeSingle(),
+    supabase.auth.admin.getUserById(userId),
+  ]);
+  if (profileRes.error) throw new Error(profileRes.error.message);
+
+  const authUser = authUserRes.data.user;
+  const rawEmail = authUser?.email ?? null;
+  // Synthetic emails created for phone-only users are not real emails
+  const email = rawEmail && !rawEmail.startsWith('phone_') ? rawEmail : null;
+  const phone = authUser?.phone ? authUser.phone.replace(/^\+91/, '') : (profileRes.data?.phone ?? null);
+
+  return {
+    ...profileRes.data,
+    phone,
+    email,
+  };
+}
+
+// Onboarding upsert — creates the row on first save
 export async function upsertProfile(userId: string, profile: {
   name: string;
-  city: string;
+  city?: string;
   language: string;
   goal_tier: string;
   avatar_url?: string;
+  onboarding_completed?: boolean;
 }) {
   const { data, error } = await getSupabase()
     .from('users')
-    .upsert({ id: userId, ...profile }, { onConflict: 'id' })
+    .upsert(
+      { id: userId, onboarding_completed: true, ...profile },
+      { onConflict: 'id' },
+    )
     .select()
     .single();
   if (error) throw new Error(error.message);
   return data;
 }
 
+// Partial update for the profile edit screen
+export async function updateProfile(userId: string, data: Record<string, unknown>) {
+  // Ensure the user row exists before updating (handles edge cases where
+  // a user reaches the edit screen without having completed onboarding)
+  const { data: updated, error } = await getSupabase()
+    .from('users')
+    .upsert({ id: userId, ...data }, { onConflict: 'id' })
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return updated;
+}
+
 export async function updateAvatar(userId: string, avatarUrl: string) {
+  // upsert so the call works even if the users row doesn't exist yet
   const { data, error } = await getSupabase()
     .from('users')
-    .update({ avatar_url: avatarUrl })
-    .eq('id', userId)
+    .upsert({ id: userId, avatar_url: avatarUrl }, { onConflict: 'id' })
     .select('avatar_url')
     .single();
   if (error) throw new Error(error.message);

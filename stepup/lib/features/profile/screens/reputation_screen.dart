@@ -61,7 +61,7 @@ class ReputationScreen extends StatelessWidget {
                       style: AppTheme.bigNum(84, color: AppTheme.voltLime)),
                   const SizedBox(height: 8),
                   Text('TOP 8% NATIONALLY',
-                      style: AppTheme.label(11, color: AppTheme.ink3)
+                      style: AppTheme.label(11, color: AppTheme.ink2)
                           .copyWith(letterSpacing: 1.5)),
                   const SizedBox(height: 6),
                   Row(
@@ -80,7 +80,7 @@ class ReputationScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               Text('BREAKDOWN',
-                  style: AppTheme.label(10, color: AppTheme.ink3).copyWith(
+                  style: AppTheme.label(10, color: AppTheme.ink2).copyWith(
                       letterSpacing: 1.2, fontWeight: FontWeight.w800)),
               const SizedBox(height: 12),
 
@@ -164,7 +164,7 @@ class _StatBox extends StatelessWidget {
         const SizedBox(height: 6),
         Text(value, style: AppTheme.bigNum(22)),
         const SizedBox(height: 2),
-        Text(label, style: AppTheme.label(10, color: AppTheme.ink3)),
+        Text(label, style: AppTheme.label(10, color: AppTheme.ink2)),
       ],
     ),
   );

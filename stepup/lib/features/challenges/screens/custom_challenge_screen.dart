@@ -89,17 +89,23 @@ class _CustomChallengeScreenState
                   const EdgeInsets.fromLTRB(20, 16, 20, 40),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  Row(children: [
-                    IconButton(
-                      onPressed: () => context.pop(),
-                      icon: const Icon(
-                          Icons.arrow_back_rounded,
-                          color: Colors.white),
-                    ),
-                    Text('Create Challenge',
-                        style: AppTheme.bigNum(24)),
-                  ]),
-                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () => context.pop(),
+                        child: Text('← Cancel',
+                            style: AppTheme.label(13, color: AppTheme.ink2)),
+                      ),
+                      Text('1 / 2',
+                          style: AppTheme.label(11, color: AppTheme.ink2)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text('CREATE A', style: AppTheme.bigNum(28)),
+                  Text('CHALLENGE',
+                      style: AppTheme.bigNum(28, color: AppTheme.voltLime)),
+                  const SizedBox(height: 8),
 
                   _Label('Challenge Name'),
                   TextField(
@@ -141,7 +147,7 @@ class _CustomChallengeScreenState
                                     decoration: BoxDecoration(
                                       color: _difficulty == d
                                           ? AppTheme.voltLime
-                                              .withOpacity(0.1)
+                                              .withValues(alpha: 0.1)
                                           : AppTheme.surface,
                                       borderRadius:
                                           BorderRadius.circular(12),
@@ -205,10 +211,10 @@ class _CustomChallengeScreenState
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: AppTheme.amber.withOpacity(0.08),
+                      color: AppTheme.amber.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: AppTheme.amber.withOpacity(0.2)),
+                          color: AppTheme.amber.withValues(alpha: 0.2)),
                     ),
                     child: Row(
                       mainAxisAlignment:
@@ -224,20 +230,27 @@ class _CustomChallengeScreenState
                   ),
                   const SizedBox(height: 20),
 
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _loading ? null : _create,
-                      child: _loading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppTheme.bg),
-                            )
-                          : const Text(
-                              'Next — Invite Friends'),
+                  GestureDetector(
+                    onTap: _loading ? null : _create,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: AppTheme.amber.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: AppTheme.amber.withValues(alpha: 0.4)),
+                      ),
+                      child: Center(
+                        child: _loading
+                            ? const SizedBox(
+                                width: 20, height: 20,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: AppTheme.amber))
+                            : Text('Next — Invite friends →',
+                                style: AppTheme.label(14, color: AppTheme.amber)
+                                    .copyWith(fontWeight: FontWeight.w700)),
+                      ),
                     ),
                   ),
                 ]),
@@ -259,7 +272,7 @@ class _Label extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 8),
         child: Text(
           text.toUpperCase(),
-          style: AppTheme.label(10, color: AppTheme.ink3).copyWith(
+          style: AppTheme.label(10, color: AppTheme.ink2).copyWith(
               letterSpacing: 1.0, fontWeight: FontWeight.w700),
         ),
       );
@@ -283,7 +296,7 @@ class _Chip extends StatelessWidget {
               horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
             color: selected
-                ? AppTheme.voltLime.withOpacity(0.1)
+                ? AppTheme.voltLime.withValues(alpha: 0.1)
                 : AppTheme.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(

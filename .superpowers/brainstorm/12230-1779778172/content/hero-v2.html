@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero Designs v2 — Elevated</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:ital,wght@0,700;0,900;1,900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  :root {
+    --volt: #D4FF3A;
+    --volt-dim: rgba(212,255,58,0.12);
+    --volt-glow: rgba(212,255,58,0.25);
+    --amber: #FFB547;
+    --amber-dim: rgba(255,181,71,0.12);
+    --amber-glow: rgba(255,181,71,0.25);
+    --bg: #050510;
+    --surface: #0D0D1A;
+    --surface2: #13131F;
+    --ink2: #A3A3B3;
+    --ink3: #4B5563;
+    --border: rgba(255,255,255,0.07);
+    --plat: #94A3B8;
+    --diamond: #67E8F9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #07071a;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    padding: 28px 16px 80px;
+  }
+
+  h1 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 28px; color: white;
+    text-align: center; margin-bottom: 4px;
+  }
+  .subtitle { color: var(--ink2); font-size: 13px; text-align: center; margin-bottom: 40px; }
+
+  .designs { display: flex; flex-direction: column; gap: 48px; max-width: 480px; margin: 0 auto; }
+
+  .design-wrap {
+    cursor: pointer;
+    border-radius: 22px;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    overflow: hidden;
+    background: #0a0a18;
+  }
+  .design-wrap:hover { transform: translateY(-3px); border-color: var(--volt-glow); box-shadow: 0 8px 40px rgba(212,255,58,0.08); }
+  .design-wrap.selected { border-color: var(--volt); box-shadow: 0 0 0 1px var(--volt), 0 8px 40px rgba(212,255,58,0.15); }
+  .design-wrap.selected .tag { background: var(--volt); color: #050510; }
+
+  .tag {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 14px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 11px; letter-spacing: 1px;
+    color: var(--ink2); background: rgba(255,255,255,0.03);
+    transition: all 0.2s;
+  }
+  .tag .check { display: none; }
+  .design-wrap.selected .tag .check { display: inline; }
+
+  /* ── Shared stat row ── */
+  .stat-row {
+    display: flex;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+  .stat-cell {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; padding: 11px 4px; gap: 3px;
+  }
+  .stat-cell + .stat-cell { border-left: 1px solid var(--border); }
+  .sv {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 17px; color: white; line-height: 1;
+  }
+  .sl { font-size: 8px; font-weight: 700; letter-spacing: 0.6px; color: var(--ink2); text-transform: uppercase; }
+  .si { font-size: 13px; line-height: 1; }
+
+  /* prog util */
+  .pt { background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+  .pf { height: 100%; border-radius: 99px; }
+  .pf-volt { background: var(--volt); }
+  .pf-amber { background: var(--amber); }
+  .pf-grad { background: linear-gradient(90deg, var(--amber) 0%, var(--volt) 100%); }
+  .pf-diamond { background: linear-gradient(90deg, #67E8F9, #A5F3FC); }
+
+  /* ════════════════════════════════════════════════════════════
+     D4-V2: SPLIT FOCUS — ELEVATED
+     Two panels separated by a glowing volt divider.
+     Left = XP with animated glow number. Right = tier with
+     season progression grid and rank chip.
+     ════════════════════════════════════════════════════════════ */
+  .d4v2 { overflow: hidden; }
+
+  .d4v2 .card-top {
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    background: var(--surface);
+    padding: 18px 16px 16px;
+    gap: 0;
+    position: relative;
+  }
+
+  .d4v2 .card-top::before {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,255,58,0.15), transparent);
+  }
+
+  .d4v2 .glow-divider {
+    width: 1.5px;
+    background: linear-gradient(180deg, transparent 0%, var(--volt) 40%, var(--volt) 60%, transparent 100%);
+    opacity: 0.35;
+    margin: 0 4px;
+  }
+
+  .d4v2 .left-panel { padding-right: 14px; }
+  .d4v2 .right-panel { padding-left: 14px; }
+
+  .d4v2 .panel-eyebrow {
+    font-size: 9px; font-weight: 700; letter-spacing: 1.2px;
+    color: var(--ink3); text-transform: uppercase; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .d4v2 .panel-eyebrow .dot {
+    width: 4px; height: 4px; border-radius: 50%; background: var(--volt); flex-shrink: 0;
+  }
+  .d4v2 .panel-eyebrow .dot-amber { background: var(--amber); }
+
+  .d4v2 .xp-num-giant {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 50px; color: var(--volt);
+    line-height: 0.85; letter-spacing: -1px;
+    text-shadow: 0 0 24px rgba(212,255,58,0.2);
+  }
+  .d4v2 .xp-unit { font-size: 13px; color: rgba(212,255,58,0.55); font-weight: 700; margin-top: 4px; letter-spacing: 1px; }
+
+  .d4v2 .streak-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 99px;
+    background: var(--volt-dim); border: 1px solid rgba(212,255,58,0.2);
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 10px; color: var(--volt);
+    margin-top: 10px;
+  }
+
+  .d4v2 .tier-name {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-style: italic; font-size: 32px;
+    background: linear-gradient(135deg, var(--amber), #FFD580, var(--amber));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+
+  .d4v2 .season-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 6px;
+    background: var(--amber-dim); border: 1px solid rgba(255,181,71,0.2);
+    font-size: 9px; font-weight: 700; color: var(--amber);
+    margin-top: 6px; letter-spacing: 0.5px;
+  }
+
+  .d4v2 .rank-row {
+    display: flex; align-items: center; gap: 5px; margin-top: 8px;
+  }
+  .d4v2 .rank-num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 20px; color: white;
+  }
+  .d4v2 .rank-label { font-size: 10px; color: var(--ink2); }
+
+  .d4v2 .prog-footer {
+    padding: 12px 16px 14px;
+    background: var(--surface);
+  }
+  .d4v2 .prog-meta {
+    display: flex; justify-content: space-between;
+    font-size: 10px; margin-bottom: 6px;
+  }
+  .d4v2 .prog-meta .from { color: var(--volt); font-weight: 700; }
+  .d4v2 .prog-meta .to { color: var(--ink2); }
+  .d4v2 .prog-meta .pct {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 12px; color: var(--amber);
+  }
+  .d4v2 .next-hint {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 7px; font-size: 10px; color: var(--ink2);
+  }
+  .d4v2 .arrow-icon {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--volt-dim); border: 1px solid rgba(212,255,58,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: var(--volt); font-weight: 900;
+  }
+
+
+  /* ════════════════════════════════════════════════════════════
+     D5-V2: GRADIENT BANNER — ELEVATED
+     Full-bleed. Textured dark background with volt particle dots,
+     oversized XP with volt glow, tier badge as a proper pill with
+     gradient border, segmented season progress track, coins hint.
+     ════════════════════════════════════════════════════════════ */
+  .d5v2 { overflow: hidden; }
+
+  .d5v2 .hero-body {
+    position: relative; overflow: hidden;
+    padding: 18px 18px 0;
+    background: linear-gradient(160deg, #0f0f28 0%, #09091e 50%, var(--bg) 100%);
+  }
+
+  /* subtle grid pattern */
+  .d5v2 .hero-body::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(212,255,58,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,255,58,0.03) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+
+  .d5v2 .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; position: relative; z-index: 1; }
+
+  .d5v2 .streak-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 11px; border-radius: 99px;
+    background: var(--volt); font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 11px; color: var(--bg);
+  }
+
+  .d5v2 .season-flag {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    color: var(--ink2); text-transform: uppercase;
+  }
+
+  .d5v2 .main-block { position: relative; z-index: 1; margin-bottom: 12px; }
+
+  .d5v2 .xp-label-small {
+    font-size: 9px; font-weight: 700; letter-spacing: 2px;
+    color: rgba(212,255,58,0.5); text-transform: uppercase; margin-bottom: 2px;
+  }
+
+  .d5v2 .xp-huge {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 68px; line-height: 0.85;
+    color: var(--volt);
+    text-shadow: 0 0 40px rgba(212,255,58,0.3), 0 0 80px rgba(212,255,58,0.1);
+    letter-spacing: -2px;
+  }
+
+  .d5v2 .tier-row {
+    display: flex; align-items: center; gap: 10px; margin-top: 10px;
+  }
+
+  /* gradient border pill trick */
+  .d5v2 .tier-pill-outer {
+    padding: 1.5px; border-radius: 99px;
+    background: linear-gradient(90deg, var(--amber), var(--volt));
+  }
+  .d5v2 .tier-pill-inner {
+    padding: 4px 14px; border-radius: 99px;
+    background: var(--bg);
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 13px;
+    background: linear-gradient(90deg, rgba(255,181,71,0.08), rgba(212,255,58,0.06));
+  }
+  .d5v2 .tier-pill-inner span {
+    background: linear-gradient(90deg, var(--amber), var(--volt));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    font-size: 13px; font-weight: 900;
+  }
+
+  .d5v2 .rank-small { font-size: 11px; color: var(--ink2); }
+
+  .d5v2 .prog-section { position: relative; z-index: 1; margin-bottom: 0; }
+
+  .d5v2 .prog-labels {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 5px; font-size: 10px;
+  }
+  .d5v2 .prog-labels .from { color: var(--volt); font-weight: 700; }
+  .d5v2 .prog-labels .to { color: var(--ink2); }
+  .d5v2 .prog-labels .remain { color: var(--amber); font-weight: 700; }
+
+  .d5v2 .prog-bar-wrap { position: relative; height: 8px; }
+  .d5v2 .prog-bar-wrap .pt { height: 8px; }
+  .d5v2 .prog-bar-wrap .glow-dot {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    left: calc(63% - 4px);
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--volt);
+    box-shadow: 0 0 8px 3px rgba(212,255,58,0.5);
+  }
+
+  .d5v2 .tier-track {
+    display: flex; gap: 3px; margin-top: 10px; margin-bottom: 16px;
+  }
+  .d5v2 .tt-seg {
+    flex: 1; height: 3px; border-radius: 2px;
+    position: relative; overflow: hidden;
+  }
+  .d5v2 .tt-seg.done { background: var(--volt); }
+  .d5v2 .tt-seg.active { background: linear-gradient(90deg, var(--amber), var(--volt)); }
+  .d5v2 .tt-seg.lock { background: rgba(255,255,255,0.07); }
+  .d5v2 .tt-labels {
+    display: flex; margin-bottom: 4px;
+  }
+  .d5v2 .tt-labels span {
+    flex: 1; font-size: 7px; font-weight: 700; letter-spacing: 0.5px;
+    color: var(--ink3); text-transform: uppercase; text-align: center;
+  }
+  .d5v2 .tt-labels span.done { color: var(--volt); }
+  .d5v2 .tt-labels span.active { color: var(--amber); }
+
+
+  /* ════════════════════════════════════════════════════════════
+     D8-V2: SEASON PASS — ELEVATED
+     Battle-pass feel. Left = tier stamp with perforated divider.
+     Right = XP + progress. Ghost tier letter oversized. Reward
+     nodes above the XP bar showing what unlocks next.
+     ════════════════════════════════════════════════════════════ */
+  .d8v2 { overflow: hidden; }
+
+  .d8v2 .card-body {
+    background: var(--surface);
+    position: relative; overflow: hidden;
+  }
+
+  .d8v2 .ghost-bg {
+    position: absolute; right: -16px; top: -16px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-style: italic; font-size: 120px;
+    line-height: 1; color: rgba(255,181,71,0.04);
+    pointer-events: none; user-select: none;
+    letter-spacing: -4px;
+  }
+
+  /* perforated left edge */
+  .d8v2 .pass-layout {
+    display: grid; grid-template-columns: auto 1px 1fr;
+    min-height: 140px;
+  }
+
+  .d8v2 .pass-left {
+    width: 82px; padding: 16px 12px;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 6px;
+    background: linear-gradient(180deg, rgba(255,181,71,0.08) 0%, rgba(255,181,71,0.03) 100%);
+    position: relative;
+  }
+
+  /* perforated line using radial-gradient circles */
+  .d8v2 .perf-line {
+    width: 1px; background: none;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.15) 1.5px, transparent 1.5px);
+    background-size: 1px 10px;
+    background-repeat: repeat-y;
+  }
+
+  .d8v2 .pass-right {
+    padding: 16px 16px 14px 16px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+
+  .d8v2 .tier-letter {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 52px; line-height: 1;
+    background: linear-gradient(160deg, #FFD580, var(--amber), #CC8800);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .d8v2 .tier-word {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 10px; letter-spacing: 2px;
+    color: rgba(255,181,71,0.5); text-transform: uppercase;
+  }
+  .d8v2 .season-word {
+    font-size: 9px; font-weight: 700; letter-spacing: 1px;
+    color: var(--ink3); text-transform: uppercase; margin-top: 2px;
+  }
+  .d8v2 .streak-vert {
+    margin-top: 6px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px;
+  }
+  .d8v2 .streak-num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 20px; color: var(--volt); line-height: 1;
+  }
+  .d8v2 .streak-lbl {
+    font-size: 8px; font-weight: 700; letter-spacing: 0.5px;
+    color: rgba(212,255,58,0.5); text-transform: uppercase;
+  }
+
+  .d8v2 .xp-eyebrow {
+    font-size: 9px; font-weight: 700; letter-spacing: 1px;
+    color: var(--ink3); text-transform: uppercase; margin-bottom: 4px;
+  }
+  .d8v2 .xp-main {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 42px; line-height: 0.9; color: var(--volt);
+    text-shadow: 0 0 20px rgba(212,255,58,0.2);
+  }
+  .d8v2 .xp-sub { font-size: 11px; color: var(--ink2); margin-top: 2px; }
+
+  .d8v2 .reward-nodes {
+    display: flex; align-items: center; gap: 0; margin: 12px 0 6px;
+  }
+  .d8v2 .r-node {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    flex: 1;
+  }
+  .d8v2 .r-dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+  }
+  .d8v2 .r-dot.done { background: rgba(212,255,58,0.15); border: 2px solid var(--volt); }
+  .d8v2 .r-dot.now { background: rgba(255,181,71,0.15); border: 2px solid var(--amber); box-shadow: 0 0 8px rgba(255,181,71,0.3); }
+  .d8v2 .r-dot.locked { background: rgba(255,255,255,0.04); border: 1.5px dashed var(--ink3); }
+  .d8v2 .r-lbl { font-size: 7px; font-weight: 700; color: var(--ink3); letter-spacing: 0.3px; }
+  .d8v2 .r-lbl.done { color: rgba(212,255,58,0.6); }
+  .d8v2 .r-lbl.now { color: var(--amber); }
+  .d8v2 .r-connector {
+    flex: 1; height: 1.5px; background: var(--border); margin-top: -11px; position: relative; top: 0;
+  }
+  .d8v2 .r-connector.done { background: var(--volt); opacity: 0.4; }
+
+  .d8v2 .prog-bottom { padding: 0 16px 14px; background: var(--surface); }
+  .d8v2 .prog-nums { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 5px; }
+  .d8v2 .prog-nums .cur { color: var(--volt); font-weight: 700; }
+  .d8v2 .prog-nums .next { color: var(--ink2); }
+  .d8v2 .prog-nums .diff { color: var(--amber); font-weight: 700; }
+
+
+  /* ════════════════════════════════════════════════════════════
+     D10-V2: DARK ENERGY — ELEVATED
+     Full cinematic treatment. Deep layered gradients + volt glow
+     orbs. XP in massive display font with letter-spacing.
+     Tier as a metallic gradient. Animated-feel progress with
+     glowing head. XP-earned-today callout strip at bottom.
+     ════════════════════════════════════════════════════════════ */
+  .d10v2 { overflow: hidden; }
+
+  .d10v2 .card-body {
+    position: relative; overflow: hidden;
+    padding: 0;
+    background: #050510;
+  }
+
+  /* multi-layer bg */
+  .d10v2 .bg-layer {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 80% at 100% 0%, rgba(255,181,71,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 60% at 0% 100%, rgba(212,255,58,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(50,30,100,0.3) 0%, transparent 60%),
+      linear-gradient(160deg, #0e0e26 0%, #080816 40%, #050510 100%);
+  }
+
+  /* scanline texture */
+  .d10v2 .scanlines {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.025;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,1) 2px, rgba(255,255,255,1) 3px);
+  }
+
+  .d10v2 .content { position: relative; z-index: 1; padding: 18px 18px 0; }
+
+  .d10v2 .top-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+
+  .d10v2 .left-col { }
+
+  .d10v2 .xp-eyebrow {
+    font-size: 9px; font-weight: 700; letter-spacing: 2.5px;
+    color: rgba(212,255,58,0.4); text-transform: uppercase; margin-bottom: 4px;
+  }
+  .d10v2 .xp-massive {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 72px; line-height: 0.82;
+    color: var(--volt); letter-spacing: -3px;
+    text-shadow:
+      0 0 20px rgba(212,255,58,0.4),
+      0 0 60px rgba(212,255,58,0.15),
+      0 2px 0 rgba(0,0,0,0.5);
+  }
+  .d10v2 .xp-season {
+    font-size: 11px; color: rgba(212,255,58,0.4); font-weight: 600; margin-top: 4px; letter-spacing: 0.5px;
+  }
+
+  .d10v2 .right-col { text-align: right; padding-top: 2px; }
+
+  .d10v2 .season-tag {
+    font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--ink3); text-transform: uppercase; margin-bottom: 6px;
+  }
+
+  .d10v2 .tier-mega {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-style: italic; font-size: 28px; line-height: 0.9;
+    background: linear-gradient(135deg, #FFE082 0%, var(--amber) 40%, #CC7700 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-shadow: none;
+  }
+  .d10v2 .rank-line { font-size: 10px; color: var(--ink2); margin-top: 5px; }
+  .d10v2 .streak-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 99px; margin-top: 6px;
+    background: var(--volt); font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 10px; color: var(--bg);
+  }
+
+  .d10v2 .divider-line {
+    height: 1px; margin: 12px 0;
+    background: linear-gradient(90deg, transparent, rgba(212,255,58,0.15), rgba(255,181,71,0.15), transparent);
+  }
+
+  .d10v2 .next-block { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .d10v2 .next-arrow {
+    width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+    background: linear-gradient(135deg, rgba(212,255,58,0.15), rgba(212,255,58,0.05));
+    border: 1px solid rgba(212,255,58,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 900; color: var(--volt);
+  }
+  .d10v2 .next-text { flex: 1; }
+  .d10v2 .next-tier-name {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 16px; color: var(--plat);
+  }
+  .d10v2 .next-xp { font-size: 10px; color: var(--ink2); }
+  .d10v2 .next-pct {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 20px; color: var(--volt);
+  }
+
+  .d10v2 .prog-wrap { position: relative; margin-bottom: 0; }
+  .d10v2 .prog-bg { height: 8px; background: rgba(255,255,255,0.05); border-radius: 99px; overflow: visible; position: relative; }
+  .d10v2 .prog-inner {
+    height: 100%; width: 63%; border-radius: 99px;
+    background: linear-gradient(90deg, rgba(212,255,58,0.6), var(--volt));
+    position: relative;
+  }
+  .d10v2 .prog-inner::after {
+    content: '';
+    position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--volt);
+    box-shadow: 0 0 10px 4px rgba(212,255,58,0.5);
+  }
+
+  .d10v2 .today-strip {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 18px 14px;
+    position: relative; z-index: 1;
+  }
+  .d10v2 .today-label { font-size: 10px; color: var(--ink2); }
+  .d10v2 .today-val {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 18px;
+    background: linear-gradient(90deg, var(--amber), var(--volt));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  /* ── Selection bar ── */
+  #sel-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(7,7,26,0.96); backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(212,255,58,0.15);
+    padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; color: var(--ink2); z-index: 200;
+  }
+  #sel-bar strong { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 16px; color: var(--volt); }
+</style>
+</head>
+<body>
+
+<h1>Hero Designs — Level 2</h1>
+<p class="subtitle">Elevated versions of your selections · Click to choose</p>
+
+<div class="designs">
+
+  <!-- ══════════════════════════════════════════════
+       D4-V2: SPLIT FOCUS — ELEVATED
+       ══════════════════════════════════════════════ -->
+  <div class="design-wrap" data-choice="4" onclick="toggle(this)">
+    <div class="tag">DESIGN 4 — SPLIT FOCUS (ELEVATED) <span class="check">✓</span></div>
+    <div class="d4v2">
+      <div class="card-top">
+        <!-- LEFT: XP -->
+        <div class="left-panel">
+          <div class="panel-eyebrow"><div class="dot"></div>SEASON 3 XP</div>
+          <div class="xp-num-giant">2,840</div>
+          <div class="xp-unit">XP EARNED</div>
+          <div class="streak-chip">⭐ 7 DAY STREAK</div>
+        </div>
+        <!-- Glowing divider -->
+        <div class="glow-divider"></div>
+        <!-- RIGHT: Tier -->
+        <div class="right-panel">
+          <div class="panel-eyebrow"><div class="dot dot-amber"></div>CURRENT TIER</div>
+          <div class="tier-name">GOLD</div>
+          <div class="season-chip">SEASON 3</div>
+          <div class="rank-row">
+            <div class="rank-num">#12</div>
+            <div class="rank-label">of 340 members</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress footer -->
+      <div class="prog-footer">
+        <div class="prog-meta">
+          <span class="from">2,840 XP</span>
+          <span class="pct">63%</span>
+          <span class="to">PLATINUM · 3,000</span>
+        </div>
+        <div class="pt" style="height:6px">
+          <div class="pf pf-grad" style="width:63%"></div>
+        </div>
+        <div class="next-hint">
+          <div class="arrow-icon">→</div>
+          <span>160 XP away from <strong style="color:var(--plat)">PLATINUM TIER</strong></span>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-cell"><div class="si">👟</div><div class="sv">287</div><div class="sl">STEPS</div></div>
+        <div class="stat-cell"><div class="si">⚡</div><div class="sv">0.2</div><div class="sl">KM</div></div>
+        <div class="stat-cell"><div class="si">🔥</div><div class="sv">138</div><div class="sl">KCAL</div></div>
+        <div class="stat-cell"><div class="si">⏱</div><div class="sv">0</div><div class="sl">MIN</div></div>
+        <div class="stat-cell"><div class="si">❤️</div><div class="sv">71</div><div class="sl">BPM</div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       D5-V2: GRADIENT BANNER — ELEVATED
+       ══════════════════════════════════════════════ -->
+  <div class="design-wrap" data-choice="5" onclick="toggle(this)">
+    <div class="tag">DESIGN 5 — GRADIENT BANNER (ELEVATED) <span class="check">✓</span></div>
+    <div class="d5v2">
+      <div class="hero-body">
+        <div class="top-bar">
+          <div class="streak-pill">⭐ 7 DAY STREAK</div>
+          <div class="season-flag">SEASON 3 · ACTIVE</div>
+        </div>
+
+        <div class="main-block">
+          <div class="xp-label-small">XP THIS SEASON</div>
+          <div class="xp-huge">2,840</div>
+          <div class="tier-row">
+            <div class="tier-pill-outer">
+              <div class="tier-pill-inner"><span>GOLD TIER</span></div>
+            </div>
+            <div class="rank-small">Rank #12 · 340 members</div>
+          </div>
+        </div>
+
+        <div class="prog-section">
+          <div class="prog-labels">
+            <span class="from">2,840</span>
+            <span class="remain">−160 XP</span>
+            <span class="to">PLATINUM 3,000</span>
+          </div>
+          <div class="prog-bar-wrap">
+            <div class="pt" style="height:8px">
+              <div class="pf pf-grad" style="width:63%"></div>
+            </div>
+            <div class="glow-dot"></div>
+          </div>
+
+          <div class="tt-labels">
+            <span class="done">BRNZ</span>
+            <span class="done">SLVR</span>
+            <span class="active">GOLD</span>
+            <span>PLAT</span>
+            <span>DMND</span>
+          </div>
+          <div class="tier-track">
+            <div class="tt-seg done"></div>
+            <div class="tt-seg done"></div>
+            <div class="tt-seg active"></div>
+            <div class="tt-seg lock"></div>
+            <div class="tt-seg lock"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-cell"><div class="si">👟</div><div class="sv">287</div><div class="sl">STEPS</div></div>
+        <div class="stat-cell"><div class="si">⚡</div><div class="sv">0.2</div><div class="sl">KM</div></div>
+        <div class="stat-cell"><div class="si">🔥</div><div class="sv">138</div><div class="sl">KCAL</div></div>
+        <div class="stat-cell"><div class="si">⏱</div><div class="sv">0</div><div class="sl">MIN</div></div>
+        <div class="stat-cell"><div class="si">❤️</div><div class="sv">71</div><div class="sl">BPM</div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       D8-V2: SEASON PASS — ELEVATED
+       ══════════════════════════════════════════════ -->
+  <div class="design-wrap" data-choice="8" onclick="toggle(this)">
+    <div class="tag">DESIGN 8 — SEASON PASS (ELEVATED) <span class="check">✓</span></div>
+    <div class="d8v2">
+      <div class="card-body">
+        <div class="ghost-bg">GOLD</div>
+        <div class="pass-layout">
+
+          <!-- Tier stub (left) -->
+          <div class="pass-left">
+            <div class="tier-letter">G</div>
+            <div class="tier-word">GOLD</div>
+            <div class="season-word">S3</div>
+            <div class="streak-vert">
+              <div class="streak-num">7</div>
+              <div class="streak-lbl">DAY STK</div>
+            </div>
+          </div>
+
+          <!-- Perforated divider -->
+          <div class="perf-line"></div>
+
+          <!-- XP + progress (right) -->
+          <div class="pass-right">
+            <div class="xp-eyebrow">SEASON 3 XP</div>
+            <div class="xp-main">2,840</div>
+            <div class="xp-sub">160 XP to Platinum</div>
+
+            <!-- Reward nodes: Bronze ✓ → Silver ✓ → Gold (now) → Platinum → Diamond -->
+            <div class="reward-nodes">
+              <div class="r-node">
+                <div class="r-dot done">✓</div>
+                <div class="r-lbl done">BRNZ</div>
+              </div>
+              <div class="r-connector done"></div>
+              <div class="r-node">
+                <div class="r-dot done">✓</div>
+                <div class="r-lbl done">SLVR</div>
+              </div>
+              <div class="r-connector done"></div>
+              <div class="r-node">
+                <div class="r-dot now">★</div>
+                <div class="r-lbl now">GOLD</div>
+              </div>
+              <div class="r-connector"></div>
+              <div class="r-node">
+                <div class="r-dot locked">○</div>
+                <div class="r-lbl">PLAT</div>
+              </div>
+              <div class="r-connector"></div>
+              <div class="r-node">
+                <div class="r-dot locked">○</div>
+                <div class="r-lbl">DMND</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prog-bottom">
+        <div class="prog-nums">
+          <span class="cur">2,840 XP</span>
+          <span class="diff">+160 to unlock</span>
+          <span class="next">3,000 XP</span>
+        </div>
+        <div class="pt" style="height:7px">
+          <div class="pf pf-grad" style="width:63%"></div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-cell"><div class="si">👟</div><div class="sv">287</div><div class="sl">STEPS</div></div>
+        <div class="stat-cell"><div class="si">⚡</div><div class="sv">0.2</div><div class="sl">KM</div></div>
+        <div class="stat-cell"><div class="si">🔥</div><div class="sv">138</div><div class="sl">KCAL</div></div>
+        <div class="stat-cell"><div class="si">⏱</div><div class="sv">0</div><div class="sl">MIN</div></div>
+        <div class="stat-cell"><div class="si">❤️</div><div class="sv">71</div><div class="sl">BPM</div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════
+       D10-V2: DARK ENERGY — ELEVATED
+       ══════════════════════════════════════════════ -->
+  <div class="design-wrap" data-choice="10" onclick="toggle(this)">
+    <div class="tag">DESIGN 10 — DARK ENERGY (ELEVATED) <span class="check">✓</span></div>
+    <div class="d10v2">
+      <div class="card-body">
+        <div class="bg-layer"></div>
+        <div class="scanlines"></div>
+        <div class="content">
+          <div class="top-row">
+            <div class="left-col">
+              <div class="xp-eyebrow">XP THIS SEASON</div>
+              <div class="xp-massive">2,840</div>
+              <div class="xp-season">SEASON 3 · ONGOING</div>
+            </div>
+            <div class="right-col">
+              <div class="season-tag">GOLD TIER</div>
+              <div class="tier-mega">GOLD</div>
+              <div class="rank-line">Rank #12 of 340</div>
+              <div class="streak-pill">⭐ 7D</div>
+            </div>
+          </div>
+
+          <div class="divider-line"></div>
+
+          <div class="next-block">
+            <div class="next-arrow">→</div>
+            <div class="next-text">
+              <div class="next-tier-name">PLATINUM</div>
+              <div class="next-xp">3,000 XP threshold · 160 XP away</div>
+            </div>
+            <div class="next-pct">63%</div>
+          </div>
+
+          <div class="prog-wrap" style="margin-bottom:0">
+            <div class="prog-bg">
+              <div class="prog-inner"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="today-strip">
+          <div class="today-label">EARNED TODAY</div>
+          <div class="today-val">+320 XP</div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-cell"><div class="si">👟</div><div class="sv">287</div><div class="sl">STEPS</div></div>
+        <div class="stat-cell"><div class="si">⚡</div><div class="sv">0.2</div><div class="sl">KM</div></div>
+        <div class="stat-cell"><div class="si">🔥</div><div class="sv">138</div><div class="sl">KCAL</div></div>
+        <div class="stat-cell"><div class="si">⏱</div><div class="sv">0</div><div class="sl">MIN</div></div>
+        <div class="stat-cell"><div class="si">❤️</div><div class="sv">71</div><div class="sl">BPM</div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /designs -->
+
+<div id="sel-bar">
+  <span id="sel-text">Click to select your favourite</span>
+  <span id="sel-count" style="font-size:11px;color:var(--ink3)"></span>
+</div>
+
+<script>
+const selected = new Set();
+function toggle(el) {
+  const c = el.dataset.choice;
+  if (selected.has(c)) { selected.delete(c); el.classList.remove('selected'); }
+  else { selected.add(c); el.classList.add('selected'); }
+  update();
+  try { fetch('/event', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ type:'click', choice: Array.from(selected).join(','), text:'Selected v2: '+Array.from(selected).join(', '), timestamp:Date.now() }) }); } catch(e){}
+}
+function update() {
+  const t = document.getElementById('sel-text');
+  const c = document.getElementById('sel-count');
+  if (!selected.size) { t.textContent = 'Click to select your favourite'; c.textContent=''; return; }
+  t.innerHTML = '<strong>Selected: Design ' + Array.from(selected).join(', ') + '</strong>';
+  c.textContent = selected.size + ' selected';
+}
+</script>
+</body>
+</html>

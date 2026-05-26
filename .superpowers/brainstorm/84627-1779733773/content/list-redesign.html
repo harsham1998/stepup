@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Bottom List Redesign</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #080814;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  padding: 32px 24px 80px;
+}
+
+.page-title { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+.page-sub { font-size: 14px; color: #A3A3B3; margin-bottom: 36px; }
+.page-sub span { color: #D4FF3A; font-weight: 600; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 32px;
+  max-width: 1300px;
+}
+
+/* ── Phone card ── */
+.card {
+  border-radius: 22px;
+  border: 1.5px solid #1e1e35;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.2s, transform 0.18s;
+  background: #0d0d1c;
+}
+.card:hover { border-color: rgba(212,255,58,0.35); transform: translateY(-3px); box-shadow: 0 0 30px rgba(212,255,58,0.07); }
+.card.selected { border-color: #D4FF3A !important; box-shadow: 0 0 40px rgba(212,255,58,0.14) !important; }
+
+.card-label {
+  padding: 14px 16px;
+  border-top: 1px solid #1e1e35;
+  background: #080814;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.card-letter {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: #D4FF3A; color: #050510;
+  font-weight: 800; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-family: 'Space Grotesk', sans-serif;
+}
+.card-label h3 { font-size: 13px; color: #fff; font-weight: 700; margin-bottom: 3px; font-family: 'Space Grotesk', sans-serif; }
+.card-label p { font-size: 11px; color: #A3A3B3; line-height: 1.5; }
+
+.selected-check {
+  display: none; position: absolute; top: 12px; right: 12px;
+  width: 26px; height: 26px; background: #D4FF3A; border-radius: 50%;
+  align-items: center; justify-content: center;
+  font-size: 13px; color: #050510; font-weight: 900; z-index: 99;
+}
+.card.selected .selected-check { display: flex; }
+
+/* ════════════════════
+   SHARED: Activity Rings Header (same across all 3)
+════════════════════ */
+.phone { background: #050510; overflow: hidden; position: relative; font-family: 'Inter', sans-serif; }
+
+.shared-header { padding: 18px 18px 0; }
+.sh-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.sh-title { font-size: 19px; font-weight: 900; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+.sh-actions { display: flex; gap: 8px; }
+.sh-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: #A3A3B3;
+}
+
+.sh-profile { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.sh-ring-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+.sh-ring-svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.sh-inner {
+  position: absolute; inset: 7px; border-radius: 50%;
+  background: rgba(212,255,58,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 900; color: #D4FF3A;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.sh-cam {
+  position: absolute; bottom: 0; right: -2px;
+  width: 22px; height: 22px; background: #D4FF3A;
+  border-radius: 50%; border: 2.5px solid #050510;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #050510; font-weight: 900; z-index: 2;
+}
+.sh-info {}
+.sh-name { font-size: 19px; font-weight: 800; color: #fff; font-family: 'Space Grotesk', sans-serif; margin-bottom: 3px; }
+.sh-handle { font-size: 11px; color: #A3A3B3; margin-bottom: 8px; }
+.sh-chips { display: flex; gap: 5px; }
+.chip { display: inline-flex; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.chip-lime { background: rgba(212,255,58,0.12); color: #D4FF3A; border: 1px solid rgba(212,255,58,0.25); }
+.chip-gray { background: rgba(255,255,255,0.06); color: #A3A3B3; border: 1px solid rgba(255,255,255,0.1); }
+.chip-purple { background: rgba(139,92,246,0.12); color: #A78BFA; border: 1px solid rgba(139,92,246,0.25); }
+
+.sh-stat-bar {
+  display: flex; margin: 0 0 16px;
+  background: #0D0D1A; border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px; overflow: hidden;
+}
+.sh-stat { flex: 1; padding: 12px 8px; text-align: center; }
+.sh-stat:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.07); }
+.sh-stat .n { font-size: 18px; font-weight: 900; color: #fff; display: block; font-family: 'Space Grotesk', sans-serif; }
+.sh-stat .l { font-size: 9px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.4px; }
+
+.sh-week { margin-bottom: 20px; }
+.sh-week-head { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.sh-week-title { font-size: 11px; font-weight: 700; color: #fff; }
+.sh-week-sub { font-size: 10px; color: #D4FF3A; font-weight: 600; }
+.sh-days { display: flex; gap: 10px; }
+.sh-day { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+.sh-day-ring { position: relative; width: 28px; height: 28px; }
+.sh-day-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.sh-day-lbl { font-size: 8px; color: #4B5563; }
+.sh-day.today .sh-day-lbl { color: #D4FF3A; font-weight: 700; }
+
+.divider-label {
+  font-size: 9px; font-weight: 700; color: #4B5563;
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 0 18px 8px;
+}
+
+/* ════════════════════════════════════
+   LIST A — "Feature Cards + Slim List"
+   Two large feature cards at top, slim rows below
+════════════════════════════════════ */
+.la-featured {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; padding: 0 16px 12px;
+}
+.la-feat-card {
+  background: #0D0D1A;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 14px 12px;
+  position: relative; overflow: hidden;
+}
+.la-feat-card::after {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  opacity: 0.06;
+}
+.la-feat-card.rep::after { background: #D4FF3A; }
+.la-feat-card.xp::after { background: #A78BFA; }
+.la-feat-icon { font-size: 18px; margin-bottom: 8px; display: block; }
+.la-feat-val {
+  font-size: 24px; font-weight: 900; color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  display: block; line-height: 1; margin-bottom: 2px;
+}
+.la-feat-label { font-size: 10px; color: #A3A3B3; display: block; margin-bottom: 6px; }
+.la-feat-bar-bg { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; }
+.la-feat-bar-fill { height: 100%; border-radius: 2px; }
+.la-feat-sub { font-size: 9px; color: #A3A3B3; margin-top: 4px; }
+
+.la-slim-list { padding: 0 16px; }
+.la-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.la-row:last-child { border: none; }
+.la-icon-box {
+  width: 34px; height: 34px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.la-row-info { flex: 1; }
+.la-row-title { font-size: 13px; font-weight: 600; color: #fff; display: block; margin-bottom: 1px; }
+.la-row-sub { font-size: 10px; color: #A3A3B3; }
+.la-row-right { display: flex; align-items: center; gap: 6px; }
+.la-row-val { font-size: 12px; font-weight: 700; color: #D4FF3A; }
+.la-arrow { font-size: 11px; color: #4B5563; }
+
+/* ════════════════════════════════════
+   LIST B — "Grouped Sections"
+   Section headers + rich row items with value + colored icon bg
+════════════════════════════════════ */
+.lb-section { padding: 0 16px 4px; }
+.lb-group-label {
+  font-size: 9px; font-weight: 700; color: #4B5563;
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 12px 0 6px;
+}
+.lb-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px;
+  background: #0D0D1A;
+  border-radius: 12px;
+  margin-bottom: 5px;
+}
+.lb-icon-box {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.lb-row-info { flex: 1; }
+.lb-row-title { font-size: 13px; font-weight: 600; color: #fff; display: block; line-height: 1; margin-bottom: 2px; }
+.lb-row-sub { font-size: 10px; color: #A3A3B3; }
+.lb-right { display: flex; align-items: center; gap: 6px; }
+.lb-val { font-size: 12px; font-weight: 700; }
+.lb-arrow { font-size: 11px; color: #4B5563; }
+
+/* ════════════════════════════════════
+   LIST C — "App Grid"
+   2-column tappable cards, icon + title + value, all equal
+════════════════════════════════════ */
+.lc-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; padding: 0 16px 16px;
+}
+.lc-cell {
+  background: #0D0D1A;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 14px 12px;
+  position: relative;
+}
+.lc-cell.wide {
+  grid-column: span 2;
+  display: flex; align-items: center; gap: 14px;
+}
+.lc-cell-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; margin-bottom: 10px; flex-shrink: 0;
+}
+.lc-cell.wide .lc-cell-icon { margin-bottom: 0; }
+.lc-cell-val {
+  font-size: 22px; font-weight: 900; color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  display: block; margin-bottom: 2px; line-height: 1;
+}
+.lc-cell.wide .lc-cell-val { font-size: 18px; }
+.lc-cell-label { font-size: 10px; color: #A3A3B3; display: block; }
+.lc-cell-sub { font-size: 9px; color: #4B5563; margin-top: 4px; }
+.lc-arrow-abs {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 10px; color: #4B5563;
+}
+
+/* selection bar */
+#selection-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #0d0d1c; border-top: 1px solid #1e1e35;
+  padding: 14px 24px; font-size: 14px; color: #A3A3B3;
+  display: flex; align-items: center; gap: 10px; z-index: 100;
+}
+#sel-count { font-weight: 700; color: #D4FF3A; }
+</style>
+</head>
+<body>
+
+<div class="page-title">Activity Rings — Bottom List Redesigns</div>
+<p class="page-sub">Same header kept · <span>3 different list treatments</span> · Click to pick your favourite</p>
+
+<div id="selection-bar"><span id="sel-count">Pick one</span> — click a design to vote</div>
+
+<div class="grid">
+
+  <!-- ══════════════════════════════════════
+       OPTION A  —  Feature Cards + Slim List
+  ══════════════════════════════════════ -->
+  <div class="card" data-choice="a" onclick="pick(this)" style="position:relative">
+    <div class="selected-check">✓</div>
+    <div class="phone">
+      <!-- shared header -->
+      <div class="shared-header">
+        <div class="sh-topbar">
+          <span class="sh-title">Me</span>
+          <div class="sh-actions"><div class="sh-btn">＋</div><div class="sh-btn">⚙</div></div>
+        </div>
+        <div class="sh-profile">
+          <div class="sh-ring-wrap">
+            <svg class="sh-ring-svg" viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="33" fill="none" stroke="rgba(212,255,58,0.12)" stroke-width="3"/>
+              <circle cx="36" cy="36" r="33" fill="none" stroke="#D4FF3A" stroke-width="3" stroke-dasharray="207.3" stroke-dashoffset="58" stroke-linecap="round"/>
+              <circle cx="36" cy="36" r="27" fill="none" stroke="rgba(255,181,71,0.12)" stroke-width="2.5"/>
+              <circle cx="36" cy="36" r="27" fill="none" stroke="#FFB547" stroke-width="2.5" stroke-dasharray="169.6" stroke-dashoffset="50" stroke-linecap="round"/>
+            </svg>
+            <div class="sh-inner">H</div>
+            <div class="sh-cam">+</div>
+          </div>
+          <div class="sh-info">
+            <div class="sh-name">Harsha</div>
+            <div class="sh-handle">@harsha_m · India</div>
+            <div class="sh-chips">
+              <span class="chip chip-lime">Free</span>
+              <span class="chip chip-gray">GOLD III</span>
+              <span class="chip chip-purple">LV 23</span>
+            </div>
+          </div>
+        </div>
+        <div class="sh-stat-bar">
+          <div class="sh-stat"><span class="n" style="color:#D4FF3A">12D</span><span class="l">Streak</span></div>
+          <div class="sh-stat"><span class="n">847</span><span class="l">Rep</span></div>
+          <div class="sh-stat"><span class="n">10</span><span class="l">Chall.</span></div>
+          <div class="sh-stat"><span class="n" style="color:#FFB547">1.2K</span><span class="l">Coins</span></div>
+        </div>
+        <div class="sh-week">
+          <div class="sh-week-head"><span class="sh-week-title">This week</span><span class="sh-week-sub">↑ 12%</span></div>
+          <div class="sh-days">
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="62" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">M</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">T</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">W</span></div>
+            <div class="sh-day today"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="20" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">T</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="sh-day-lbl">F</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="sh-day-lbl">S</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="sh-day-lbl">S</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIST A: Feature cards + slim rows -->
+      <div class="divider-label">YOUR STATS</div>
+      <div class="la-featured">
+        <div class="la-feat-card rep">
+          <span class="la-feat-icon">📊</span>
+          <span class="la-feat-val" style="color:#D4FF3A">847</span>
+          <span class="la-feat-label">Fitness Rep</span>
+          <div class="la-feat-bar-bg"><div class="la-feat-bar-fill" style="width:68%;background:#D4FF3A"></div></div>
+          <span class="la-feat-sub">↑ 12% this week</span>
+        </div>
+        <div class="la-feat-card xp">
+          <span class="la-feat-icon">⚡</span>
+          <span class="la-feat-val" style="color:#A78BFA">LV 23</span>
+          <span class="la-feat-label">XP & Level</span>
+          <div class="la-feat-bar-bg"><div class="la-feat-bar-fill" style="width:68%;background:#A78BFA"></div></div>
+          <span class="la-feat-sub">6,800 / 10,000 XP</span>
+        </div>
+      </div>
+
+      <div class="divider-label">EXPLORE</div>
+      <div class="la-slim-list">
+        <div class="la-row">
+          <div class="la-icon-box" style="background:rgba(255,99,99,0.12)">🔥</div>
+          <div class="la-row-info">
+            <span class="la-row-title">Streak & Shield</span>
+            <span class="la-row-sub">12-day active streak</span>
+          </div>
+          <div class="la-row-right"><span class="la-row-val">12D</span><span class="la-arrow">›</span></div>
+        </div>
+        <div class="la-row">
+          <div class="la-icon-box" style="background:rgba(99,180,255,0.12)">📅</div>
+          <div class="la-row-info">
+            <span class="la-row-title">Daily Missions</span>
+            <span class="la-row-sub">3 of 5 done today</span>
+          </div>
+          <div class="la-row-right"><span class="la-row-val">3/5</span><span class="la-arrow">›</span></div>
+        </div>
+        <div class="la-row">
+          <div class="la-icon-box" style="background:rgba(212,255,58,0.08)">🏆</div>
+          <div class="la-row-info">
+            <span class="la-row-title">Achievements</span>
+            <span class="la-row-sub">14 earned · 22 locked</span>
+          </div>
+          <div class="la-row-right"><span class="la-arrow">›</span></div>
+        </div>
+        <div class="la-row">
+          <div class="la-icon-box" style="background:rgba(255,181,71,0.1)">🪙</div>
+          <div class="la-row-info">
+            <span class="la-row-title">Coins & Rewards</span>
+            <span class="la-row-sub">1,200 available</span>
+          </div>
+          <div class="la-row-right"><span class="la-row-val" style="color:#FFB547">1.2K</span><span class="la-arrow">›</span></div>
+        </div>
+        <div class="la-row">
+          <div class="la-icon-box" style="background:rgba(139,92,246,0.1)">⚔️</div>
+          <div class="la-row-info">
+            <span class="la-row-title">Rivals</span>
+            <span class="la-row-sub">2 active battles</span>
+          </div>
+          <div class="la-row-right"><span class="la-arrow">›</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="card-letter">A</div>
+      <div>
+        <h3>Feature Cards + Slim Rows</h3>
+        <p>Top 2 big cards surface live data · Rows below show values + context · Grouped with section labels</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       OPTION B  —  Grouped Sections
+  ══════════════════════════════════════ -->
+  <div class="card" data-choice="b" onclick="pick(this)" style="position:relative">
+    <div class="selected-check">✓</div>
+    <div class="phone">
+      <!-- shared header -->
+      <div class="shared-header">
+        <div class="sh-topbar">
+          <span class="sh-title">Me</span>
+          <div class="sh-actions"><div class="sh-btn">＋</div><div class="sh-btn">⚙</div></div>
+        </div>
+        <div class="sh-profile">
+          <div class="sh-ring-wrap">
+            <svg class="sh-ring-svg" viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="33" fill="none" stroke="rgba(212,255,58,0.12)" stroke-width="3"/>
+              <circle cx="36" cy="36" r="33" fill="none" stroke="#D4FF3A" stroke-width="3" stroke-dasharray="207.3" stroke-dashoffset="58" stroke-linecap="round"/>
+              <circle cx="36" cy="36" r="27" fill="none" stroke="rgba(255,181,71,0.12)" stroke-width="2.5"/>
+              <circle cx="36" cy="36" r="27" fill="none" stroke="#FFB547" stroke-width="2.5" stroke-dasharray="169.6" stroke-dashoffset="50" stroke-linecap="round"/>
+            </svg>
+            <div class="sh-inner">H</div>
+            <div class="sh-cam">+</div>
+          </div>
+          <div class="sh-info">
+            <div class="sh-name">Harsha</div>
+            <div class="sh-handle">@harsha_m · India</div>
+            <div class="sh-chips">
+              <span class="chip chip-lime">Free</span>
+              <span class="chip chip-gray">GOLD III</span>
+              <span class="chip chip-purple">LV 23</span>
+            </div>
+          </div>
+        </div>
+        <div class="sh-stat-bar">
+          <div class="sh-stat"><span class="n" style="color:#D4FF3A">12D</span><span class="l">Streak</span></div>
+          <div class="sh-stat"><span class="n">847</span><span class="l">Rep</span></div>
+          <div class="sh-stat"><span class="n">10</span><span class="l">Chall.</span></div>
+          <div class="sh-stat"><span class="n" style="color:#FFB547">1.2K</span><span class="l">Coins</span></div>
+        </div>
+        <div class="sh-week">
+          <div class="sh-week-head"><span class="sh-week-title">This week</span><span class="sh-week-sub">↑ 12%</span></div>
+          <div class="sh-days">
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="62" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">M</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">T</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">W</span></div>
+            <div class="sh-day today"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="20" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">T</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="sh-day-lbl">F</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="sh-day-lbl">S</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="sh-day-lbl">S</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIST B: Grouped sections -->
+      <div class="lb-section">
+        <div class="lb-group-label">PROGRESS</div>
+        <div class="lb-row">
+          <div class="lb-icon-box" style="background:rgba(212,255,58,0.1)">📊</div>
+          <div class="lb-row-info">
+            <span class="lb-row-title">Fitness Reputation</span>
+            <span class="lb-row-sub">↑ 12% this week</span>
+          </div>
+          <div class="lb-right"><span class="lb-val" style="color:#D4FF3A">847</span><span class="lb-arrow">›</span></div>
+        </div>
+        <div class="lb-row">
+          <div class="lb-icon-box" style="background:rgba(139,92,246,0.1)">⚡</div>
+          <div class="lb-row-info">
+            <span class="lb-row-title">XP & Level</span>
+            <span class="lb-row-sub">6,800 / 10,000 XP</span>
+          </div>
+          <div class="lb-right"><span class="lb-val" style="color:#A78BFA">LV 23</span><span class="lb-arrow">›</span></div>
+        </div>
+        <div class="lb-row">
+          <div class="lb-icon-box" style="background:rgba(255,99,99,0.1)">🔥</div>
+          <div class="lb-row-info">
+            <span class="lb-row-title">Streak & Shield</span>
+            <span class="lb-row-sub">Shield active · 3 uses left</span>
+          </div>
+          <div class="lb-right"><span class="lb-val" style="color:#FF6363">12D</span><span class="lb-arrow">›</span></div>
+        </div>
+
+        <div class="lb-group-label" style="padding-top:8px">COMPETE</div>
+        <div class="lb-row">
+          <div class="lb-icon-box" style="background:rgba(99,180,255,0.1)">📅</div>
+          <div class="lb-row-info">
+            <span class="lb-row-title">Daily Missions</span>
+            <span class="lb-row-sub">3 of 5 complete</span>
+          </div>
+          <div class="lb-right"><span class="lb-val" style="color:#63B4FF">3/5</span><span class="lb-arrow">›</span></div>
+        </div>
+        <div class="lb-row">
+          <div class="lb-icon-box" style="background:rgba(255,181,71,0.1)">⚔️</div>
+          <div class="lb-row-info">
+            <span class="lb-row-title">Rivals</span>
+            <span class="lb-row-sub">2 active battles</span>
+          </div>
+          <div class="lb-right"><span class="lb-val" style="color:#FFB547">2</span><span class="lb-arrow">›</span></div>
+        </div>
+        <div class="lb-row">
+          <div class="lb-icon-box" style="background:rgba(255,181,71,0.08)">🏅</div>
+          <div class="lb-row-info">
+            <span class="lb-row-title">League</span>
+            <span class="lb-row-sub">Gold III · #47 this week</span>
+          </div>
+          <div class="lb-right"><span class="lb-arrow">›</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="card-letter">B</div>
+      <div>
+        <h3>Grouped Sections</h3>
+        <p>Progress vs Compete sections · Colored icon boxes per item · Live values on right instead of just an arrow</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       OPTION C  —  App Grid
+  ══════════════════════════════════════ -->
+  <div class="card" data-choice="c" onclick="pick(this)" style="position:relative">
+    <div class="selected-check">✓</div>
+    <div class="phone">
+      <!-- shared header -->
+      <div class="shared-header">
+        <div class="sh-topbar">
+          <span class="sh-title">Me</span>
+          <div class="sh-actions"><div class="sh-btn">＋</div><div class="sh-btn">⚙</div></div>
+        </div>
+        <div class="sh-profile">
+          <div class="sh-ring-wrap">
+            <svg class="sh-ring-svg" viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="33" fill="none" stroke="rgba(212,255,58,0.12)" stroke-width="3"/>
+              <circle cx="36" cy="36" r="33" fill="none" stroke="#D4FF3A" stroke-width="3" stroke-dasharray="207.3" stroke-dashoffset="58" stroke-linecap="round"/>
+              <circle cx="36" cy="36" r="27" fill="none" stroke="rgba(255,181,71,0.12)" stroke-width="2.5"/>
+              <circle cx="36" cy="36" r="27" fill="none" stroke="#FFB547" stroke-width="2.5" stroke-dasharray="169.6" stroke-dashoffset="50" stroke-linecap="round"/>
+            </svg>
+            <div class="sh-inner">H</div>
+            <div class="sh-cam">+</div>
+          </div>
+          <div class="sh-info">
+            <div class="sh-name">Harsha</div>
+            <div class="sh-handle">@harsha_m · India</div>
+            <div class="sh-chips">
+              <span class="chip chip-lime">Free</span>
+              <span class="chip chip-gray">GOLD III</span>
+              <span class="chip chip-purple">LV 23</span>
+            </div>
+          </div>
+        </div>
+        <div class="sh-stat-bar">
+          <div class="sh-stat"><span class="n" style="color:#D4FF3A">12D</span><span class="l">Streak</span></div>
+          <div class="sh-stat"><span class="n">847</span><span class="l">Rep</span></div>
+          <div class="sh-stat"><span class="n">10</span><span class="l">Chall.</span></div>
+          <div class="sh-stat"><span class="n" style="color:#FFB547">1.2K</span><span class="l">Coins</span></div>
+        </div>
+        <div class="sh-week">
+          <div class="sh-week-head"><span class="sh-week-title">This week</span><span class="sh-week-sub">↑ 12%</span></div>
+          <div class="sh-days">
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="62" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">M</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">T</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">W</span></div>
+            <div class="sh-day today"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="20" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="sh-day-lbl">T</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="sh-day-lbl">F</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="sh-day-lbl">S</span></div>
+            <div class="sh-day"><div class="sh-day-ring"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="sh-day-lbl">S</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIST C: App grid -->
+      <div style="padding: 0 16px 16px">
+        <div class="lc-grid">
+          <!-- Rep card -->
+          <div class="lc-cell" style="border-color:rgba(212,255,58,0.15)">
+            <span class="lc-arrow-abs">›</span>
+            <div class="lc-cell-icon" style="background:rgba(212,255,58,0.1)">📊</div>
+            <span class="lc-cell-val" style="color:#D4FF3A">847</span>
+            <span class="lc-cell-label">Fitness Rep</span>
+            <div class="lc-cell-sub">↑ 12% this week</div>
+          </div>
+          <!-- XP card -->
+          <div class="lc-cell" style="border-color:rgba(139,92,246,0.15)">
+            <span class="lc-arrow-abs">›</span>
+            <div class="lc-cell-icon" style="background:rgba(139,92,246,0.1)">⚡</div>
+            <span class="lc-cell-val" style="color:#A78BFA">LV 23</span>
+            <span class="lc-cell-label">XP & Level</span>
+            <div class="lc-cell-sub">68% to next level</div>
+          </div>
+          <!-- Streak card -->
+          <div class="lc-cell" style="border-color:rgba(255,99,99,0.15)">
+            <span class="lc-arrow-abs">›</span>
+            <div class="lc-cell-icon" style="background:rgba(255,99,99,0.1)">🔥</div>
+            <span class="lc-cell-val" style="color:#FF8080">12D</span>
+            <span class="lc-cell-label">Streak</span>
+            <div class="lc-cell-sub">Shield active</div>
+          </div>
+          <!-- Coins card -->
+          <div class="lc-cell" style="border-color:rgba(255,181,71,0.15)">
+            <span class="lc-arrow-abs">›</span>
+            <div class="lc-cell-icon" style="background:rgba(255,181,71,0.1)">🪙</div>
+            <span class="lc-cell-val" style="color:#FFB547">1.2K</span>
+            <span class="lc-cell-label">Coins</span>
+            <div class="lc-cell-sub">Spend in shop</div>
+          </div>
+          <!-- Missions wide -->
+          <div class="lc-cell wide">
+            <span class="lc-arrow-abs">›</span>
+            <div class="lc-cell-icon" style="background:rgba(99,180,255,0.1);margin-bottom:0">📅</div>
+            <div>
+              <span class="lc-cell-val" style="font-size:16px">Daily Missions</span>
+              <span class="lc-cell-label">3 of 5 done · keep going!</span>
+            </div>
+          </div>
+          <!-- Rivals -->
+          <div class="lc-cell">
+            <span class="lc-arrow-abs">›</span>
+            <div class="lc-cell-icon" style="background:rgba(255,100,180,0.1)">⚔️</div>
+            <span class="lc-cell-val" style="font-size:18px">Rivals</span>
+            <span class="lc-cell-label">2 active</span>
+          </div>
+          <!-- League -->
+          <div class="lc-cell">
+            <span class="lc-arrow-abs">›</span>
+            <div class="lc-cell-icon" style="background:rgba(255,181,71,0.08)">🏅</div>
+            <span class="lc-cell-val" style="font-size:18px">League</span>
+            <span class="lc-cell-label">Gold III</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="card-letter">C</div>
+      <div>
+        <h3>App Grid</h3>
+        <p>Equal-weight tappable cards · Each shows live value · Colored borders per category · Wide card for missions</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let picked = null;
+  function pick(el) {
+    if (picked) picked.classList.remove('selected');
+    picked = el;
+    el.classList.add('selected');
+    const c = el.dataset.choice;
+    document.getElementById('sel-count').textContent = 'Option ' + c.toUpperCase() + ' selected';
+    if (window.__companion_emit) window.__companion_emit({ type: 'click', choice: c, text: 'Option ' + c.toUpperCase() });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StepUp — Design 1 &amp; 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #06060f;
+    font-family: 'Inter', sans-serif;
+    color: #fff;
+    padding: 48px 28px 100px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .page-title {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 32px; font-weight: 900; color: #D4FF3A; margin-bottom: 4px;
+  }
+  .page-sub { font-size: 13px; color: #6B7280; }
+
+  .design-block { margin-top: 56px; }
+  .design-header {
+    display: flex; align-items: baseline; gap: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding-bottom: 14px; margin-bottom: 24px;
+  }
+  .design-number {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 52px; font-weight: 900; line-height: 1;
+    color: rgba(255,255,255,0.07);
+  }
+  .design-name  { font-family: 'Big Shoulders Display', sans-serif; font-size: 22px; font-weight: 900; }
+  .design-desc  { font-size: 12px; color: #6B7280; margin-top: 3px; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media(max-width:640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── shared helpers ── */
+  .cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .T { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.5px; white-space: nowrap;
+  }
+  .b-lime   { background: #D4FF3A; color: #050510; }
+  .b-amber  { background: rgba(255,181,71,0.15); color: #FFB547; border: 1px solid rgba(255,181,71,0.38); }
+  .b-gray   { background: rgba(255,255,255,0.1); color: #d1d5db; border: 1px solid rgba(255,255,255,0.14); }
+  .b-lo     { background: rgba(212,255,58,0.1); color: #D4FF3A; border: 1px solid rgba(212,255,58,0.32); }
+  .b-blue   { background: rgba(96,165,250,0.12); color: #93C5FD; border: 1px solid rgba(96,165,250,0.3); }
+  .b-purple { background: rgba(167,139,250,0.12); color: #C4B5FD; border: 1px solid rgba(167,139,250,0.3); }
+  .b-teal   { background: rgba(52,211,153,0.12); color: #6EE7B7; border: 1px solid rgba(52,211,153,0.3); }
+  .b-red    { background: rgba(239,68,68,0.15); color: #EF4444; border: 1px solid rgba(239,68,68,0.32); }
+
+  .live-dot {
+    width: 7px; height: 7px; background: #EF4444;
+    border-radius: 50%; display: inline-block; margin-right: 4px;
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+  .coin { font-size: 11px; }   /* ¢ coin symbol size */
+
+  /* ══════════════════════
+     DESIGN 1
+  ══════════════════════ */
+  .d1 {
+    height: 136px; border-radius: 18px; overflow: hidden;
+    display: flex; background: #0e0e1c;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .d1-left {
+    flex: 1; min-width: 0; padding: 13px 15px;
+    display: flex; flex-direction: column; gap: 5px;
+    justify-content: center; z-index: 2;
+  }
+  .d1-row   { display: flex; align-items: center; gap: 7px; }
+  .d1-title { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 20px; line-height: 1.2; }
+  .d1-sub   { font-size: 11px; color: #6B7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .d1-meta  { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .d1-meta span { font-size: 11px; color: #9CA3AF; }
+  .d1-meta b    { font-weight: 700; }
+
+  .d1-img {
+    width: 148px; flex-shrink: 0; position: relative; overflow: hidden;
+  }
+  .d1-img img { filter: brightness(.72) saturate(.82); }
+  .d1-img::before {
+    content: ''; position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(to right, #0e0e1c 0%, transparent 46%);
+  }
+  .d1-play {
+    position: absolute; right: 11px; bottom: 11px; z-index: 2;
+    width: 34px; height: 34px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ══════════════════════
+     DESIGN 6
+  ══════════════════════ */
+  .d6 { height: 210px; border-radius: 20px; overflow: hidden; position: relative; }
+  .d6 img { filter: brightness(.52) saturate(.72); }
+  .d6-top {
+    position: absolute; top: 16px; left: 16px; right: 16px; z-index: 2;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .d6-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0; padding: 16px; z-index: 2;
+    background: linear-gradient(to top, rgba(5,5,16,.98) 0%, rgba(5,5,16,.5) 60%, transparent 100%);
+  }
+  .d6-stats { display: flex; gap: 20px; align-items: flex-end; }
+  .d6-stat  { display: flex; flex-direction: column; }
+  .d6-stat .lbl { font-size: 9px; color: #6B7280; font-weight: 700; letter-spacing: .4px; margin-bottom: 1px; }
+  .d6-stat .val { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 16px; line-height: 1.1; }
+  .d6-btn {
+    margin-left: auto; padding: 10px 20px; border-radius: 12px;
+    font-size: 13px; font-weight: 800; cursor: pointer; align-self: flex-end; white-space: nowrap;
+  }
+
+  .divider { height: 1px; background: rgba(255,255,255,.06); margin-top: 52px; }
+</style>
+</head>
+<body>
+
+<p class="page-title">Designs 1 &amp; 6</p>
+<p class="page-sub">All rewards &amp; entries are coins only · no real money</p>
+
+
+<!-- ══════════════════════════════════════════════════════
+     DESIGN 1 — HORIZONTAL SPLIT
+══════════════════════════════════════════════════════ -->
+<div class="design-block">
+  <div class="design-header">
+    <div class="design-number">1</div>
+    <div>
+      <div class="design-name">Horizontal Split</div>
+      <div class="design-desc">Content left · Photo right · Compact &amp; scannable</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- Running – free -->
+    <div class="d1">
+      <div class="d1-left">
+        <div class="d1-row"><div class="badge b-lo">🏃 Running</div></div>
+        <div class="d1-title">Morning 10K</div>
+        <div class="d1-sub">10K steps every day for 7 days</div>
+        <div class="d1-meta">
+          <span>👥 <b>2.4K</b></span>
+          <span style="color:#D4FF3A;font-weight:700">FREE</span>
+          <span style="color:#FFB547;font-weight:700">+50¢ reward</span>
+        </div>
+      </div>
+      <div class="d1-img">
+        <img class="cover" src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=296&h=272&q=85" alt="">
+        <div class="d1-play" style="background:#D4FF3A">
+          <svg width="11" height="13" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- HIIT – free + live -->
+    <div class="d1">
+      <div class="d1-left">
+        <div class="d1-row">
+          <div class="badge b-gray">🔥 HIIT</div>
+          <div style="display:flex;align-items:center;font-size:10px;font-weight:800;color:#EF4444"><span class="live-dot"></span>LIVE</div>
+        </div>
+        <div class="d1-title">HIIT Intervals</div>
+        <div class="d1-sub">Daily 30-min burn · all levels welcome</div>
+        <div class="d1-meta">
+          <span>👁 <b>150K</b></span>
+          <span style="color:#D4FF3A;font-weight:700">FREE</span>
+          <span style="color:#FFB547;font-weight:700">+80¢ reward</span>
+        </div>
+      </div>
+      <div class="d1-img">
+        <img class="cover" src="https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?auto=format&fit=crop&w=296&h=272&q=85" alt="">
+        <div class="d1-play" style="background:#FFB547">
+          <svg width="11" height="13" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gym – paid entry -->
+    <div class="d1">
+      <div class="d1-left">
+        <div class="d1-row"><div class="badge b-amber">💪 Gym</div></div>
+        <div class="d1-title">Iron Will Month</div>
+        <div class="d1-sub">3× sessions per week · 4 weeks</div>
+        <div class="d1-meta">
+          <span>👥 <b>620</b></span>
+          <span style="color:#FFB547;font-weight:700">30¢ entry</span>
+          <span style="color:#FFB547;font-weight:700">+200¢ reward</span>
+        </div>
+      </div>
+      <div class="d1-img">
+        <img class="cover" src="https://images.unsplash.com/photo-1583454110851-a10b4872a14c?auto=format&fit=crop&w=296&h=272&q=85" alt="">
+        <div class="d1-play" style="background:#FFB547">
+          <svg width="11" height="13" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cycling – free -->
+    <div class="d1">
+      <div class="d1-left">
+        <div class="d1-row"><div class="badge b-blue">🚴 Cycling</div></div>
+        <div class="d1-title">Century Ride</div>
+        <div class="d1-sub">100 km total · complete in 14 days</div>
+        <div class="d1-meta">
+          <span>👥 <b>540</b></span>
+          <span style="color:#D4FF3A;font-weight:700">FREE</span>
+          <span style="color:#FFB547;font-weight:700">+60¢ reward</span>
+        </div>
+      </div>
+      <div class="d1-img">
+        <img class="cover" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=296&h=272&q=85" alt="">
+        <div class="d1-play" style="background:#60A5FA">
+          <svg width="11" height="13" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Yoga – free -->
+    <div class="d1">
+      <div class="d1-left">
+        <div class="d1-row"><div class="badge b-purple">🧘 Yoga</div></div>
+        <div class="d1-title">Zen Zone</div>
+        <div class="d1-sub">Daily session · 30 days · all levels</div>
+        <div class="d1-meta">
+          <span>👥 <b>1.8K</b></span>
+          <span style="color:#D4FF3A;font-weight:700">FREE</span>
+          <span style="color:#FFB547;font-weight:700">+45¢ reward</span>
+        </div>
+      </div>
+      <div class="d1-img">
+        <img class="cover" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=296&h=272&q=85" alt="">
+        <div class="d1-play" style="background:#A78BFA">
+          <svg width="11" height="13" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Swimming – paid -->
+    <div class="d1">
+      <div class="d1-left">
+        <div class="d1-row"><div class="badge b-teal">🏊 Swimming</div></div>
+        <div class="d1-title">Lap Legends</div>
+        <div class="d1-sub">20 laps per week · 2-week challenge</div>
+        <div class="d1-meta">
+          <span>👥 <b>240</b></span>
+          <span style="color:#FFB547;font-weight:700">30¢ entry</span>
+          <span style="color:#FFB547;font-weight:700">+120¢ reward</span>
+        </div>
+      </div>
+      <div class="d1-img">
+        <img class="cover" src="https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=296&h=272&q=85" alt="">
+        <div class="d1-play" style="background:#34D399">
+          <svg width="11" height="13" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Steps / Walking -->
+    <div class="d1">
+      <div class="d1-left">
+        <div class="d1-row"><div class="badge b-lo">👟 Steps</div></div>
+        <div class="d1-title">10K Steps Daily</div>
+        <div class="d1-sub">Walk your way to top 50% · 30 days</div>
+        <div class="d1-meta">
+          <span>👥 <b>3.2K</b></span>
+          <span style="color:#D4FF3A;font-weight:700">FREE</span>
+          <span style="color:#FFB547;font-weight:700">+30¢ reward</span>
+        </div>
+      </div>
+      <div class="d1-img">
+        <img class="cover" src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=296&h=272&q=85" alt="">
+        <div class="d1-play" style="background:#D4FF3A">
+          <svg width="11" height="13" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tournament – paid entry, big reward -->
+    <div class="d1" style="border-color:rgba(255,181,71,.38)">
+      <div class="d1-left">
+        <div class="d1-row">
+          <div class="badge b-amber">🏆 Tournament</div>
+          <div class="badge b-lime" style="font-size:9px">SEASONAL</div>
+        </div>
+        <div class="d1-title">Summer Grand Slam</div>
+        <div class="d1-sub">All activities · May – Jun 2025</div>
+        <div class="d1-meta">
+          <span>👥 <b>1.2K</b></span>
+          <span style="color:#FFB547;font-weight:700">80¢ entry</span>
+          <span style="color:#FFB547;font-weight:700">+5000¢ pool</span>
+        </div>
+      </div>
+      <div class="d1-img">
+        <img class="cover" src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=296&h=272&q=85" alt="">
+        <div class="d1-play" style="background:#FFB547">
+          <svg width="11" height="13" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     DESIGN 6 — FULL IMAGE HERO
+══════════════════════════════════════════════════════ -->
+<div class="design-block">
+  <div class="design-header">
+    <div class="design-number">6</div>
+    <div>
+      <div class="design-name">Full Image Hero</div>
+      <div class="design-desc">Photo edge-to-edge · brightness raised · bold bottom overlay</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- Tournament -->
+    <div class="d6" style="border:1.5px solid rgba(255,181,71,.42)">
+      <img class="cover" src="https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=700&h=420&q=88" alt="">
+      <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,181,71,.18) 0%,rgba(5,5,16,.7) 55%)"></div>
+      <div class="d6-top">
+        <div class="badge b-lime">⚡ LIVE NOW</div>
+        <div class="badge b-amber">Seasonal</div>
+      </div>
+      <div class="d6-bottom">
+        <div class="T italic" style="font-size:24px;line-height:1.1;margin-bottom:4px">Ultra Marathon<br>Championship</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-bottom:12px">42K steps · 30 days · May–Jun 2025</div>
+        <div class="d6-stats">
+          <div class="d6-stat"><div class="lbl">REWARD POOL</div><div class="val" style="color:#FFB547">5000¢</div></div>
+          <div class="d6-stat"><div class="lbl">PLAYERS</div><div class="val">3,441</div></div>
+          <div class="d6-stat"><div class="lbl">ENTRY</div><div class="val" style="color:#FFB547">80¢</div></div>
+          <div class="d6-btn" style="background:#FFB547;color:#050510">Join →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Running – free -->
+    <div class="d6" style="border:1.5px solid rgba(212,255,58,.38)">
+      <img class="cover" src="https://images.unsplash.com/photo-1571008887538-b36bb32f4571?auto=format&fit=crop&w=700&h=420&q=88" alt="">
+      <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(212,255,58,.14) 0%,rgba(5,5,16,.7) 55%)"></div>
+      <div class="d6-top">
+        <div class="badge b-lo">🏃 Running</div>
+        <div style="display:flex;align-items:center;font-size:11px;font-weight:800;color:#EF4444"><span class="live-dot"></span>LIVE</div>
+      </div>
+      <div class="d6-bottom">
+        <div class="T italic" style="font-size:24px;line-height:1.1;margin-bottom:4px">Morning Sprint<br>Series</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-bottom:12px">5K every day · 7 days</div>
+        <div class="d6-stats">
+          <div class="d6-stat"><div class="lbl">REWARD</div><div class="val" style="color:#D4FF3A">+50¢</div></div>
+          <div class="d6-stat"><div class="lbl">PLAYERS</div><div class="val">890</div></div>
+          <div class="d6-stat"><div class="lbl">ENTRY</div><div class="val" style="color:#D4FF3A">FREE</div></div>
+          <div class="d6-btn" style="background:#D4FF3A;color:#050510">Join →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gym – paid -->
+    <div class="d6" style="border:1.5px solid rgba(249,115,22,.34)">
+      <img class="cover" src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=700&h=420&q=88" alt="">
+      <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(249,115,22,.14) 0%,rgba(5,5,16,.7) 55%)"></div>
+      <div class="d6-top">
+        <div class="badge b-gray">💪 Gym</div>
+        <div class="badge b-amber" style="font-size:9px">Monthly</div>
+      </div>
+      <div class="d6-bottom">
+        <div class="T italic" style="font-size:24px;line-height:1.1;margin-bottom:4px">Iron Will<br>Challenge</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-bottom:12px">3× sessions / week · 4 weeks</div>
+        <div class="d6-stats">
+          <div class="d6-stat"><div class="lbl">REWARD</div><div class="val" style="color:#FFB547">+200¢</div></div>
+          <div class="d6-stat"><div class="lbl">PLAYERS</div><div class="val">620</div></div>
+          <div class="d6-stat"><div class="lbl">ENTRY</div><div class="val" style="color:#FFB547">30¢</div></div>
+          <div class="d6-btn" style="background:#FFB547;color:#050510">Join →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cycling – free -->
+    <div class="d6" style="border:1.5px solid rgba(96,165,250,.32)">
+      <img class="cover" src="https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=700&h=420&q=88" alt="">
+      <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(96,165,250,.12) 0%,rgba(5,5,16,.7) 55%)"></div>
+      <div class="d6-top">
+        <div class="badge b-blue">🚴 Cycling</div>
+      </div>
+      <div class="d6-bottom">
+        <div class="T italic" style="font-size:24px;line-height:1.1;margin-bottom:4px">Century Ride<br>Challenge</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-bottom:12px">100 km total · 14 days</div>
+        <div class="d6-stats">
+          <div class="d6-stat"><div class="lbl">REWARD</div><div class="val" style="color:#D4FF3A">+60¢</div></div>
+          <div class="d6-stat"><div class="lbl">PLAYERS</div><div class="val">540</div></div>
+          <div class="d6-stat"><div class="lbl">ENTRY</div><div class="val" style="color:#D4FF3A">FREE</div></div>
+          <div class="d6-btn" style="background:#D4FF3A;color:#050510">Join →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HIIT – free + live -->
+    <div class="d6" style="border:1.5px solid rgba(239,68,68,.3)">
+      <img class="cover" src="https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=700&h=420&q=88" alt="">
+      <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(239,68,68,.12) 0%,rgba(5,5,16,.7) 55%)"></div>
+      <div class="d6-top">
+        <div class="badge b-gray">🔥 HIIT</div>
+        <div style="display:flex;align-items:center;font-size:11px;font-weight:800;color:#EF4444"><span class="live-dot"></span>LIVE</div>
+      </div>
+      <div class="d6-bottom">
+        <div class="T italic" style="font-size:24px;line-height:1.1;margin-bottom:4px">HIIT Intervals<br>30-Day Burn</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-bottom:12px">Daily session · all levels · 30 days</div>
+        <div class="d6-stats">
+          <div class="d6-stat"><div class="lbl">REWARD</div><div class="val" style="color:#D4FF3A">+80¢</div></div>
+          <div class="d6-stat"><div class="lbl">VIEWS</div><div class="val">150K</div></div>
+          <div class="d6-stat"><div class="lbl">ENTRY</div><div class="val" style="color:#D4FF3A">FREE</div></div>
+          <div class="d6-btn" style="background:#D4FF3A;color:#050510">Join →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Yoga – free -->
+    <div class="d6" style="border:1.5px solid rgba(167,139,250,.32)">
+      <img class="cover" src="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?auto=format&fit=crop&w=700&h=420&q=88" alt="">
+      <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(167,139,250,.12) 0%,rgba(5,5,16,.7) 55%)"></div>
+      <div class="d6-top">
+        <div class="badge b-purple">🧘 Yoga</div>
+      </div>
+      <div class="d6-bottom">
+        <div class="T italic" style="font-size:24px;line-height:1.1;margin-bottom:4px">Mindful Month<br>Yoga Series</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-bottom:12px">Daily session · 30 days</div>
+        <div class="d6-stats">
+          <div class="d6-stat"><div class="lbl">REWARD</div><div class="val" style="color:#D4FF3A">+45¢</div></div>
+          <div class="d6-stat"><div class="lbl">PLAYERS</div><div class="val">1.8K</div></div>
+          <div class="d6-stat"><div class="lbl">ENTRY</div><div class="val" style="color:#D4FF3A">FREE</div></div>
+          <div class="d6-btn" style="background:#D4FF3A;color:#050510">Join →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Swimming – paid -->
+    <div class="d6" style="border:1.5px solid rgba(52,211,153,.32)">
+      <img class="cover" src="https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=700&h=420&q=88" alt="">
+      <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(52,211,153,.12) 0%,rgba(5,5,16,.7) 55%)"></div>
+      <div class="d6-top">
+        <div class="badge b-teal">🏊 Swimming</div>
+        <div class="badge b-amber" style="font-size:9px">Weekly</div>
+      </div>
+      <div class="d6-bottom">
+        <div class="T italic" style="font-size:24px;line-height:1.1;margin-bottom:4px">Lap Legends<br>Challenge</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-bottom:12px">20 laps per week · 2 weeks</div>
+        <div class="d6-stats">
+          <div class="d6-stat"><div class="lbl">REWARD</div><div class="val" style="color:#FFB547">+120¢</div></div>
+          <div class="d6-stat"><div class="lbl">PLAYERS</div><div class="val">240</div></div>
+          <div class="d6-stat"><div class="lbl">ENTRY</div><div class="val" style="color:#FFB547">30¢</div></div>
+          <div class="d6-btn" style="background:#FFB547;color:#050510">Join →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Steps – free -->
+    <div class="d6" style="border:1.5px solid rgba(212,255,58,.32)">
+      <img class="cover" src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=700&h=420&q=88" alt="">
+      <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(212,255,58,.12) 0%,rgba(5,5,16,.7) 55%)"></div>
+      <div class="d6-top">
+        <div class="badge b-lo">👟 Steps</div>
+      </div>
+      <div class="d6-bottom">
+        <div class="T italic" style="font-size:24px;line-height:1.1;margin-bottom:4px">10K Daily<br>Steps Challenge</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-bottom:12px">10,000 steps every day · 30 days</div>
+        <div class="d6-stats">
+          <div class="d6-stat"><div class="lbl">REWARD</div><div class="val" style="color:#D4FF3A">+30¢</div></div>
+          <div class="d6-stat"><div class="lbl">PLAYERS</div><div class="val">3.2K</div></div>
+          <div class="d6-stat"><div class="lbl">ENTRY</div><div class="val" style="color:#D4FF3A">FREE</div></div>
+          <div class="d6-btn" style="background:#D4FF3A;color:#050510">Join →</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider"></div>
+<div style="margin-top:28px;display:flex;align-items:center;gap:10px">
+  <div class="badge b-lime">StepUp</div>
+  <p style="font-size:12px;color:#6B7280">Reply <b style="color:#fff">1</b> or <b style="color:#fff">6</b> — I'll implement it straight into the app</p>
+</div>
+
+</body>
+</html>

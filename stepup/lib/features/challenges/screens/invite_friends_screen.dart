@@ -57,17 +57,23 @@ class _InviteFriendsScreenState
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
                     children: [
-                      Row(children: [
-                        IconButton(
-                          onPressed: () => context.pop(),
-                          icon: const Icon(
-                              Icons.arrow_back_rounded,
-                              color: Colors.white),
-                        ),
-                        Text('Invite Friends',
-                            style: AppTheme.bigNum(24)),
-                      ]),
-                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () => context.pop(),
+                            child: Text('← Back',
+                                style: AppTheme.label(13, color: AppTheme.ink2)),
+                          ),
+                          Text('2 / 2',
+                              style: AppTheme.label(11, color: AppTheme.ink2)),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text('INVITE', style: AppTheme.bigNum(28)),
+                      Text('YOUR SQUAD',
+                          style: AppTheme.bigNum(28, color: AppTheme.voltLime)),
+                      const SizedBox(height: 8),
 
                       if (_challenge != null)
                         Container(
@@ -78,7 +84,7 @@ class _InviteFriendsScreenState
                                 BorderRadius.circular(14),
                             border: Border.all(
                                 color: AppTheme.voltLime
-                                    .withOpacity(0.3)),
+                                    .withValues(alpha: 0.3)),
                           ),
                           child: Row(children: [
                             const Icon(
@@ -185,12 +191,22 @@ class _InviteFriendsScreenState
                       ]),
                       const Spacer(),
 
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => context.go('/home'),
-                          child: const Text(
-                              'Done — Go to Home'),
+                      GestureDetector(
+                        onTap: () => context.go('/home'),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color: AppTheme.amber.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: AppTheme.amber.withValues(alpha: 0.4)),
+                          ),
+                          child: Center(
+                            child: Text('Done — Go to Home',
+                                style: AppTheme.label(14, color: AppTheme.amber)
+                                    .copyWith(fontWeight: FontWeight.w700)),
+                          ),
                         ),
                       ),
                     ]),
@@ -220,9 +236,9 @@ class _ShareBtn extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withOpacity(0.2)),
+              border: Border.all(color: color.withValues(alpha: 0.2)),
             ),
             child: Column(children: [
               Icon(icon, color: color, size: 22),

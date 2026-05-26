@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StepUp — Design 5 Variants</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:    #050510;
+  --surf:  #0D0D1A;
+  --surf2: #13131F;
+  --lime:  #D4FF3A;
+  --amber: #FFB547;
+  --ink2:  #A3A3B3;
+  --ink3:  #4B5563;
+  --green: #34D399;
+  --red:   #EF4444;
+  --gold:  #FFD700;
+  --silver:#C0C0C0;
+  --bronze:#CD7F32;
+}
+
+body {
+  background: #02020c;
+  font-family: 'Inter', sans-serif;
+  color: #fff;
+  padding: 40px 28px 80px;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 32px; font-weight: 900; color: var(--lime);
+  margin-bottom: 3px;
+}
+.page-sub { font-size: 12px; color: var(--ink3); margin-bottom: 40px; }
+
+.phones-row {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+/* ── PHONE SHELL ── */
+.phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.phone-shell {
+  width: 210px;
+  height: 455px;
+  border-radius: 38px;
+  border: 1.5px solid rgba(255,255,255,0.13);
+  background: #050510;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 12px 50px rgba(0,0,0,0.7);
+  transition: transform .25s, box-shadow .25s;
+}
+.phone-shell:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 60px rgba(212,255,58,0.14);
+}
+
+/* ── STATUS BAR ── */
+.sbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 18px 0; font-size: 9px; font-weight: 700; color: #fff;
+}
+.sbar-r { display: flex; gap: 5px; align-items: center; }
+
+/* ── BOTTOM NAV ── */
+.bot-nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 46px;
+  background: rgba(10,10,22,0.97);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 8px;
+}
+.bn-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 7.5px; color: var(--ink3);
+}
+.bn-item.active { color: var(--lime); }
+.bn-icon { width: 18px; height: 14px; display: flex; align-items: flex-end; justify-content: center; gap: 2px; }
+.bn-icon span { background: currentColor; border-radius: 1px; width: 3px; }
+
+/* Radar common */
+.radar-wrap {
+  position: relative;
+  width: 182px;
+  height: 136px;
+  margin: 2px auto;
+}
+.radar-ring {
+  position: absolute;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+/* member dots — positioned via inline style */
+.rdot {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  flex-direction: column;
+}
+/* center = you */
+.rdot-you {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 10;
+}
+
+/* List rows */
+.lb-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 6px; border-radius: 8px;
+}
+.lb-row.me { background: rgba(212,255,58,0.05); border: 1px solid rgba(212,255,58,0.2); }
+.lb-row.dim { opacity: 0.5; }
+.lb-num {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 12px; font-weight: 900;
+  width: 22px; flex-shrink: 0;
+}
+.lb-av {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--surf2);
+  font-size: 8px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink2); flex-shrink: 0;
+}
+.lb-name { font-size: 9px; font-weight: 600; flex: 1; }
+.lb-pct { font-size: 10px; font-weight: 800; }
+.cutoff-line {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 6.5px; color: var(--red); font-weight: 700;
+  padding: 2px 6px;
+}
+.cutoff-line::before, .cutoff-line::after {
+  content: ''; flex: 1; height: 1px; background: rgba(239,68,68,0.3);
+}
+
+/* design label */
+.d-label { font-family: 'Big Shoulders Display', sans-serif; font-size: 13px; font-weight: 900; color: var(--ink2); }
+.d-name  { font-family: 'Big Shoulders Display', sans-serif; font-size: 19px; font-weight: 900; color: #fff; margin-top:-6px; }
+.d-desc  { font-size: 10.5px; color: var(--ink3); text-align: center; max-width: 180px; line-height: 1.5; }
+
+
+/* ═══════════════════════════════════
+   VARIANT A — ORBIT MEDAL
+   Nav: single compact context bar
+═══════════════════════════════════ */
+
+.va-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 14px 5px;
+}
+.va-nav-league {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 9px 4px 7px; border-radius: 20px;
+  background: rgba(212,255,58,0.12); border: 1px solid rgba(212,255,58,0.3);
+  font-size: 8.5px; font-weight: 800; color: var(--lime);
+}
+.va-nav-league span { font-size: 10px; }
+.va-nav-filter {
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 9px; border-radius: 20px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  font-size: 8px; font-weight: 700; color: var(--ink2);
+}
+.va-nav-filter b { color: #fff; }
+.va-nav-filter svg { opacity: 0.5; }
+
+.va-hero {
+  margin: 0 14px 5px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(212,255,58,0.08) 0%, rgba(212,255,58,0.02) 100%);
+  border: 1px solid rgba(212,255,58,0.18);
+  padding: 7px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.va-hero-left {}
+.va-hero-rank { font-size: 7.5px; color: var(--ink3); }
+.va-hero-big {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 18px; font-weight: 900; color: var(--lime); line-height: 1.1;
+}
+.va-hero-sub { font-size: 7px; color: var(--ink2); }
+.va-hero-badge {
+  padding: 4px 9px; border-radius: 20px;
+  background: rgba(255,181,71,0.15); color: var(--amber);
+  border: 1px solid rgba(255,181,71,0.3);
+  font-size: 7.5px; font-weight: 800;
+}
+
+/* Orbit Medal radar member treatments */
+.rdot-gold {
+  width: 28px; height: 28px;
+  background: rgba(255,215,0,0.15);
+  border: 2px solid rgba(255,215,0,0.7);
+  box-shadow: 0 0 10px rgba(255,215,0,0.3), inset 0 0 6px rgba(255,215,0,0.1);
+  font-size: 9px; color: var(--gold);
+}
+.rdot-silver {
+  width: 24px; height: 24px;
+  background: rgba(192,192,192,0.12);
+  border: 1.5px solid rgba(192,192,192,0.6);
+  box-shadow: 0 0 6px rgba(192,192,192,0.2);
+  font-size: 8px; color: var(--silver);
+}
+.rdot-bronze {
+  width: 24px; height: 24px;
+  background: rgba(205,127,50,0.12);
+  border: 1.5px solid rgba(205,127,50,0.6);
+  box-shadow: 0 0 6px rgba(205,127,50,0.2);
+  font-size: 8px; color: var(--bronze);
+}
+.rdot-dim {
+  width: 18px; height: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-size: 7px; color: var(--ink3);
+}
+.rdot-faded {
+  width: 16px; height: 16px;
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.2);
+  font-size: 6px; color: rgba(239,68,68,0.6);
+}
+
+/* medal badge floats above dot */
+.medal-badge {
+  position: absolute;
+  top: -9px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px; line-height: 1;
+}
+
+/* you center */
+.va-you {
+  width: 34px; height: 34px;
+  background: rgba(212,255,58,0.12);
+  border: 2px solid rgba(212,255,58,0.6);
+  box-shadow: 0 0 14px rgba(212,255,58,0.35), 0 0 30px rgba(212,255,58,0.08);
+}
+.va-you-rank {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 10px; font-weight: 900; color: var(--lime); line-height: 1;
+}
+.va-you-lbl { font-size: 5.5px; color: rgba(212,255,58,0.7); font-weight: 700; }
+
+/* member name labels */
+.rdot-label {
+  position: absolute;
+  font-size: 6px; font-weight: 700; color: var(--ink3);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* section label */
+.radar-section-label {
+  font-size: 7px; font-weight: 700; color: var(--ink3);
+  letter-spacing: 0.3px;
+  text-align: center;
+  padding: 0 14px 2px;
+}
+
+/* ═══════════════════════════════════
+   VARIANT B — ZONE RINGS
+   Nav: embedded in title header
+═══════════════════════════════════ */
+
+.vb-header {
+  padding: 6px 14px 4px;
+}
+.vb-title-row {
+  display: flex; align-items: baseline; gap: 6px;
+}
+.vb-title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 21px; font-weight: 900;
+}
+.vb-filter-chip {
+  padding: 2px 8px; border-radius: 20px;
+  background: rgba(212,255,58,0.12); border: 1px solid rgba(212,255,58,0.25);
+  font-size: 7.5px; font-weight: 800; color: var(--lime);
+  display: flex; align-items: center; gap: 3px;
+}
+.vb-sub {
+  font-size: 7.5px; color: var(--ink3);
+  margin-top: 1px;
+  display: flex; align-items: center; gap: 5px;
+}
+.vb-league-pip {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: rgba(255,181,71,0.12); border: 1px solid rgba(255,181,71,0.25);
+  border-radius: 20px; padding: 1px 6px;
+  font-size: 6.5px; font-weight: 800; color: var(--amber);
+}
+
+.vb-you-pill {
+  margin: 3px 14px;
+  border-radius: 10px;
+  background: rgba(212,255,58,0.05);
+  border: 1px solid rgba(212,255,58,0.18);
+  padding: 6px 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.vb-you-left {}
+.vb-you-label { font-size: 7px; color: var(--ink3); }
+.vb-you-big {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 22px; font-weight: 900; color: var(--lime); line-height: 1;
+}
+.vb-you-sub { font-size: 7px; color: var(--ink2); }
+.vb-coin {
+  text-align: center;
+  padding: 4px 8px; border-radius: 8px;
+  background: rgba(255,181,71,0.1); border: 1px solid rgba(255,181,71,0.25);
+  font-size: 7px; font-weight: 800; color: var(--amber);
+}
+
+/* Zone ring radar */
+.vb-zone-outer { border: 1px solid rgba(239,68,68,0.15); }
+.vb-zone-mid   { border: 1px solid rgba(255,181,71,0.15); }
+.vb-zone-inner { border: 1px solid rgba(212,255,58,0.25); background: rgba(212,255,58,0.02); }
+
+.rdot-glow-gold {
+  width: 26px; height: 26px;
+  background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(255,215,0,0.05) 100%);
+  border: 2px solid rgba(255,215,0,0.65);
+  box-shadow: 0 0 8px rgba(255,215,0,0.35);
+  font-size: 8px; color: var(--gold);
+}
+.rdot-glow-silver {
+  width: 22px; height: 22px;
+  background: rgba(192,192,192,0.1);
+  border: 1.5px solid rgba(192,192,192,0.55);
+  box-shadow: 0 0 6px rgba(192,192,192,0.18);
+  font-size: 7px; color: var(--silver);
+}
+.rdot-glow-bronze {
+  width: 22px; height: 22px;
+  background: rgba(205,127,50,0.1);
+  border: 1.5px solid rgba(205,127,50,0.55);
+  box-shadow: 0 0 6px rgba(205,127,50,0.18);
+  font-size: 7px; color: var(--bronze);
+}
+
+/* zone labels on ring edges */
+.zone-label {
+  position: absolute;
+  font-size: 5.5px; font-weight: 800; letter-spacing: 0.3px;
+  right: -1px; top: 50%; transform: translateY(-50%);
+  padding: 1px 3px; border-radius: 3px;
+}
+
+/* ═══════════════════════════════════
+   VARIANT C — STELLAR CONSTELLATIONS
+   Nav: 2 icon-only tabs top-right
+═══════════════════════════════════ */
+
+.vc-topbar {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 7px 14px 4px;
+}
+.vc-title-col {}
+.vc-title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 21px; font-weight: 900;
+}
+.vc-sub { font-size: 7.5px; color: var(--ink3); }
+
+.vc-icon-tabs {
+  display: flex; gap: 4px; margin-top: 2px;
+}
+.vc-tab-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+.vc-tab-icon.active {
+  background: rgba(212,255,58,0.12);
+  border-color: rgba(212,255,58,0.3);
+}
+
+.vc-filter-row {
+  display: flex; align-items: center; gap: 4px;
+  padding: 0 14px 5px;
+}
+.vc-filter-item {
+  padding: 3px 8px; border-radius: 20px;
+  font-size: 7.5px; font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--ink3);
+}
+.vc-filter-item.active {
+  background: var(--lime); color: #050510;
+  border-color: transparent;
+  font-weight: 800;
+}
+
+.vc-hero {
+  margin: 2px 14px 4px;
+  border-radius: 12px;
+  background: rgba(212,255,58,0.05);
+  border: 1px solid rgba(212,255,58,0.16);
+  padding: 6px 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.vc-hero-num {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 28px; font-weight: 900; color: var(--lime); line-height: 1;
+}
+.vc-hero-right { flex: 1; }
+.vc-hero-label { font-size: 7px; color: var(--ink3); }
+.vc-hero-tier { font-size: 9px; font-weight: 700; color: var(--ink2); }
+.vc-hero-badge {
+  padding: 3px 8px; border-radius: 20px;
+  background: rgba(255,181,71,0.12); border: 1px solid rgba(255,181,71,0.28);
+  color: var(--amber); font-size: 7px; font-weight: 800;
+}
+
+/* Stellar radar - dots with constellation lines */
+.constellation-line {
+  position: absolute;
+  background: rgba(212,255,58,0.08);
+  height: 1px;
+  transform-origin: left center;
+}
+
+.rdot-star-gold {
+  width: 26px; height: 26px;
+  background: rgba(255,215,0,0.12);
+  border: 1.5px solid rgba(255,215,0,0.6);
+  box-shadow: 0 0 10px rgba(255,215,0,0.25), 0 0 20px rgba(255,215,0,0.08);
+  font-size: 8px; color: var(--gold);
+}
+.rdot-star-silver {
+  width: 22px; height: 22px;
+  background: rgba(192,192,192,0.08);
+  border: 1.5px solid rgba(192,192,192,0.5);
+  font-size: 7px; color: var(--silver);
+}
+.rdot-star-bronze {
+  width: 22px; height: 22px;
+  background: rgba(205,127,50,0.08);
+  border: 1.5px solid rgba(205,127,50,0.5);
+  font-size: 7px; color: var(--bronze);
+}
+.rdot-neutral {
+  width: 18px; height: 18px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 6.5px; color: var(--ink3);
+}
+.rdot-danger {
+  width: 16px; height: 16px;
+  background: rgba(239,68,68,0.05);
+  border: 1px solid rgba(239,68,68,0.18);
+  font-size: 6px; color: rgba(239,68,68,0.5);
+}
+
+/* ═══════════════════════════════════
+   VARIANT D — PULSE RING
+   Nav: floating pill + swipe dots
+═══════════════════════════════════ */
+
+.vd-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 7px 14px 4px;
+}
+.vd-title-col {}
+.vd-title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 21px; font-weight: 900;
+}
+.vd-sub { font-size: 7.5px; color: var(--ink3); }
+.vd-league-chip {
+  margin-top: 3px;
+  padding: 3px 8px; border-radius: 20px;
+  background: rgba(212,255,58,0.12); border: 1px solid rgba(212,255,58,0.28);
+  font-size: 7.5px; font-weight: 800; color: var(--lime);
+  display: flex; align-items: center; gap: 3px;
+}
+
+.vd-filter-dots {
+  display: flex; align-items: center; gap: 6px;
+  padding: 2px 14px 5px;
+}
+.vd-filter-dot {
+  font-size: 7.5px; font-weight: 700; color: var(--ink3);
+}
+.vd-filter-dot.active { color: var(--lime); }
+.vd-dot-indicator {
+  display: flex; gap: 3px; align-items: center; margin-left: auto;
+}
+.vd-dot-indicator span {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--ink3);
+}
+.vd-dot-indicator span.active {
+  width: 12px; border-radius: 2px;
+  background: var(--lime);
+}
+
+.vd-you-ring-card {
+  margin: 2px 14px 4px;
+  border-radius: 12px;
+  background: rgba(212,255,58,0.04);
+  border: 1px solid rgba(212,255,58,0.15);
+  padding: 7px 10px;
+}
+.vd-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+.vd-card-rank {
+  font-size: 7px; color: var(--ink3);
+}
+.vd-card-big {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 19px; font-weight: 900; color: var(--lime); line-height: 1.1;
+}
+.vd-card-sub { font-size: 7px; color: var(--ink2); }
+.vd-card-badge {
+  padding: 3px 8px; border-radius: 20px;
+  background: rgba(255,181,71,0.12); border: 1px solid rgba(255,181,71,0.28);
+  font-size: 7px; font-weight: 800; color: var(--amber);
+}
+.vd-progress { height: 2.5px; background: rgba(255,255,255,0.07); border-radius: 3px; }
+.vd-progress-fill { height: 100%; width: 84%; background: linear-gradient(90deg, var(--lime), #a8ff00); border-radius: 3px; }
+.vd-progress-labels { display: flex; justify-content: space-between; margin-top: 2px; font-size: 5.5px; color: var(--ink3); }
+
+/* Pulse ring radar */
+.rdot-pulse-gold {
+  width: 28px; height: 28px;
+  background: rgba(255,215,0,0.13);
+  border: 2px solid rgba(255,215,0,0.65);
+  box-shadow: 0 0 10px rgba(255,215,0,0.3);
+  font-size: 8px; color: var(--gold);
+}
+.rdot-pulse-silver {
+  width: 24px; height: 24px;
+  background: rgba(192,192,192,0.1);
+  border: 1.5px solid rgba(192,192,192,0.6);
+  font-size: 8px; color: var(--silver);
+}
+.rdot-pulse-bronze {
+  width: 24px; height: 24px;
+  background: rgba(205,127,50,0.1);
+  border: 1.5px solid rgba(205,127,50,0.6);
+  font-size: 8px; color: var(--bronze);
+}
+
+/* SHARED: SVG battery/signal icons */
+svg { display: block; }
+</style>
+</head>
+<body>
+
+<div class="page-title">Design 5 — Variants</div>
+<div class="page-sub">Full orbit radar · top 3 distinct · creative nav</div>
+
+<div class="phones-row">
+
+<!-- ════════════════════════════════
+     VARIANT A — ORBIT MEDAL
+════════════════════════════════ -->
+<div class="phone-wrap">
+  <div class="phone-shell" style="background: radial-gradient(ellipse at 50% 5%, #0b0b1e 0%, #050510 55%);">
+
+    <!-- status -->
+    <div class="sbar">
+      <span>10:08</span>
+      <div class="sbar-r">
+        <svg width="12" height="8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+        <svg width="10" height="8"><path d="M5 2C2.5 2 0.5 3.5 0 5.5L1.5 5.5C2 4.3 3.4 3.5 5 3.5S8 4.3 8.5 5.5L10 5.5C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+        <svg width="21" height="9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".4"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".4"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+      </div>
+    </div>
+
+    <!-- NAV A: single compact context bar -->
+    <div class="va-nav">
+      <div class="va-nav-league"><span>🏆</span> League</div>
+      <div class="va-nav-filter">
+        <b>This challenge</b>
+        <svg width="8" height="5" viewBox="0 0 8 5"><path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+
+    <!-- hero -->
+    <div class="va-hero">
+      <div class="va-hero-left">
+        <div class="va-hero-rank">You · #14 of 92</div>
+        <div class="va-hero-big">Top 16% ★</div>
+        <div class="va-hero-sub">7-Day Gym · Day 4 of 7</div>
+      </div>
+      <div class="va-hero-badge">+200¢ on track</div>
+    </div>
+
+    <!-- RADAR: Full Orbit -->
+    <div class="radar-section-label">RANKING ORBIT</div>
+    <div class="radar-wrap" style="height:148px;">
+      <!-- rings -->
+      <div class="radar-ring" style="width:130px;height:130px;border:1px solid rgba(212,255,58,0.08);"></div>
+      <div class="radar-ring" style="width:88px;height:88px;border:1px solid rgba(212,255,58,0.06);"></div>
+      <div class="radar-ring" style="width:48px;height:48px;border:1px solid rgba(212,255,58,0.1);"></div>
+
+      <!-- #1 Aarav — 12 o'clock — GOLD -->
+      <div class="rdot rdot-gold" style="top:calc(50% - 58px);left:50%;width:28px;height:28px;font-size:9px;color:var(--gold);">
+        <div class="medal-badge">👑</div>
+        A
+      </div>
+      <div class="rdot-label" style="top:calc(50% - 76px);left:50%;transform:translateX(-50%);font-size:6px;color:var(--gold);">#1 Aarav M</div>
+
+      <!-- #2 Sneha — 10 o'clock — SILVER -->
+      <div class="rdot rdot-silver" style="top:calc(50% - 30px);left:calc(50% - 55px);width:24px;height:24px;font-size:8px;color:var(--silver);">
+        S
+      </div>
+      <div class="rdot-label" style="top:calc(50% - 42px);left:calc(50% - 80px);font-size:5.5px;color:var(--silver);">#2 Sneha</div>
+
+      <!-- #3 Vikram — 2 o'clock — BRONZE -->
+      <div class="rdot rdot-bronze" style="top:calc(50% - 30px);left:calc(50% + 43px);width:24px;height:24px;font-size:8px;color:var(--bronze);">
+        V
+      </div>
+      <div class="rdot-label" style="top:calc(50% - 42px);left:calc(50% + 52px);font-size:5.5px;color:var(--bronze);">#3 Vikram</div>
+
+      <!-- #5 Priya — 3 o'clock (right) -->
+      <div class="rdot rdot-dim" style="top:50%;left:calc(50% + 60px);width:18px;height:18px;font-size:7px;">P</div>
+      <div class="rdot-label" style="top:calc(50% + 11px);left:calc(50% + 56px);font-size:5.5px;">#5</div>
+
+      <!-- #8 Dev — 4 o'clock -->
+      <div class="rdot rdot-dim" style="top:calc(50% + 28px);left:calc(50% + 50px);width:18px;height:18px;font-size:7px;">D</div>
+
+      <!-- #46 Last — 9 o'clock (left) — faded -->
+      <div class="rdot rdot-faded" style="top:50%;left:calc(50% - 61px);width:18px;height:18px;font-size:6px;border-color:rgba(255,181,71,0.3);color:var(--amber);">L</div>
+      <div class="rdot-label" style="top:calc(50% + 11px);left:calc(50% - 72px);font-size:5.5px;color:rgba(255,181,71,0.6);">#46</div>
+
+      <!-- #47 Rohit — 8 o'clock — red/below cutoff -->
+      <div class="rdot rdot-faded" style="top:calc(50% + 28px);left:calc(50% - 56px);width:16px;height:16px;font-size:6px;">R</div>
+
+      <!-- YOU — center -->
+      <div class="rdot-you va-you" style="width:34px;height:34px;">
+        <div class="va-you-rank">#14</div>
+        <div class="va-you-lbl">YOU</div>
+      </div>
+      <!-- outer glow pulse ring -->
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;border:1px solid rgba(212,255,58,0.2);pointer-events:none;"></div>
+    </div>
+
+    <!-- list -->
+    <div style="padding: 0 12px; display: flex; flex-direction: column; gap: 2px;">
+      <div class="lb-row me">
+        <div class="lb-num" style="color:var(--lime);">#14</div>
+        <div class="lb-av" style="background:rgba(212,255,58,0.15);color:var(--lime);">Y</div>
+        <div class="lb-name" style="color:var(--lime);">You</div>
+        <div class="lb-pct" style="color:var(--lime);">100%</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-num" style="color:var(--ink3);">#46</div>
+        <div class="lb-av">L</div>
+        <div class="lb-name" style="color:var(--ink2);">Last top 50%</div>
+        <div class="lb-pct" style="color:var(--ink3);">75%</div>
+      </div>
+      <div class="cutoff-line">Top 50% cutoff</div>
+      <div class="lb-row dim">
+        <div class="lb-num" style="color:var(--ink3);">#47</div>
+        <div class="lb-av">R</div>
+        <div class="lb-name" style="color:var(--ink3);">Rohit S</div>
+        <div class="lb-pct" style="color:var(--ink3);">71%</div>
+      </div>
+      <div class="lb-row dim" style="opacity:0.3;">
+        <div class="lb-num" style="color:var(--ink3);">#48</div>
+        <div class="lb-av">K</div>
+        <div class="lb-name" style="color:var(--ink3);">Kavya P</div>
+        <div class="lb-pct" style="color:var(--ink3);">71%</div>
+      </div>
+    </div>
+
+    <!-- bottom nav -->
+    <div class="bot-nav">
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Home</span></div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Chat</span></div>
+      <div class="bn-item active">
+        <div class="bn-icon"><span style="height:5px;"></span><span style="height:8px;"></span><span style="height:11px;"></span></div>
+        <span>Lead</span>
+      </div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Coins</span></div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Me</span></div>
+    </div>
+  </div>
+  <div class="d-label">VARIANT A</div>
+  <div class="d-name">Orbit Medal</div>
+  <div class="d-desc">Gold/silver/bronze medal rings · single context bar nav · full orbit with left + right</div>
+</div>
+
+
+<!-- ════════════════════════════════
+     VARIANT B — ZONE RINGS
+════════════════════════════════ -->
+<div class="phone-wrap">
+  <div class="phone-shell" style="background: radial-gradient(ellipse at 50% 8%, #080d14 0%, #050510 50%);">
+
+    <div class="sbar">
+      <span>10:08</span>
+      <div class="sbar-r">
+        <svg width="12" height="8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+        <svg width="10" height="8"><path d="M5 2C2.5 2 0.5 3.5 0 5.5L1.5 5.5C2 4.3 3.4 3.5 5 3.5S8 4.3 8.5 5.5L10 5.5C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+        <svg width="21" height="9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".4"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".4"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+      </div>
+    </div>
+
+    <!-- NAV B: title carries the filter inline -->
+    <div class="vb-header">
+      <div class="vb-title-row">
+        <div class="vb-title">Leaderboard</div>
+        <div class="vb-filter-chip">
+          This challenge
+          <svg width="7" height="5" viewBox="0 0 8 5"><path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div class="vb-sub">
+        <div class="vb-league-pip">🏆 League</div>
+        7-Day Gym · Day 4 of 7
+      </div>
+    </div>
+
+    <!-- you pill -->
+    <div class="vb-you-pill">
+      <div class="vb-you-left">
+        <div class="vb-you-label">Your ranking</div>
+        <div class="vb-you-big">#14</div>
+        <div class="vb-you-sub">Top 16% · 92 participants</div>
+      </div>
+      <div class="vb-coin">On track<br>+200¢</div>
+    </div>
+
+    <!-- RADAR: Zone Rings - colored rings by tier -->
+    <div class="radar-section-label" style="color:var(--ink3);">COMPETITIVE ZONE</div>
+    <div class="radar-wrap" style="height:148px;">
+      <!-- outer zone: red (danger / below cutoff) -->
+      <div class="radar-ring vb-zone-outer" style="width:136px;height:136px;"></div>
+      <!-- middle zone: amber (near cutoff) -->
+      <div class="radar-ring vb-zone-mid" style="width:100px;height:100px;background:rgba(255,181,71,0.015);"></div>
+      <!-- inner zone: lime (top tier) -->
+      <div class="radar-ring vb-zone-inner" style="width:62px;height:62px;"></div>
+
+      <!-- zone labels -->
+      <div style="position:absolute;top:50%;right:0;transform:translateY(-50%);font-size:5px;font-weight:800;color:rgba(239,68,68,0.4);letter-spacing:0.3px;">DANGER</div>
+      <div style="position:absolute;top:50%;right:18px;transform:translateY(-50%);font-size:5px;font-weight:800;color:rgba(255,181,71,0.35);letter-spacing:0.3px;">SAFE</div>
+      <div style="position:absolute;top:50%;right:38px;transform:translateY(-50%);font-size:5px;font-weight:800;color:rgba(212,255,58,0.4);letter-spacing:0.3px;">TOP</div>
+
+      <!-- #1 — 12 o'clock — on INNER ring — GOLD GLOW -->
+      <div class="rdot rdot-glow-gold" style="top:calc(50% - 58px);left:50%;width:26px;height:26px;font-size:8px;color:var(--gold);">
+        <div class="medal-badge" style="font-size:9px;">👑</div>
+        A
+      </div>
+
+      <!-- #2 — 10 o'clock — INNER ring — SILVER -->
+      <div class="rdot rdot-glow-silver" style="top:calc(50% - 29px);left:calc(50% - 54px);width:22px;height:22px;font-size:7px;color:var(--silver);">S</div>
+
+      <!-- #3 — 2 o'clock — INNER ring — BRONZE -->
+      <div class="rdot rdot-glow-bronze" style="top:calc(50% - 29px);left:calc(50% + 43px);width:22px;height:22px;font-size:7px;color:var(--bronze);">V</div>
+
+      <!-- #5 — 3 o'clock (right) — MID ring -->
+      <div class="rdot rdot-dim" style="top:50%;left:calc(50% + 57px);width:18px;height:18px;font-size:6.5px;border-color:rgba(255,181,71,0.2);">P</div>
+
+      <!-- #8 — 4 o'clock — MID ring -->
+      <div class="rdot rdot-dim" style="top:calc(50% + 28px);left:calc(50% + 48px);width:17px;height:17px;font-size:6.5px;border-color:rgba(255,181,71,0.2);">D</div>
+
+      <!-- #46 Last — 9 o'clock (left) — MID/OUTER boundary -->
+      <div class="rdot rdot-dim" style="top:50%;left:calc(50% - 58px);width:18px;height:18px;font-size:6.5px;border-color:rgba(239,68,68,0.25);color:rgba(239,68,68,0.5);">L</div>
+
+      <!-- #47 Rohit — 8 o'clock — OUTER ring (danger) -->
+      <div class="rdot rdot-faded" style="top:calc(50% + 28px);left:calc(50% - 52px);width:16px;height:16px;font-size:6px;">R</div>
+
+      <!-- YOU — center LIME -->
+      <div class="rdot-you va-you" style="width:34px;height:34px;">
+        <div class="va-you-rank">#14</div>
+        <div class="va-you-lbl">YOU</div>
+      </div>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;border:1px solid rgba(212,255,58,0.18);pointer-events:none;"></div>
+    </div>
+
+    <!-- list -->
+    <div style="padding: 0 12px; display: flex; flex-direction: column; gap: 2px;">
+      <div class="lb-row">
+        <div class="lb-num" style="color:var(--gold);">#1</div>
+        <div class="lb-av" style="background:rgba(255,215,0,0.12);color:var(--gold);">A</div>
+        <div class="lb-name">Aarav M</div>
+        <div class="lb-pct" style="color:var(--gold);">100%</div>
+      </div>
+      <div class="lb-row me">
+        <div class="lb-num" style="color:var(--lime);">#14</div>
+        <div class="lb-av" style="background:rgba(212,255,58,0.15);color:var(--lime);">Y</div>
+        <div class="lb-name" style="color:var(--lime);">You</div>
+        <div class="lb-pct" style="color:var(--lime);">100%</div>
+      </div>
+      <div class="lb-row">
+        <div class="lb-num" style="color:var(--ink3);">#46</div>
+        <div class="lb-av">L</div>
+        <div class="lb-name" style="color:var(--ink2);">Last top 50%</div>
+        <div class="lb-pct" style="color:var(--ink3);">75%</div>
+      </div>
+      <div class="cutoff-line">Top 50% cutoff</div>
+      <div class="lb-row dim">
+        <div class="lb-num" style="color:var(--ink3);">#47</div>
+        <div class="lb-av">R</div>
+        <div class="lb-name" style="color:var(--ink3);">Rohit S</div>
+        <div class="lb-pct" style="color:var(--ink3);">71%</div>
+      </div>
+    </div>
+
+    <div class="bot-nav">
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Home</span></div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Chat</span></div>
+      <div class="bn-item active">
+        <div class="bn-icon"><span style="height:5px;"></span><span style="height:8px;"></span><span style="height:11px;"></span></div>
+        <span>Lead</span>
+      </div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Coins</span></div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Me</span></div>
+    </div>
+  </div>
+  <div class="d-label">VARIANT B</div>
+  <div class="d-name">Zone Rings</div>
+  <div class="d-desc">Colored tier zones (top/safe/danger) · filter embedded in title · zone labels on rings</div>
+</div>
+
+
+<!-- ════════════════════════════════
+     VARIANT C — STELLAR
+════════════════════════════════ -->
+<div class="phone-wrap">
+  <div class="phone-shell" style="background: #050510;">
+
+    <div class="sbar">
+      <span>10:08</span>
+      <div class="sbar-r">
+        <svg width="12" height="8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+        <svg width="10" height="8"><path d="M5 2C2.5 2 0.5 3.5 0 5.5L1.5 5.5C2 4.3 3.4 3.5 5 3.5S8 4.3 8.5 5.5L10 5.5C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+        <svg width="21" height="9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".4"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".4"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+      </div>
+    </div>
+
+    <!-- NAV C: title left + 2 icon-only tabs top right -->
+    <div class="vc-topbar">
+      <div class="vc-title-col">
+        <div class="vc-title">Leaderboard</div>
+        <div class="vc-sub">7-Day Gym · Day 4 of 7</div>
+      </div>
+      <div class="vc-icon-tabs">
+        <div class="vc-tab-icon active" title="League">🏆</div>
+        <div class="vc-tab-icon" title="Standings">📊</div>
+      </div>
+    </div>
+
+    <!-- filter row -->
+    <div class="vc-filter-row">
+      <div class="vc-filter-item active">This challenge</div>
+      <div class="vc-filter-item">Friends</div>
+      <div class="vc-filter-item">Global</div>
+    </div>
+
+    <!-- hero -->
+    <div class="vc-hero">
+      <div class="vc-hero-num">#14</div>
+      <div class="vc-hero-right">
+        <div class="vc-hero-label">You · of 92 participants</div>
+        <div class="vc-hero-tier">Top 16% ★ — very strong</div>
+      </div>
+      <div class="vc-hero-badge">+200¢</div>
+    </div>
+
+    <!-- RADAR: Stellar / Constellation -->
+    <div class="radar-section-label" style="margin-top:4px;">STAR MAP</div>
+    <div class="radar-wrap" style="height:148px;">
+      <!-- subtle bg radial -->
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:110px;height:110px;border-radius:50%;background:radial-gradient(circle, rgba(212,255,58,0.04) 0%, transparent 70%);pointer-events:none;"></div>
+
+      <!-- rings (very faint) -->
+      <div class="radar-ring" style="width:134px;height:134px;border:1px dashed rgba(255,255,255,0.05);"></div>
+      <div class="radar-ring" style="width:90px;height:90px;border:1px dashed rgba(255,255,255,0.05);"></div>
+      <div class="radar-ring" style="width:46px;height:46px;border:1px solid rgba(212,255,58,0.08);"></div>
+
+      <!-- constellation lines (SVG) -->
+      <svg style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;" viewBox="0 0 182 148">
+        <!-- center to ring guide lines, very faint -->
+        <line x1="91" y1="74" x2="91" y2="15" stroke="rgba(212,255,58,0.06)" stroke-width="1"/>
+        <line x1="91" y1="74" x2="37" y2="44" stroke="rgba(212,255,58,0.05)" stroke-width="1"/>
+        <line x1="91" y1="74" x2="145" y2="44" stroke="rgba(212,255,58,0.05)" stroke-width="1"/>
+        <!-- cross connections between top 3 -->
+        <line x1="91" y1="15" x2="37" y2="44" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+        <line x1="91" y1="15" x2="145" y2="44" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      </svg>
+
+      <!-- #1 Aarav — 12 o'clock — GOLD STAR -->
+      <div class="rdot rdot-star-gold" style="top:calc(50% - 59px);left:50%;width:26px;height:26px;font-size:8px;color:var(--gold);">
+        <div class="medal-badge">⭐</div>
+        A
+      </div>
+      <div class="rdot-label" style="top:calc(50% - 77px);left:50%;transform:translateX(-50%);color:rgba(255,215,0,0.7);">#1</div>
+
+      <!-- #2 Sneha — 10 o'clock — SILVER -->
+      <div class="rdot rdot-star-silver" style="top:calc(50% - 30px);left:calc(50% - 54px);width:22px;height:22px;font-size:7.5px;color:var(--silver);">S</div>
+      <div class="rdot-label" style="top:calc(50% - 30px);left:calc(50% - 78px);color:rgba(192,192,192,0.7);">#2</div>
+
+      <!-- #3 Vikram — 2 o'clock — BRONZE -->
+      <div class="rdot rdot-star-bronze" style="top:calc(50% - 30px);left:calc(50% + 43px);width:22px;height:22px;font-size:7.5px;color:var(--bronze);">V</div>
+      <div class="rdot-label" style="top:calc(50% - 30px);left:calc(50% + 58px);color:rgba(205,127,50,0.7);">#3</div>
+
+      <!-- #5 — 3 o'clock (RIGHT) -->
+      <div class="rdot rdot-neutral" style="top:50%;left:calc(50% + 58px);width:18px;height:18px;font-size:6.5px;">P</div>
+      <div class="rdot-label" style="top:calc(50% + 11px);left:calc(50% + 56px);">#5</div>
+
+      <!-- #8 — 4 o'clock -->
+      <div class="rdot rdot-neutral" style="top:calc(50% + 28px);left:calc(50% + 48px);width:17px;height:17px;font-size:6.5px;">D</div>
+
+      <!-- #46 — 9 o'clock (LEFT) -->
+      <div class="rdot rdot-neutral" style="top:50%;left:calc(50% - 60px);width:18px;height:18px;font-size:6.5px;border-color:rgba(239,68,68,0.2);color:rgba(239,68,68,0.45);">L</div>
+      <div class="rdot-label" style="top:calc(50% + 11px);left:calc(50% - 68px);color:rgba(239,68,68,0.4);">#46</div>
+
+      <!-- #47 — 8 o'clock -->
+      <div class="rdot rdot-danger" style="top:calc(50% + 28px);left:calc(50% - 52px);width:15px;height:15px;font-size:5.5px;">R</div>
+
+      <!-- YOU — center LIME glow -->
+      <div class="rdot-you va-you" style="width:34px;height:34px;">
+        <div class="va-you-rank">#14</div>
+        <div class="va-you-lbl">YOU</div>
+      </div>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;border:1px solid rgba(212,255,58,0.15);pointer-events:none;"></div>
+    </div>
+
+    <!-- list -->
+    <div style="padding: 0 12px; display: flex; flex-direction: column; gap: 2px; margin-top: 2px;">
+      <div class="lb-row" style="padding:4px 6px;">
+        <div class="lb-num" style="color:var(--gold);">#1</div>
+        <div class="lb-av" style="background:rgba(255,215,0,0.12);color:var(--gold);">A</div>
+        <div class="lb-name">Aarav M</div>
+        <div class="lb-pct" style="color:var(--gold);">100%</div>
+      </div>
+      <div class="lb-row" style="padding:4px 6px;">
+        <div class="lb-num" style="color:var(--silver);">#2</div>
+        <div class="lb-av" style="background:rgba(192,192,192,0.1);color:var(--silver);">S</div>
+        <div class="lb-name">Sneha R</div>
+        <div class="lb-pct" style="color:var(--silver);">100%</div>
+      </div>
+      <div class="lb-row me" style="padding:4px 6px;">
+        <div class="lb-num" style="color:var(--lime);">#14</div>
+        <div class="lb-av" style="background:rgba(212,255,58,0.15);color:var(--lime);">Y</div>
+        <div class="lb-name" style="color:var(--lime);">You</div>
+        <div class="lb-pct" style="color:var(--lime);">100%</div>
+      </div>
+      <div class="lb-row" style="padding:4px 6px;">
+        <div class="lb-num" style="color:var(--ink3);">#46</div>
+        <div class="lb-av">L</div>
+        <div class="lb-name" style="color:var(--ink2);">Last top 50%</div>
+        <div class="lb-pct" style="color:var(--ink3);">75%</div>
+      </div>
+      <div class="cutoff-line">Top 50% cutoff</div>
+      <div class="lb-row dim" style="padding:4px 6px;">
+        <div class="lb-num" style="color:var(--ink3);">#47</div>
+        <div class="lb-av">R</div>
+        <div class="lb-name" style="color:var(--ink3);">Rohit S</div>
+        <div class="lb-pct" style="color:var(--ink3);">71%</div>
+      </div>
+    </div>
+
+    <div class="bot-nav">
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Home</span></div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Chat</span></div>
+      <div class="bn-item active">
+        <div class="bn-icon"><span style="height:5px;"></span><span style="height:8px;"></span><span style="height:11px;"></span></div>
+        <span>Lead</span>
+      </div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Coins</span></div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Me</span></div>
+    </div>
+  </div>
+  <div class="d-label">VARIANT C</div>
+  <div class="d-name">Stellar</div>
+  <div class="d-desc">Constellation lines between top 3 · ⭐ icon for #1 · 2 icon tabs nav</div>
+</div>
+
+
+<!-- ════════════════════════════════
+     VARIANT D — PULSE RING + SWIPE NAV
+════════════════════════════════ -->
+<div class="phone-wrap">
+  <div class="phone-shell" style="background: radial-gradient(ellipse at 50% 15%, #0a0a1c 0%, #050510 55%);">
+
+    <div class="sbar">
+      <span>10:08</span>
+      <div class="sbar-r">
+        <svg width="12" height="8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+        <svg width="10" height="8"><path d="M5 2C2.5 2 0.5 3.5 0 5.5L1.5 5.5C2 4.3 3.4 3.5 5 3.5S8 4.3 8.5 5.5L10 5.5C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+        <svg width="21" height="9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".4"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".4"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+      </div>
+    </div>
+
+    <!-- NAV D: title + league chip on left, filter swipe dots on right -->
+    <div class="vd-header">
+      <div class="vd-title-col">
+        <div class="vd-title">Leaderboard</div>
+        <div class="vd-sub">7-Day Gym · Day 4 of 7</div>
+      </div>
+      <div class="vd-league-chip">🏆 League</div>
+    </div>
+
+    <!-- filter as swipe dots -->
+    <div class="vd-filter-dots">
+      <div class="vd-filter-dot active">This challenge</div>
+      <div class="vd-dot-indicator">
+        <span class="active"></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <!-- you card with progress -->
+    <div class="vd-you-ring-card">
+      <div class="vd-card-top">
+        <div>
+          <div class="vd-card-rank">You · #14 of 92</div>
+          <div class="vd-card-big">Top 16% ★</div>
+          <div class="vd-card-sub">Well inside the earning zone</div>
+        </div>
+        <div class="vd-card-badge">+200¢</div>
+      </div>
+      <div class="vd-progress"><div class="vd-progress-fill"></div></div>
+      <div class="vd-progress-labels">
+        <span>Top 50% cutoff #46</span>
+        <span style="color:var(--lime);">84% above ✓</span>
+      </div>
+    </div>
+
+    <!-- RADAR: Pulse Ring with gradient sweep -->
+    <div class="radar-section-label" style="margin-top:3px;">ORBIT VIEW</div>
+    <div class="radar-wrap" style="height:148px;">
+
+      <!-- gradient sweep bg (conic) -->
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:120px;height:120px;border-radius:50%;background:conic-gradient(from -90deg, rgba(212,255,58,0.06) 0deg, rgba(212,255,58,0) 120deg, rgba(212,255,58,0) 360deg);pointer-events:none;"></div>
+
+      <!-- rings -->
+      <div class="radar-ring" style="width:130px;height:130px;border:1px solid rgba(212,255,58,0.07);"></div>
+      <div class="radar-ring" style="width:90px;height:90px;border:1px solid rgba(212,255,58,0.06);"></div>
+      <div class="radar-ring" style="width:50px;height:50px;border:1px solid rgba(212,255,58,0.12);"></div>
+
+      <!-- #1 Aarav — 12 o'clock — GOLD PULSE -->
+      <div class="rdot rdot-pulse-gold" style="top:calc(50% - 58px);left:50%;width:28px;height:28px;font-size:9px;color:var(--gold);">
+        <div class="medal-badge">👑</div>
+        A
+      </div>
+
+      <!-- #2 Sneha — 10 o'clock — SILVER -->
+      <div class="rdot rdot-pulse-silver" style="top:calc(50% - 30px);left:calc(50% - 55px);width:24px;height:24px;font-size:8px;color:var(--silver);">S</div>
+      <div class="rdot-label" style="top:calc(50% - 43px);left:calc(50% - 80px);font-size:5.5px;color:rgba(192,192,192,0.6);">#2</div>
+
+      <!-- #3 Vikram — 2 o'clock — BRONZE -->
+      <div class="rdot rdot-pulse-bronze" style="top:calc(50% - 30px);left:calc(50% + 43px);width:24px;height:24px;font-size:8px;color:var(--bronze);">V</div>
+      <div class="rdot-label" style="top:calc(50% - 43px);left:calc(50% + 58px);font-size:5.5px;color:rgba(205,127,50,0.6);">#3</div>
+
+      <!-- #5 — 3 o'clock (RIGHT) -->
+      <div class="rdot rdot-dim" style="top:50%;left:calc(50% + 60px);width:18px;height:18px;font-size:6.5px;">P</div>
+      <div class="rdot-label" style="top:calc(50% + 11px);left:calc(50% + 57px);font-size:5.5px;">#5</div>
+
+      <!-- #8 — 4 o'clock -->
+      <div class="rdot rdot-dim" style="top:calc(50% + 28px);left:calc(50% + 49px);width:17px;height:17px;font-size:6.5px;">D</div>
+
+      <!-- #46 — 9 o'clock (LEFT) — amber (boundary) -->
+      <div class="rdot rdot-dim" style="top:50%;left:calc(50% - 62px);width:18px;height:18px;font-size:6.5px;border-color:rgba(255,181,71,0.3);color:rgba(255,181,71,0.55);">L</div>
+      <div class="rdot-label" style="top:calc(50% + 11px);left:calc(50% - 74px);font-size:5.5px;color:rgba(255,181,71,0.5);">#46</div>
+
+      <!-- #47 Rohit — 8 o'clock — red (danger) -->
+      <div class="rdot rdot-faded" style="top:calc(50% + 28px);left:calc(50% - 53px);width:16px;height:16px;font-size:6px;">R</div>
+
+      <!-- YOU — center -->
+      <div class="rdot-you va-you" style="width:34px;height:34px;">
+        <div class="va-you-rank">#14</div>
+        <div class="va-you-lbl">YOU</div>
+      </div>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;border:1px solid rgba(212,255,58,0.18);pointer-events:none;"></div>
+    </div>
+
+    <!-- list -->
+    <div style="padding: 0 12px; display: flex; flex-direction: column; gap: 2px;">
+      <div class="lb-row" style="padding:4px 6px;">
+        <div class="lb-num" style="color:var(--gold);">#1</div>
+        <div class="lb-av" style="background:rgba(255,215,0,0.12);color:var(--gold);">A</div>
+        <div class="lb-name">Aarav M</div>
+        <div class="lb-pct" style="color:var(--gold);">100%</div>
+      </div>
+      <div class="lb-row me" style="padding:4px 6px;">
+        <div class="lb-num" style="color:var(--lime);">#14</div>
+        <div class="lb-av" style="background:rgba(212,255,58,0.15);color:var(--lime);">Y</div>
+        <div class="lb-name" style="color:var(--lime);">You</div>
+        <div class="lb-pct" style="color:var(--lime);">100%</div>
+      </div>
+      <div class="lb-row" style="padding:4px 6px;">
+        <div class="lb-num" style="color:var(--ink3);">#46</div>
+        <div class="lb-av">L</div>
+        <div class="lb-name" style="color:var(--ink2);">Last top 50%</div>
+        <div class="lb-pct" style="color:var(--ink3);">75%</div>
+      </div>
+      <div class="cutoff-line">Top 50% cutoff</div>
+      <div class="lb-row dim" style="padding:4px 6px;">
+        <div class="lb-num" style="color:var(--ink3);">#47</div>
+        <div class="lb-av">R</div>
+        <div class="lb-name" style="color:var(--ink3);">Rohit S</div>
+        <div class="lb-pct" style="color:var(--ink3);">71%</div>
+      </div>
+    </div>
+
+    <div class="bot-nav">
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Home</span></div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Chat</span></div>
+      <div class="bn-item active">
+        <div class="bn-icon"><span style="height:5px;"></span><span style="height:8px;"></span><span style="height:11px;"></span></div>
+        <span>Lead</span>
+      </div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Coins</span></div>
+      <div class="bn-item"><div class="bn-icon"><span style="height:8px;"></span></div><span>Me</span></div>
+    </div>
+  </div>
+  <div class="d-label">VARIANT D</div>
+  <div class="d-name">Pulse Ring</div>
+  <div class="d-desc">Conic sweep glow · swipe-dot filter nav · progress bar on hero card</div>
+</div>
+
+</div><!-- /phones-row -->
+
+</body>
+</html>

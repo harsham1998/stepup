@@ -146,6 +146,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white)),
               ]),
               const Spacer(),
+              // Coins
+              GestureDetector(
+                onTap: () => context.push('/coins'),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.monetization_on_rounded, color: AppTheme.amber, size: 20),
+                  const SizedBox(width: 4),
+                  Text('$coins',
+                    style: GoogleFonts.bigShouldersDisplay(
+                      fontSize: 15, fontWeight: FontWeight.w900, color: AppTheme.amber)),
+                ]),
+              ),
+              const SizedBox(width: 14),
               // Bell
               GestureDetector(
                 onTap: () => context.push('/notifications'),
@@ -211,9 +223,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 ),
-                Text('STEPS  ·  ${distKm.toStringAsFixed(1)} KM',
-                  style: AppTheme.label(11, color: AppTheme.ink2)
-                    .copyWith(letterSpacing: 0.5, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 12),
                 // Progress bar
                 ClipRRect(
@@ -230,7 +239,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Row(children: [
                   _StatCell(icon: Icons.bolt_rounded, value: distKm.toStringAsFixed(1), label: 'KM'),
                   _StatDivider(),
-                  _StatCell(icon: Icons.favorite_border_rounded, value: '$kcal', label: 'KCAL'),
+                  _StatCell(icon: Icons.favorite_border_rounded, value: '$kcal', label: 'KCAL', emoji: '🔥'),
                   _StatDivider(),
                   _StatCell(icon: Icons.access_time_rounded, value: '$activeMins', label: 'MIN'),
                   _StatDivider(),
@@ -238,6 +247,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     icon: Icons.monitor_heart_outlined,
                     value: bpm > 0 ? '$bpm' : '--',
                     label: 'BPM',
+                    emoji: '❤️',
                   ),
                 ]),
               ]),
@@ -546,12 +556,15 @@ class _SectionRow extends StatelessWidget {
 class _StatCell extends StatelessWidget {
   final IconData icon;
   final String value, label;
-  const _StatCell({required this.icon, required this.value, required this.label});
+  final String? emoji;
+  const _StatCell({required this.icon, required this.value, required this.label, this.emoji});
 
   @override
   Widget build(BuildContext context) => Expanded(
         child: Column(children: [
-          Icon(icon, color: AppTheme.ink2, size: 16),
+          emoji != null
+              ? Text(emoji!, style: const TextStyle(fontSize: 14, height: 1.1))
+              : Icon(icon, color: AppTheme.ink2, size: 16),
           const SizedBox(height: 4),
           Text(value,
             style: GoogleFonts.bigShouldersDisplay(
@@ -687,48 +700,33 @@ class _MissionCard extends StatelessWidget {
                   ),
                 ),
 
-              // ── Top-right: % floating glass chip ─────────────────
-              Positioned(
-                top: 9, right: 9,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(7, 3, 7, 4),
-                      decoration: BoxDecoration(
-                        color: done
-                            ? AppTheme.voltLime.withValues(alpha: 0.15)
-                            : Colors.black.withValues(alpha: 0.45),
-                        border: Border.all(
-                          color: done
-                              ? AppTheme.voltLime.withValues(alpha: 0.2)
-                              : Colors.white.withValues(alpha: 0.1),
+              // ── Top-right: % floating glass chip (active only) ───
+              if (!done)
+                Positioned(
+                  top: 9, right: 9,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.45),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.1),
+                          ),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('$pct%',
-                            style: GoogleFonts.bigShouldersDisplay(
-                              fontSize: 16, fontWeight: FontWeight.w900,
-                              height: 1.0,
-                              color: done ? AppTheme.voltLime : AppTheme.amber,
-                            )),
-                          Text('done',
-                            style: GoogleFonts.inter(
-                              fontSize: 6, letterSpacing: 0.5,
-                              color: done
-                                  ? AppTheme.voltLime.withValues(alpha: 0.55)
-                                  : Colors.white38,
-                            )),
-                        ],
+                        child: Text('$pct%',
+                          style: GoogleFonts.bigShouldersDisplay(
+                            fontSize: 16, fontWeight: FontWeight.w900,
+                            height: 1.0,
+                            color: AppTheme.amber,
+                          )),
                       ),
                     ),
                   ),
                 ),
-              ),
 
               // ── Bottom: icon badge + label + name + bar ───────────
               Positioned(
@@ -754,9 +752,9 @@ class _MissionCard extends StatelessWidget {
                         const SizedBox(width: 7),
                         Text(label.toUpperCase(),
                           style: GoogleFonts.inter(
-                            fontSize: 7, fontWeight: FontWeight.w600,
+                            fontSize: 7, fontWeight: FontWeight.w700,
                             letterSpacing: 1.5,
-                            color: Colors.white38,
+                            color: Colors.white70,
                           )),
                       ]),
                       const SizedBox(height: 6),
@@ -786,10 +784,10 @@ class _MissionCard extends StatelessWidget {
                       Text(
                         done ? 'Complete' : mission.progressLabel,
                         style: GoogleFonts.inter(
-                          fontSize: 7,
+                          fontSize: 8,
                           color: done
-                              ? AppTheme.voltLime.withValues(alpha: 0.5)
-                              : Colors.white38,
+                              ? AppTheme.voltLime.withValues(alpha: 0.6)
+                              : Colors.white60,
                         ),
                       ),
                     ],
@@ -852,16 +850,18 @@ class _ChallengeCard extends StatelessWidget {
   final Challenge challenge;
   const _ChallengeCard({required this.challenge});
 
-  static String _imageUrl(String activityType) {
-    const urls = <String, String>{
-      'running': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800&q=80',
-      'gym':     'https://images.unsplash.com/photo-1583454110851-a10b4872a14c?auto=format&fit=crop&w=800&q=80',
-      'cycling': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80',
-      'outdoor': 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=800&q=80',
-      'steps':   'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80',
-      'walking': 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=800&q=80',
+  static String _imageAsset(String activityType, String challengeId) {
+    const images = <String, List<String>>{
+      'running': ['assets/challenges/running_1.jpg', 'assets/challenges/running_2.jpg'],
+      'gym':     ['assets/challenges/gym_1.jpg',     'assets/challenges/gym_2.jpg'],
+      'cycling': ['assets/challenges/cycling_1.jpg', 'assets/challenges/cycling_2.jpg'],
+      'outdoor': ['assets/challenges/outdoor_1.jpg'],
+      'steps':   ['assets/challenges/steps_1.jpg',   'assets/challenges/steps_2.jpg'],
+      'walking': ['assets/challenges/steps_2.jpg',   'assets/challenges/walking_2.jpg'],
     };
-    return urls[activityType.toLowerCase()] ?? urls['steps']!;
+    final paths = images[activityType.toLowerCase()] ?? images['steps']!;
+    if (paths.length == 1) return paths[0];
+    return paths[challengeId.codeUnitAt(challengeId.length - 1) % paths.length];
   }
 
   @override
@@ -884,8 +884,8 @@ class _ChallengeCard extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 Container(color: cfg.colorA.withValues(alpha: 0.2)),
-                Image.network(
-                  _imageUrl(challenge.activityType),
+                Image.asset(
+                  _imageAsset(challenge.activityType, challenge.id),
                   fit: BoxFit.cover,
                   errorBuilder: (_, error, stack) => const SizedBox(),
                 ),

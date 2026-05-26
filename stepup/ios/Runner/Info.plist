@@ -76,5 +76,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>StepUp needs access to your photo library to set your profile picture.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>StepUp needs camera access to take your profile picture.</string>
 </dict>
 </plist>

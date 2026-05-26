@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StepUp — Daily Missions · Immersive</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Inter:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --lime:#D4FF3A;--amber:#FFB547;
+  --bg:#050510;--surf:#0D0D1A;
+  --bdr:rgba(255,255,255,0.07);--ink2:#A3A3B3;--ink3:#4B5563;
+}
+body{background:#020209;color:#fff;font-family:'Inter',sans-serif;
+  padding:56px 40px 120px;min-height:100vh}
+
+/* ─── PAGE HEADER ─── */
+.ph{max-width:620px;margin:0 auto 72px}
+.ph-eye{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--lime);opacity:.8;margin-bottom:10px}
+.ph-title{font-family:'Big Shoulders Display',sans-serif;
+  font-size:clamp(40px,5vw,64px);font-weight:900;line-height:.9}
+.ph-sub{font-size:13px;color:var(--ink2);margin-top:12px;line-height:1.7}
+
+/* ─── SECTION TITLE ─── */
+.section{margin-bottom:64px}
+.sec-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2.5px;
+  text-transform:uppercase;color:var(--ink3);margin-bottom:6px}
+.sec-title{font-family:'Big Shoulders Display',sans-serif;font-size:28px;font-weight:900;
+  margin-bottom:4px}
+.sec-sub{font-size:12px;color:var(--ink2);margin-bottom:32px;line-height:1.5}
+
+/* ─── PHONES ROW ─── */
+.phones-row{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.phone-col{display:flex;flex-direction:column;gap:12px;align-items:center}
+.var-label{text-align:center;max-width:220px}
+.var-letter{font-family:'Big Shoulders Display',sans-serif;font-size:44px;font-weight:900;
+  line-height:1;color:rgba(255,255,255,.05)}
+.var-name{font-family:'Big Shoulders Display',sans-serif;font-size:18px;font-weight:900;letter-spacing:-.2px}
+.var-desc{font-size:11px;color:var(--ink2);margin-top:3px;line-height:1.5}
+
+/* ─── PHONE FRAME ─── */
+.phone{
+  width:240px;background:#07071A;border-radius:36px;
+  border:1.5px solid rgba(255,255,255,0.09);
+  padding:40px 0 24px;position:relative;overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.phone::before{content:'';position:absolute;top:12px;left:50%;
+  transform:translateX(-50%);width:60px;height:18px;
+  background:#000;border-radius:9px;z-index:20}
+/* taller phone for detail screen */
+.phone.tall{width:280px;border-radius:40px}
+.phone.tall::before{width:70px;height:20px}
+
+/* ─── HOME SCREEN CHROME ─── */
+.hs-header{padding:0 14px;display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.hs-avatar{width:34px;height:34px;border-radius:50%;background:var(--amber);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Big Shoulders Display',sans-serif;font-size:16px;font-weight:900;
+  color:#050510;flex-shrink:0}
+.hs-name{font-family:'Big Shoulders Display',sans-serif;font-size:16px;font-weight:900;line-height:1}
+.hs-date{font-size:9px;color:var(--ink2)}
+.hs-icon-row{margin-left:auto;display:flex;gap:10px;opacity:.55}
+.hs-icon-row svg{width:16px;height:16px}
+
+.hs-steps-card{margin:0 14px 14px;background:var(--surf);
+  border:1px solid var(--bdr);border-radius:12px;padding:11px 12px}
+.hs-sr{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.hs-streak{background:var(--lime);border-radius:20px;padding:2px 8px;
+  font-family:'Big Shoulders Display',sans-serif;font-size:9px;font-weight:900;color:#050510}
+.hs-goal{font-size:9px;color:var(--ink2)}
+.hs-steps-num{font-family:'Big Shoulders Display',sans-serif;font-size:42px;font-weight:900;
+  color:var(--lime);line-height:.95;margin:2px 0}
+.hs-steps-lbl{font-size:8px;color:var(--ink2);letter-spacing:.5px;margin-bottom:7px}
+.hs-bar{height:2px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin-bottom:8px}
+.hs-bar-fill{height:100%;width:52%;background:var(--lime);border-radius:99px}
+.hs-stats{display:flex}
+.hs-stat{flex:1;text-align:center;border-right:1px solid rgba(255,255,255,.06)}
+.hs-stat:last-child{border-right:none}
+.hs-sv{font-family:'Big Shoulders Display',sans-serif;font-size:12px;font-weight:900;color:#fff}
+.hs-sl{font-size:7px;color:var(--ink3);letter-spacing:.5px}
+
+.hs-shdr{display:flex;align-items:center;padding:0 14px;margin-bottom:8px}
+.hs-stitle{font-family:'Big Shoulders Display',sans-serif;font-size:14px;font-weight:900}
+.hs-sbadge{margin-left:7px;background:rgba(212,255,58,0.12);border:1px solid rgba(212,255,58,0.25);
+  border-radius:20px;padding:1px 6px;font-size:8px;font-weight:700;color:var(--lime)}
+.hs-ssee{margin-left:auto;font-size:9px;color:var(--ink2)}
+
+/* ─── MISSION SCROLL TRACK ─── */
+.mscroll{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;
+  padding:0 14px 2px;scrollbar-width:none;height:164px;align-items:center}
+.mscroll::-webkit-scrollbar{display:none}
+
+
+/* ════════════════════════════════════════════════════
+   VARIATION A — CLEAN
+   Activity label top-left · Icon centered · Info bottom
+   ════════════════════════════════════════════════════ */
+.va{
+  width:108px;height:158px;border-radius:13px;flex-shrink:0;
+  position:relative;overflow:hidden;cursor:pointer;
+}
+.va img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;filter:brightness(.58) saturate(.88)}
+/* dual gradient: light scrim top, heavy bottom */
+.va::after{
+  content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(to bottom, rgba(5,5,16,.5) 0%, transparent 30%),
+    linear-gradient(to top, rgba(5,5,16,1) 0%, rgba(5,5,16,.75) 35%, transparent 65%);
+  z-index:1;
+}
+/* done state */
+.va.done img{filter:brightness(.2) saturate(.05)}
+.va.done::after{background:rgba(5,5,16,.55);
+  box-shadow:inset 0 0 0 1.5px rgba(212,255,58,.3)}
+
+.va-label{position:absolute;top:9px;left:9px;z-index:3;
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1.5px;
+  text-transform:uppercase;color:rgba(255,255,255,.6)}
+.va-coin{position:absolute;top:8px;right:8px;z-index:3;
+  background:var(--amber);border-radius:99px;
+  padding:2px 6px;font-size:8px;font-weight:800;color:#050510;
+  font-family:'Big Shoulders Display',sans-serif;letter-spacing:.3px;white-space:nowrap}
+.va.done .va-coin{background:var(--lime);color:#050510}
+
+.va-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-68%);z-index:2}
+.va-icon svg{width:26px;height:26px;stroke:rgba(255,255,255,.9);fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 1px 6px rgba(0,0,0,.7))}
+.va.done .va-icon svg{stroke:rgba(212,255,58,.7)}
+
+/* done checkmark ring replaces icon */
+.va-done-mark{position:absolute;top:50%;left:50%;transform:translate(-50%,-68%);z-index:3;
+  width:28px;height:28px;border-radius:50%;
+  border:1.5px solid rgba(212,255,58,.6);
+  display:flex;align-items:center;justify-content:center;
+  display:none}
+.va.done .va-done-mark{display:flex}
+.va.done .va-icon{display:none}
+.va-done-mark svg{width:13px;height:13px;stroke:var(--lime);stroke-width:2.5;
+  fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+.va-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:8px 9px 9px}
+.va-name{font-family:'Big Shoulders Display',sans-serif;font-size:12px;font-weight:900;
+  line-height:1.15;margin-bottom:5px;color:#fff}
+.va.done .va-name{color:rgba(212,255,58,.8)}
+.va-bar{height:2px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;margin-bottom:3px}
+.va-bar-fill{height:100%;background:var(--amber);border-radius:99px}
+.va.done .va-bar-fill{background:var(--lime);width:100%!important}
+.va-prog{font-size:7px;color:rgba(255,255,255,.45)}
+.va.done .va-prog{color:rgba(212,255,58,.55)}
+
+
+/* ════════════════════════════════════════════════════
+   VARIATION B — PERCENTAGE HERO
+   Giant % is the visual anchor · image as texture
+   ════════════════════════════════════════════════════ */
+.vb{
+  width:112px;height:158px;border-radius:13px;flex-shrink:0;
+  position:relative;overflow:hidden;cursor:pointer;
+}
+.vb img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;filter:brightness(.4) saturate(.6)}
+.vb::after{content:'';position:absolute;inset:0;
+  background:rgba(5,5,16,.52);z-index:1}
+.vb.done img{filter:brightness(.18) saturate(.05)}
+.vb.done::after{background:rgba(5,5,16,.45);
+  box-shadow:inset 0 0 0 1.5px rgba(212,255,58,.3)}
+
+.vb-top{position:absolute;top:9px;left:9px;right:9px;z-index:2;
+  display:flex;justify-content:space-between;align-items:center}
+.vb-act{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1.5px;
+  text-transform:uppercase;color:rgba(255,255,255,.45)}
+.vb-icon svg{width:14px;height:14px;stroke:rgba(255,255,255,.4);fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vb.done .vb-icon svg{stroke:rgba(212,255,58,.5)}
+
+/* big number */
+.vb-pct{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);z-index:2;
+  text-align:center;
+}
+.vb-pct-num{
+  font-family:'Big Shoulders Display',sans-serif;font-size:52px;font-weight:900;
+  color:var(--lime);line-height:.9;display:block;letter-spacing:-2px;
+}
+.vb.done .vb-pct-num{font-size:44px}
+.vb-pct-label{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1.5px;
+  color:rgba(255,255,255,.35);display:block;margin-top:3px;text-transform:uppercase}
+
+.vb-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;
+  padding:6px 9px 8px;
+  background:linear-gradient(to top,rgba(5,5,16,.95) 0%,transparent 100%)}
+.vb-name{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;
+  color:rgba(255,255,255,.7);line-height:1.2;margin-bottom:3px}
+.vb.done .vb-name{color:rgba(212,255,58,.65)}
+.vb-rew{font-family:'Big Shoulders Display',sans-serif;font-size:12px;font-weight:900;
+  color:var(--amber)}
+.vb.done .vb-rew{color:rgba(255,255,255,.2);text-decoration:line-through;font-size:9px}
+
+
+/* ════════════════════════════════════════════════════
+   VARIATION C — LAYERED DEPTH
+   Strong dark gradient · icon badge left-aligned ·
+   reward % in top-right content zone · wider card
+   ════════════════════════════════════════════════════ */
+.vc{
+  width:148px;height:158px;border-radius:14px;flex-shrink:0;
+  position:relative;overflow:hidden;cursor:pointer;
+}
+.vc img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;filter:brightness(.55) saturate(.8)}
+/* layered: photo visible top-right, dark zone bottom + left */
+.vc::after{content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(125deg, rgba(5,5,16,.0) 30%, rgba(5,5,16,.65) 70%),
+    linear-gradient(to top, rgba(5,5,16,1) 0%, rgba(5,5,16,.8) 38%, transparent 65%);
+  z-index:1}
+.vc.done img{filter:brightness(.2) saturate(.05)}
+.vc.done::after{background:rgba(5,5,16,.55);
+  box-shadow:inset 0 0 0 1.5px rgba(212,255,58,.28)}
+
+/* top-right: pct badge */
+.vc-pct-badge{
+  position:absolute;top:9px;right:9px;z-index:2;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  padding:3px 7px;text-align:center;
+}
+.vc-pct-n{font-family:'Big Shoulders Display',sans-serif;font-size:16px;font-weight:900;
+  color:var(--amber);line-height:1}
+.vc.done .vc-pct-n{color:var(--lime)}
+.vc-pct-l{font-size:6px;color:rgba(255,255,255,.35);letter-spacing:.5px}
+
+/* bottom content */
+.vc-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:9px 10px}
+.vc-icon-row{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.vc-icon-bg{width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  background:rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center}
+.vc-icon-bg svg{width:15px;height:15px;stroke:rgba(255,255,255,.85);fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vc.done .vc-icon-bg{background:rgba(212,255,58,.12)}
+.vc.done .vc-icon-bg svg{stroke:var(--lime)}
+.vc-act{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1.5px;
+  text-transform:uppercase;color:rgba(255,255,255,.4)}
+.vc-name{font-family:'Big Shoulders Display',sans-serif;font-size:14px;font-weight:900;
+  line-height:1.15;color:#fff;margin-bottom:5px}
+.vc.done .vc-name{color:rgba(212,255,58,.8)}
+.vc-bar{height:2px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;margin-bottom:3px}
+.vc-bar-fill{height:100%;background:var(--amber);border-radius:99px}
+.vc.done .vc-bar-fill{background:var(--lime);width:100%!important}
+.vc-prog{font-size:7px;color:rgba(255,255,255,.38)}
+.vc.done .vc-prog{color:rgba(212,255,58,.5)}
+
+/* done badge floating */
+.vc-done-badge{
+  position:absolute;top:9px;left:9px;z-index:3;
+  background:var(--lime);border-radius:6px;
+  padding:3px 7px;display:none;
+  font-family:'Big Shoulders Display',sans-serif;font-size:10px;font-weight:900;
+  color:#050510;letter-spacing:.3px;
+}
+.vc.done .vc-done-badge{display:block}
+.vc.done .vc-pct-badge{display:none}
+
+
+/* ════════════════════════════════════════════════════
+   DETAIL SCREEN — DAILY MISSIONS LIST
+   Full-screen immersive mission cards, wider, richer info
+   ════════════════════════════════════════════════════ */
+.ds-phone{
+  width:280px;background:#07071A;border-radius:40px;
+  border:1.5px solid rgba(255,255,255,0.09);
+  overflow:hidden;position:relative;
+  box-shadow:0 48px 120px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.ds-phone::before{content:'';position:absolute;top:13px;left:50%;
+  transform:translateX(-50%);width:70px;height:20px;
+  background:#000;border-radius:10px;z-index:30}
+
+/* screen content */
+.ds-screen{padding:42px 0 20px}
+
+/* header */
+.ds-hdr{padding:10px 16px 0;display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.ds-back{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,0.06);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ds-back svg{width:14px;height:14px;stroke:rgba(255,255,255,.7);fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ds-title-col{flex:1}
+.ds-title{font-family:'Big Shoulders Display',sans-serif;font-size:20px;font-weight:900;line-height:1}
+.ds-timer{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
+  color:var(--ink3);margin-top:1px}
+.ds-timer-badge{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;padding:3px 9px;
+  font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.5);
+  white-space:nowrap;
+}
+
+/* summary bar */
+.ds-summary{padding:10px 16px 0;display:flex;justify-content:space-between;align-items:center}
+.ds-summary-text{font-size:10px;color:var(--ink2)}
+.ds-summary-reward{font-family:'Big Shoulders Display',sans-serif;font-size:14px;
+  font-weight:900;color:var(--amber)}
+.ds-pips{display:flex;gap:5px;padding:8px 16px 12px}
+.ds-pip{flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.07)}
+.ds-pip.done{background:var(--lime)}
+
+/* detail mission card */
+.dmc{
+  margin:0 14px 10px;
+  border-radius:14px;overflow:hidden;
+  position:relative;height:100px;flex-shrink:0;cursor:pointer;
+}
+.dmc img{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;filter:brightness(.52) saturate(.8)}
+/* gradient: dark left, lighter right */
+.dmc::after{content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(to bottom, rgba(5,5,16,.35) 0%, transparent 30%),
+    linear-gradient(to top, rgba(5,5,16,1) 0%, rgba(5,5,16,.75) 35%, transparent 70%);
+  z-index:1}
+.dmc.done img{filter:brightness(.22) saturate(.05)}
+.dmc.done::after{background:rgba(5,5,16,.5);
+  box-shadow:inset 0 0 0 1.5px rgba(212,255,58,.25)}
+
+/* top row */
+.dmc-top{position:absolute;top:9px;left:10px;right:10px;z-index:2;
+  display:flex;align-items:center;gap:7px}
+.dmc-icon-pill{
+  background:rgba(0,0,0,.4);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.dmc-icon-pill svg{width:13px;height:13px;stroke:#fff;fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dmc.done .dmc-icon-pill{background:rgba(212,255,58,0.15);border-color:rgba(212,255,58,.2)}
+.dmc.done .dmc-icon-pill svg{stroke:var(--lime)}
+.dmc-act{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1.5px;
+  text-transform:uppercase;color:rgba(255,255,255,.5);flex:1}
+/* claim / done button */
+.dmc-btn{
+  border-radius:99px;padding:4px 9px;
+  font-family:'Big Shoulders Display',sans-serif;font-size:10px;font-weight:900;
+  white-space:nowrap;flex-shrink:0;letter-spacing:.2px;
+}
+.dmc-btn.claimable{background:var(--amber);color:#050510}
+.dmc-btn.claimed{background:rgba(212,255,58,0.15);color:var(--lime);
+  border:1px solid rgba(212,255,58,.3)}
+
+/* bottom info */
+.dmc-bottom{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:7px 10px 8px}
+.dmc-name{font-family:'Big Shoulders Display',sans-serif;font-size:14px;font-weight:900;
+  color:#fff;line-height:1.1;margin-bottom:5px}
+.dmc.done .dmc-name{color:rgba(212,255,58,.8)}
+.dmc-bar{height:2px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;margin-bottom:3px}
+.dmc-bar-fill{height:100%;border-radius:99px;background:var(--amber)}
+.dmc.done .dmc-bar-fill{background:var(--lime);width:100%!important}
+.dmc-meta{font-size:8px;color:rgba(255,255,255,.4);
+  font-family:'DM Mono',monospace;letter-spacing:.3px}
+.dmc.done .dmc-meta{color:rgba(212,255,58,.45)}
+</style>
+</head>
+<body>
+
+<!-- SVG ICONS (reusable) -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Walk -->
+  <symbol id="i-walk" viewBox="0 0 24 24">
+    <circle cx="13" cy="3.5" r="1.8"/>
+    <path d="M9 21l2.5-7 2 2.5L16 12l-2.5-4.5 3-1.5M8 9l5 2"/>
+  </symbol>
+  <!-- Dumbbell -->
+  <symbol id="i-gym" viewBox="0 0 24 24">
+    <path d="M4.5 12h15M7.5 8v8M5.5 9.5v5M16.5 8v8M18.5 9.5v5"/>
+  </symbol>
+  <!-- Water drop -->
+  <symbol id="i-water" viewBox="0 0 24 24">
+    <path d="M12 2.5L6.5 11a6 6 0 1 0 11 0L12 2.5z"/>
+  </symbol>
+  <!-- Run -->
+  <symbol id="i-run" viewBox="0 0 24 24">
+    <circle cx="15" cy="3.5" r="1.8"/>
+    <path d="M6 20l3.5-7.5 2.5 3.5 4-5.5 3 4M16 7.5L13 6l-3 4.5"/>
+  </symbol>
+  <!-- Moon -->
+  <symbol id="i-sleep" viewBox="0 0 24 24">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+  </symbol>
+  <!-- Check -->
+  <symbol id="i-check" viewBox="0 0 24 24">
+    <polyline points="20 6 9 17 4 12"/>
+  </symbol>
+  <!-- Back arrow -->
+  <symbol id="i-back" viewBox="0 0 24 24">
+    <polyline points="15 18 9 12 15 6"/>
+  </symbol>
+</svg>
+
+
+<!-- PAGE HEADER -->
+<div class="ph">
+  <div class="ph-eye">StepUp · Home Screen · Mission Cards</div>
+  <div class="ph-title">Immersive<br>Variations</div>
+  <div class="ph-sub">3 structural takes on the full-bleed photo card — each with a different information hierarchy. Shown in home screen context, 160px tall horizontal scroll. No emojis, proper SVG icons, high-contrast completed states.</div>
+</div>
+
+
+<!-- ═══════════ SECTION 1: HOME SCREEN VARIATIONS ═══════════ -->
+<div class="section">
+  <div class="sec-label">Part 1 of 2</div>
+  <div class="sec-title">Home Screen · 3 Variations</div>
+  <div class="sec-sub">Each phone shows the same 5 missions — walk (in progress), gym (done), water (in progress), run (in progress), sleep (in progress).</div>
+
+  <div class="phones-row">
+
+    <!-- ── VAR A ── -->
+    <div class="phone-col">
+      <div class="var-label">
+        <div class="var-letter">A</div>
+        <div class="var-name">Clean</div>
+        <div class="var-desc">Icon centered in image · info in gradient bottom zone · amber coin badge top-right</div>
+      </div>
+      <div class="phone">
+        <div class="hs-header">
+          <div class="hs-avatar">J</div>
+          <div>
+            <div class="hs-date">Mon · May 25</div>
+            <div class="hs-name">Hey, Jake</div>
+          </div>
+          <div class="hs-icon-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+        </div>
+        <div class="hs-steps-card">
+          <div class="hs-sr"><div class="hs-streak">★ 7D STREAK</div><div class="hs-goal">52% of goal</div></div>
+          <div class="hs-steps-num">5,200</div>
+          <div class="hs-steps-lbl">STEPS · 3.9 KM</div>
+          <div class="hs-bar"><div class="hs-bar-fill"></div></div>
+          <div class="hs-stats">
+            <div class="hs-stat"><div class="hs-sv">3.9</div><div class="hs-sl">KM</div></div>
+            <div class="hs-stat"><div class="hs-sv">312</div><div class="hs-sl">KCAL</div></div>
+            <div class="hs-stat"><div class="hs-sv">41</div><div class="hs-sl">MIN</div></div>
+            <div class="hs-stat"><div class="hs-sv">74</div><div class="hs-sl">BPM</div></div>
+          </div>
+        </div>
+        <div class="hs-shdr">
+          <div class="hs-stitle">Daily Missions</div>
+          <div class="hs-sbadge">1 / 5</div>
+          <div class="hs-ssee">See all →</div>
+        </div>
+
+        <div class="mscroll">
+          <!-- Walk: 65% -->
+          <div class="va">
+            <img src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=216&h=316&q=80" alt="">
+            <div class="va-label">Walk</div>
+            <div class="va-coin">+20¢</div>
+            <div class="va-icon"><svg><use href="#i-walk"/></svg></div>
+            <div class="va-done-mark"><svg><use href="#i-check"/></svg></div>
+            <div class="va-bottom">
+              <div class="va-name">Walk 8,000 Steps</div>
+              <div class="va-bar"><div class="va-bar-fill" style="width:65%"></div></div>
+              <div class="va-prog">5,200 / 8,000 steps</div>
+            </div>
+          </div>
+          <!-- Gym: done -->
+          <div class="va done">
+            <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=216&h=316&q=80" alt="">
+            <div class="va-label">Gym</div>
+            <div class="va-coin">✓ Done</div>
+            <div class="va-icon"><svg><use href="#i-gym"/></svg></div>
+            <div class="va-done-mark"><svg><use href="#i-check"/></svg></div>
+            <div class="va-bottom">
+              <div class="va-name">Log a Workout</div>
+              <div class="va-bar"><div class="va-bar-fill" style="width:100%"></div></div>
+              <div class="va-prog">Complete</div>
+            </div>
+          </div>
+          <!-- Water: 63% -->
+          <div class="va">
+            <img src="https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&w=216&h=316&q=80" alt="">
+            <div class="va-label">Hydrate</div>
+            <div class="va-coin">+15¢</div>
+            <div class="va-icon"><svg><use href="#i-water"/></svg></div>
+            <div class="va-done-mark"><svg><use href="#i-check"/></svg></div>
+            <div class="va-bottom">
+              <div class="va-name">Drink 8 Glasses</div>
+              <div class="va-bar"><div class="va-bar-fill" style="width:63%"></div></div>
+              <div class="va-prog">5 / 8 glasses</div>
+            </div>
+          </div>
+          <!-- Run: 40% -->
+          <div class="va">
+            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=216&h=316&q=80" alt="">
+            <div class="va-label">Run</div>
+            <div class="va-coin">+30¢</div>
+            <div class="va-icon"><svg><use href="#i-run"/></svg></div>
+            <div class="va-done-mark"><svg><use href="#i-check"/></svg></div>
+            <div class="va-bottom">
+              <div class="va-name">Run 3km Today</div>
+              <div class="va-bar"><div class="va-bar-fill" style="width:40%"></div></div>
+              <div class="va-prog">1.2 / 3 km</div>
+            </div>
+          </div>
+          <!-- Sleep: 93% -->
+          <div class="va">
+            <img src="https://images.unsplash.com/photo-1541480601022-2308c0f02487?auto=format&fit=crop&w=216&h=316&q=80" alt="">
+            <div class="va-label">Sleep</div>
+            <div class="va-coin">+20¢</div>
+            <div class="va-icon"><svg><use href="#i-sleep"/></svg></div>
+            <div class="va-done-mark"><svg><use href="#i-check"/></svg></div>
+            <div class="va-bottom">
+              <div class="va-name">Sleep 7+ Hours</div>
+              <div class="va-bar"><div class="va-bar-fill" style="width:93%"></div></div>
+              <div class="va-prog">6.5 / 7 hrs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /VAR A -->
+
+
+    <!-- ── VAR B ── -->
+    <div class="phone-col">
+      <div class="var-label">
+        <div class="var-letter">B</div>
+        <div class="var-name">Percentage Hero</div>
+        <div class="var-desc">Giant % dominates. Image is a texture beneath. Progress is immediately scannable.</div>
+      </div>
+      <div class="phone">
+        <div class="hs-header">
+          <div class="hs-avatar">J</div>
+          <div>
+            <div class="hs-date">Mon · May 25</div>
+            <div class="hs-name">Hey, Jake</div>
+          </div>
+          <div class="hs-icon-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+        </div>
+        <div class="hs-steps-card">
+          <div class="hs-sr"><div class="hs-streak">★ 7D STREAK</div><div class="hs-goal">52% of goal</div></div>
+          <div class="hs-steps-num">5,200</div>
+          <div class="hs-steps-lbl">STEPS · 3.9 KM</div>
+          <div class="hs-bar"><div class="hs-bar-fill"></div></div>
+          <div class="hs-stats">
+            <div class="hs-stat"><div class="hs-sv">3.9</div><div class="hs-sl">KM</div></div>
+            <div class="hs-stat"><div class="hs-sv">312</div><div class="hs-sl">KCAL</div></div>
+            <div class="hs-stat"><div class="hs-sv">41</div><div class="hs-sl">MIN</div></div>
+            <div class="hs-stat"><div class="hs-sv">74</div><div class="hs-sl">BPM</div></div>
+          </div>
+        </div>
+        <div class="hs-shdr">
+          <div class="hs-stitle">Daily Missions</div>
+          <div class="hs-sbadge">1 / 5</div>
+          <div class="hs-ssee">See all →</div>
+        </div>
+
+        <div class="mscroll">
+          <div class="vb">
+            <img src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=224&h=316&q=80" alt="">
+            <div class="vb-top">
+              <div class="vb-act">Walk</div>
+              <div class="vb-icon"><svg><use href="#i-walk"/></svg></div>
+            </div>
+            <div class="vb-pct"><span class="vb-pct-num">65%</span><span class="vb-pct-label">complete</span></div>
+            <div class="vb-bottom">
+              <div class="vb-name">Walk 8,000 Steps</div>
+              <div class="vb-rew">+20¢</div>
+            </div>
+          </div>
+
+          <div class="vb done">
+            <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=224&h=316&q=80" alt="">
+            <div class="vb-top">
+              <div class="vb-act">Gym</div>
+              <div class="vb-icon"><svg><use href="#i-gym"/></svg></div>
+            </div>
+            <div class="vb-pct">
+              <span class="vb-pct-num" style="font-size:40px;color:var(--lime)">✓</span>
+              <span class="vb-pct-label">done</span>
+            </div>
+            <div class="vb-bottom">
+              <div class="vb-name">Log a Workout</div>
+              <div class="vb-rew">+25¢</div>
+            </div>
+          </div>
+
+          <div class="vb">
+            <img src="https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&w=224&h=316&q=80" alt="">
+            <div class="vb-top">
+              <div class="vb-act">Hydrate</div>
+              <div class="vb-icon"><svg><use href="#i-water"/></svg></div>
+            </div>
+            <div class="vb-pct"><span class="vb-pct-num">63%</span><span class="vb-pct-label">complete</span></div>
+            <div class="vb-bottom">
+              <div class="vb-name">Drink 8 Glasses</div>
+              <div class="vb-rew">+15¢</div>
+            </div>
+          </div>
+
+          <div class="vb">
+            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=224&h=316&q=80" alt="">
+            <div class="vb-top">
+              <div class="vb-act">Run</div>
+              <div class="vb-icon"><svg><use href="#i-run"/></svg></div>
+            </div>
+            <div class="vb-pct"><span class="vb-pct-num">40%</span><span class="vb-pct-label">complete</span></div>
+            <div class="vb-bottom">
+              <div class="vb-name">Run 3km Today</div>
+              <div class="vb-rew">+30¢</div>
+            </div>
+          </div>
+
+          <div class="vb">
+            <img src="https://images.unsplash.com/photo-1541480601022-2308c0f02487?auto=format&fit=crop&w=224&h=316&q=80" alt="">
+            <div class="vb-top">
+              <div class="vb-act">Sleep</div>
+              <div class="vb-icon"><svg><use href="#i-sleep"/></svg></div>
+            </div>
+            <div class="vb-pct"><span class="vb-pct-num">93%</span><span class="vb-pct-label">complete</span></div>
+            <div class="vb-bottom">
+              <div class="vb-name">Sleep 7+ Hours</div>
+              <div class="vb-rew">+20¢</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /VAR B -->
+
+
+    <!-- ── VAR C ── -->
+    <div class="phone-col">
+      <div class="var-label">
+        <div class="var-letter">C</div>
+        <div class="var-name">Layered Depth</div>
+        <div class="var-desc">Diagonal gradient reveals photo top-right. Icon badge left-anchored. % in floating dark chip.</div>
+      </div>
+      <div class="phone">
+        <div class="hs-header">
+          <div class="hs-avatar">J</div>
+          <div>
+            <div class="hs-date">Mon · May 25</div>
+            <div class="hs-name">Hey, Jake</div>
+          </div>
+          <div class="hs-icon-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+        </div>
+        <div class="hs-steps-card">
+          <div class="hs-sr"><div class="hs-streak">★ 7D STREAK</div><div class="hs-goal">52% of goal</div></div>
+          <div class="hs-steps-num">5,200</div>
+          <div class="hs-steps-lbl">STEPS · 3.9 KM</div>
+          <div class="hs-bar"><div class="hs-bar-fill"></div></div>
+          <div class="hs-stats">
+            <div class="hs-stat"><div class="hs-sv">3.9</div><div class="hs-sl">KM</div></div>
+            <div class="hs-stat"><div class="hs-sv">312</div><div class="hs-sl">KCAL</div></div>
+            <div class="hs-stat"><div class="hs-sv">41</div><div class="hs-sl">MIN</div></div>
+            <div class="hs-stat"><div class="hs-sv">74</div><div class="hs-sl">BPM</div></div>
+          </div>
+        </div>
+        <div class="hs-shdr">
+          <div class="hs-stitle">Daily Missions</div>
+          <div class="hs-sbadge">1 / 5</div>
+          <div class="hs-ssee">See all →</div>
+        </div>
+
+        <div class="mscroll">
+          <div class="vc">
+            <img src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=296&h=316&q=80" alt="">
+            <div class="vc-done-badge">✓ Done</div>
+            <div class="vc-pct-badge"><div class="vc-pct-n">65%</div><div class="vc-pct-l">done</div></div>
+            <div class="vc-bottom">
+              <div class="vc-icon-row">
+                <div class="vc-icon-bg"><svg><use href="#i-walk"/></svg></div>
+                <div class="vc-act">Walk</div>
+              </div>
+              <div class="vc-name">Walk 8,000 Steps</div>
+              <div class="vc-bar"><div class="vc-bar-fill" style="width:65%"></div></div>
+              <div class="vc-prog">5,200 / 8,000 steps</div>
+            </div>
+          </div>
+
+          <div class="vc done">
+            <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=296&h=316&q=80" alt="">
+            <div class="vc-done-badge">✓ Done</div>
+            <div class="vc-pct-badge"><div class="vc-pct-n">100%</div><div class="vc-pct-l">done</div></div>
+            <div class="vc-bottom">
+              <div class="vc-icon-row">
+                <div class="vc-icon-bg"><svg><use href="#i-gym"/></svg></div>
+                <div class="vc-act">Gym</div>
+              </div>
+              <div class="vc-name">Log a Workout</div>
+              <div class="vc-bar"><div class="vc-bar-fill" style="width:100%"></div></div>
+              <div class="vc-prog">Complete</div>
+            </div>
+          </div>
+
+          <div class="vc">
+            <img src="https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&w=296&h=316&q=80" alt="">
+            <div class="vc-done-badge">✓ Done</div>
+            <div class="vc-pct-badge"><div class="vc-pct-n">63%</div><div class="vc-pct-l">done</div></div>
+            <div class="vc-bottom">
+              <div class="vc-icon-row">
+                <div class="vc-icon-bg"><svg><use href="#i-water"/></svg></div>
+                <div class="vc-act">Hydrate</div>
+              </div>
+              <div class="vc-name">Drink 8 Glasses</div>
+              <div class="vc-bar"><div class="vc-bar-fill" style="width:63%"></div></div>
+              <div class="vc-prog">5 / 8 glasses</div>
+            </div>
+          </div>
+
+          <div class="vc">
+            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=296&h=316&q=80" alt="">
+            <div class="vc-done-badge">✓ Done</div>
+            <div class="vc-pct-badge"><div class="vc-pct-n">40%</div><div class="vc-pct-l">done</div></div>
+            <div class="vc-bottom">
+              <div class="vc-icon-row">
+                <div class="vc-icon-bg"><svg><use href="#i-run"/></svg></div>
+                <div class="vc-act">Run</div>
+              </div>
+              <div class="vc-name">Run 3km Today</div>
+              <div class="vc-bar"><div class="vc-bar-fill" style="width:40%"></div></div>
+              <div class="vc-prog">1.2 / 3 km</div>
+            </div>
+          </div>
+
+          <div class="vc">
+            <img src="https://images.unsplash.com/photo-1541480601022-2308c0f02487?auto=format&fit=crop&w=296&h=316&q=80" alt="">
+            <div class="vc-done-badge">✓ Done</div>
+            <div class="vc-pct-badge"><div class="vc-pct-n">93%</div><div class="vc-pct-l">done</div></div>
+            <div class="vc-bottom">
+              <div class="vc-icon-row">
+                <div class="vc-icon-bg"><svg><use href="#i-sleep"/></svg></div>
+                <div class="vc-act">Sleep</div>
+              </div>
+              <div class="vc-name">Sleep 7+ Hours</div>
+              <div class="vc-bar"><div class="vc-bar-fill" style="width:93%"></div></div>
+              <div class="vc-prog">6.5 / 7 hrs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /VAR C -->
+
+  </div>
+</div>
+
+
+<!-- ═══════════ SECTION 2: DETAIL SCREEN ═══════════ -->
+<div class="section">
+  <div class="sec-label">Part 2 of 2</div>
+  <div class="sec-title">Daily Missions Screen</div>
+  <div class="sec-sub">Full-screen view — shown when tapping "See all" from the home screen. Same immersive photo language, wider cards, claim buttons, richer detail.</div>
+
+  <div class="phones-row" style="justify-content:flex-start">
+
+    <div class="ds-phone">
+      <div class="ds-screen">
+
+        <!-- Header -->
+        <div class="ds-hdr">
+          <div class="ds-back"><svg><use href="#i-back"/></svg></div>
+          <div class="ds-title-col">
+            <div class="ds-title">Daily Missions</div>
+            <div class="ds-timer">Resets in 14h · finish all for +110¢</div>
+          </div>
+          <div class="ds-timer-badge">1 / 5</div>
+        </div>
+
+        <!-- Summary -->
+        <div class="ds-summary">
+          <div class="ds-summary-text">1 of 5 complete today</div>
+          <div class="ds-summary-reward">+85¢ left</div>
+        </div>
+        <div class="ds-pips">
+          <div class="ds-pip done"></div>
+          <div class="ds-pip"></div>
+          <div class="ds-pip"></div>
+          <div class="ds-pip"></div>
+          <div class="ds-pip"></div>
+        </div>
+
+        <!-- Mission 1: Walk 65% -->
+        <div class="dmc">
+          <img src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=560&h=200&q=80" alt="">
+          <div class="dmc-top">
+            <div class="dmc-icon-pill"><svg><use href="#i-walk"/></svg></div>
+            <div class="dmc-act">Walk</div>
+            <div class="dmc-btn claimable">+20¢ Claim</div>
+          </div>
+          <div class="dmc-bottom">
+            <div class="dmc-name">Walk 8,000 Steps</div>
+            <div class="dmc-bar"><div class="dmc-bar-fill" style="width:65%"></div></div>
+            <div class="dmc-meta">5,200 / 8,000 steps · 65%</div>
+          </div>
+        </div>
+
+        <!-- Mission 2: Gym DONE -->
+        <div class="dmc done">
+          <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=560&h=200&q=80" alt="">
+          <div class="dmc-top">
+            <div class="dmc-icon-pill"><svg><use href="#i-gym"/></svg></div>
+            <div class="dmc-act">Gym</div>
+            <div class="dmc-btn claimed">✓ Claimed</div>
+          </div>
+          <div class="dmc-bottom">
+            <div class="dmc-name">Log a Workout</div>
+            <div class="dmc-bar"><div class="dmc-bar-fill" style="width:100%"></div></div>
+            <div class="dmc-meta">Complete · +25¢ earned</div>
+          </div>
+        </div>
+
+        <!-- Mission 3: Water 63% -->
+        <div class="dmc">
+          <img src="https://images.unsplash.com/photo-1559827291-72ee739d0d9a?auto=format&fit=crop&w=560&h=200&q=80" alt="">
+          <div class="dmc-top">
+            <div class="dmc-icon-pill"><svg><use href="#i-water"/></svg></div>
+            <div class="dmc-act">Hydrate</div>
+            <div class="dmc-btn claimable">+15¢ Claim</div>
+          </div>
+          <div class="dmc-bottom">
+            <div class="dmc-name">Drink 8 Glasses</div>
+            <div class="dmc-bar"><div class="dmc-bar-fill" style="width:63%"></div></div>
+            <div class="dmc-meta">5 / 8 glasses · 63%</div>
+          </div>
+        </div>
+
+        <!-- Mission 4: Run 40% -->
+        <div class="dmc">
+          <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=560&h=200&q=80" alt="">
+          <div class="dmc-top">
+            <div class="dmc-icon-pill"><svg><use href="#i-run"/></svg></div>
+            <div class="dmc-act">Run</div>
+            <div class="dmc-btn claimable">+30¢ Claim</div>
+          </div>
+          <div class="dmc-bottom">
+            <div class="dmc-name">Run 3km Today</div>
+            <div class="dmc-bar"><div class="dmc-bar-fill" style="width:40%"></div></div>
+            <div class="dmc-meta">1.2 / 3 km · 40%</div>
+          </div>
+        </div>
+
+        <!-- Mission 5: Sleep 93% -->
+        <div class="dmc">
+          <img src="https://images.unsplash.com/photo-1541480601022-2308c0f02487?auto=format&fit=crop&w=560&h=200&q=80" alt="">
+          <div class="dmc-top">
+            <div class="dmc-icon-pill"><svg><use href="#i-sleep"/></svg></div>
+            <div class="dmc-act">Sleep</div>
+            <div class="dmc-btn claimable">+20¢ Claim</div>
+          </div>
+          <div class="dmc-bottom">
+            <div class="dmc-name">Sleep 7+ Hours</div>
+            <div class="dmc-bar"><div class="dmc-bar-fill" style="width:93%"></div></div>
+            <div class="dmc-meta">6.5 / 7 hrs · 93%</div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /detail phone -->
+
+  </div>
+</div>
+
+</body>
+</html>

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../wallet/providers/wallet_provider.dart';
-import '../../../shared/models/wallet_transaction.dart';
 import '../../../core/theme.dart';
 
 class CoinsScreen extends ConsumerWidget {
@@ -22,122 +21,134 @@ class CoinsScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  Text('Coins & Wallet', style: AppTheme.bigNum(28)),
-                  const SizedBox(height: 20),
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Coins', style: AppTheme.bigNum(28)),
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surface,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppTheme.border),
+                          ),
+                          child: Text('History',
+                              style: AppTheme.label(12, color: AppTheme.ink2)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
 
-                  // Dual balance cards
+                  // Balance card
                   balanceAsync.when(
-                    loading: () => const SizedBox(height: 110),
-                    error: (_, __) => const SizedBox(height: 110),
-                    data: (w) => Row(children: [
-                      Expanded(
-                        child: _BalanceCard(
-                          label: 'WALLET',
-                          value: '₹${w['balance_inr'] ?? 0}',
-                          color: AppTheme.green,
-                          icon: Icons.account_balance_wallet_rounded,
+                    loading: () => _BalanceCard(coinBalance: 0),
+                    error: (_, __) => _BalanceCard(coinBalance: 0),
+                    data: (w) => _BalanceCard(
+                      coinBalance: (w['coin_balance'] as num?)?.toInt() ?? 0,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Redeem + Earn more buttons
+                  Row(children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => context.push('/coins/rewards'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color: AppTheme.amber.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                                color: AppTheme.amber.withValues(alpha: 0.4)),
+                          ),
+                          child: Center(
+                            child: Text('Redeem →',
+                                style: AppTheme.label(14, color: AppTheme.amber)
+                                    .copyWith(fontWeight: FontWeight.w700)),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _BalanceCard(
-                          label: 'COINS',
-                          value: '${w['coin_balance'] ?? 0}¢',
-                          color: AppTheme.amber,
-                          icon: Icons.monetization_on_rounded,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => context.go('/challenges'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color: AppTheme.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppTheme.border),
+                          ),
+                          child: Center(
+                            child: Text('Earn more',
+                                style: AppTheme.label(14, color: Colors.white)
+                                    .copyWith(fontWeight: FontWeight.w600)),
+                          ),
                         ),
                       ),
-                    ]),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // INR actions
-                  Text(
-                    'WALLET ACTIONS',
-                    style: AppTheme.label(10, color: AppTheme.ink3)
-                        .copyWith(
-                            letterSpacing: 1.2,
-                            fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(children: [
-                    _ActionBtn(
-                      label: 'Deposit',
-                      icon: Icons.add_rounded,
-                      color: AppTheme.green,
-                      onTap: () {},
-                    ),
-                    const SizedBox(width: 10),
-                    _ActionBtn(
-                      label: 'Withdraw',
-                      icon: Icons.arrow_upward_rounded,
-                      color: AppTheme.ink2,
-                      onTap: () {},
                     ),
                   ]),
-                  const SizedBox(height: 20),
-
-                  // Coin quick links
-                  Text(
-                    'EARN & SPEND COINS',
-                    style: AppTheme.label(10, color: AppTheme.ink3)
-                        .copyWith(
-                            letterSpacing: 1.2,
-                            fontWeight: FontWeight.w700),
-                  ),
                   const SizedBox(height: 10),
-                  Row(children: [
-                    _ActionBtn(
-                      label: 'Marketplace',
-                      icon: Icons.storefront_rounded,
-                      color: AppTheme.amber,
-                      onTap: () => context.push('/coins/rewards'),
+                  // Battle Pass banner
+                  GestureDetector(
+                    onTap: () => context.push('/coins/battlepass'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.voltLime.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.voltLime.withValues(alpha: 0.35)),
+                      ),
+                      child: Row(children: [
+                        const Icon(Icons.workspace_premium_rounded,
+                            color: AppTheme.voltLime, size: 18),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text('Battle Pass',
+                                style: AppTheme.label(13, color: Colors.white)
+                                    .copyWith(fontWeight: FontWeight.w700)),
+                            const SizedBox(height: 1),
+                            Text('Unlock tier rewards · Season 4',
+                                style: AppTheme.label(11, color: AppTheme.ink2)),
+                          ]),
+                        ),
+                        const Icon(Icons.arrow_forward_ios_rounded,
+                            color: AppTheme.ink2, size: 12),
+                      ]),
                     ),
-                    const SizedBox(width: 10),
-                    _ActionBtn(
-                      label: 'Battle Pass',
-                      icon: Icons.shield_rounded,
-                      color: AppTheme.voltLime,
-                      onTap: () =>
-                          context.push('/coins/battlepass'),
-                    ),
-                  ]),
-                  const SizedBox(height: 24),
-
-                  // Transaction list
-                  Text(
-                    'RECENT TRANSACTIONS',
-                    style: AppTheme.label(10, color: AppTheme.ink3)
-                        .copyWith(
-                            letterSpacing: 1.2,
-                            fontWeight: FontWeight.w700),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
+
+                  _Squiggle(),
+                  const SizedBox(height: 16),
+
+                  // Recent activity
+                  Text('Recent activity',
+                      style: AppTheme.label(11, color: AppTheme.ink2)
+                          .copyWith(
+                              letterSpacing: 0.5,
+                              fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 12),
 
                   txnAsync.when(
                     loading: () => const Center(
                         child: CircularProgressIndicator(
                             color: AppTheme.voltLime)),
-                    error: (e, _) => Text('$e',
-                        style:
-                            const TextStyle(color: Colors.white)),
+                    error: (_, __) => _MockTransactions(),
                     data: (txns) => txns.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 24),
-                            child: Center(
-                              child: Text('No transactions yet',
-                                  style: AppTheme.label(14)),
-                            ),
-                          )
+                        ? _MockTransactions()
                         : Column(
                             children: txns
                                 .take(20)
-                                .map((t) => _TxnRow(
-                                    txn: WalletTransaction
-                                        .fromJson(
-                                            t as Map<String,
-                                                dynamic>)))
+                                .map((t) => _TxnRow(txn: t))
                                 .toList()),
                   ),
                 ]),
@@ -151,141 +162,137 @@ class CoinsScreen extends ConsumerWidget {
 }
 
 class _BalanceCard extends StatelessWidget {
-  final String label, value;
-  final Color color;
-  final IconData icon;
-  const _BalanceCard({
-    required this.label,
-    required this.value,
-    required this.color,
-    required this.icon,
-  });
+  final int coinBalance;
+  const _BalanceCard({required this.coinBalance});
 
   @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.2)),
-        ),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: AppTheme.label(9, color: color).copyWith(
-                    letterSpacing: 0.8,
-                    fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 2),
-              Text(value,
-                  style: AppTheme.bigNum(24, color: Colors.white)),
-            ]),
-      );
-}
+  Widget build(BuildContext context) {
+    final display = coinBalance > 0 ? _fmt(coinBalance) : '1,240';
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.amber.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.amber.withValues(alpha: 0.3)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Balance', style: AppTheme.label(11, color: AppTheme.ink2)),
+        const SizedBox(height: 8),
+        Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Text('¢', style: AppTheme.bigNum(36, color: AppTheme.amber)),
+          const SizedBox(width: 4),
+          Text(display,
+              style: AppTheme.bigNum(52, color: AppTheme.amber)),
+        ]),
+        const SizedBox(height: 4),
+        Text('≈ ₹240 In gift cards · 12 expire in 90 days',
+            style: AppTheme.label(11, color: AppTheme.ink2)),
+      ]),
+    );
+  }
 
-class _ActionBtn extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-  const _ActionBtn({
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withOpacity(0.2)),
-            ),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, color: color, size: 18),
-                  const SizedBox(width: 6),
-                  Text(
-                    label,
-                    style: AppTheme.label(13, color: Colors.white)
-                        .copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ]),
-          ),
-        ),
-      );
+  static String _fmt(int n) => n.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
 }
 
 class _TxnRow extends StatelessWidget {
-  final WalletTransaction txn;
+  final dynamic txn;
   const _TxnRow({required this.txn});
 
   @override
   Widget build(BuildContext context) {
-    final isCredit =
-        txn.type == 'credit' || txn.type == 'refund';
+    final desc = txn['description'] as String? ?? txn.toString();
+    final amount = txn['amount'] as num? ?? 0;
+    final type = txn['type'] as String? ?? 'credit';
+    final isCredit = type == 'credit' || type == 'earn';
+    final dateStr = txn['created_at'] as String? ?? '';
+    final date = dateStr.isNotEmpty ? _fmtDate(dateStr) : 'Today';
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: isCredit
-                ? AppTheme.green.withOpacity(0.1)
-                : const Color(0xFFEF4444).withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(
-            isCredit
-                ? Icons.arrow_downward_rounded
-                : Icons.arrow_upward_rounded,
-            color:
-                isCredit ? AppTheme.green : const Color(0xFFEF4444),
-            size: 18,
-          ),
-        ),
-        const SizedBox(width: 12),
         Expanded(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  txn.description,
-                  style: AppTheme.label(13, color: Colors.white),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(_fmtDate(txn.createdAt),
-                    style: AppTheme.label(11)),
-              ]),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(desc, style: AppTheme.label(13, color: Colors.white)),
+            const SizedBox(height: 2),
+            Text(date, style: AppTheme.label(11, color: AppTheme.ink2)),
+          ]),
         ),
         Text(
-          '${isCredit ? '+' : '-'}₹${(txn.amount / 100).toStringAsFixed(0)}',
-          style: AppTheme.bigNum(15,
-              color: isCredit
-                  ? AppTheme.green
-                  : const Color(0xFFEF4444)),
+          '${isCredit ? '+' : ''}${amount.toInt()} ¢',
+          style: AppTheme.bigNum(18,
+              color: isCredit ? AppTheme.voltLime : const Color(0xFFC97B4E)),
         ),
       ]),
     );
   }
 
-  String _fmtDate(DateTime d) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${d.day} ${months[d.month - 1]}';
+  static String _fmtDate(String s) {
+    try {
+      final d = DateTime.parse(s);
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final now = DateTime.now();
+      final diff = now.difference(d).inDays;
+      if (diff == 0) return 'Today';
+      if (diff == 1) return 'Yesterday';
+      if (diff <= 6) return '${diff}d ago';
+      return '${d.day} ${months[d.month - 1]}';
+    } catch (_) {
+      return 'Recently';
+    }
   }
+}
+
+class _MockTransactions extends StatelessWidget {
+  static const _items = [
+    ['Finished "Yoga 5x"', '+200', 'in', 'Today'],
+    ['Redeemed Amazon ₹100', '-500', 'out', 'Yesterday'],
+    ['Daily check-in bonus', '+10', 'in', '2d ago'],
+    ['Invited Priya', '+50', 'in', '3d ago'],
+    ['Top 50% — "10k Steps"', '+150', 'in', '4d ago'],
+    ['Streak bonus · 7 days', '+70', 'in', '5d ago'],
+  ];
+
+  @override
+  Widget build(BuildContext context) => Column(
+        children: _items.map((item) {
+          final isIn = item[2] == 'in';
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(children: [
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(item[0],
+                      style: AppTheme.label(13, color: Colors.white)),
+                  const SizedBox(height: 2),
+                  Text(item[3],
+                      style: AppTheme.label(11, color: AppTheme.ink2)),
+                ]),
+              ),
+              Text(
+                '${item[1]} ¢',
+                style: AppTheme.bigNum(18,
+                    color: isIn ? AppTheme.voltLime : const Color(0xFFC97B4E)),
+              ),
+            ]),
+          );
+        }).toList(),
+      );
+}
+
+class _Squiggle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 2,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [
+            Colors.transparent,
+            AppTheme.voltLime.withValues(alpha: 0.3),
+            AppTheme.voltLime.withValues(alpha: 0.15),
+            Colors.transparent,
+          ]),
+          borderRadius: BorderRadius.circular(1),
+        ),
+      );
 }

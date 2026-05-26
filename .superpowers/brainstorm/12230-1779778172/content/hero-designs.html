@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero Section Redesigns</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --volt: #D4FF3A;
+    --amber: #FFB547;
+    --bg: #050510;
+    --surface: #0D0D1A;
+    --surface2: #13131F;
+    --ink2: #A3A3B3;
+    --ink3: #4B5563;
+    --border: rgba(255,255,255,0.08);
+    --red: #EF4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a18;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    padding: 24px 16px 60px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    color: white;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    color: var(--ink2);
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .design-slot {
+    cursor: pointer;
+    border-radius: 20px;
+    border: 2px solid transparent;
+    transition: border-color 0.2s, transform 0.15s;
+    background: #111120;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .design-slot:hover { transform: translateY(-2px); border-color: rgba(212,255,58,0.3); }
+  .design-slot.selected { border-color: var(--volt) !important; }
+  .design-slot.selected .design-label { background: var(--volt); color: #050510; }
+
+  .design-label {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--ink2);
+    background: rgba(255,255,255,0.04);
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .design-label .check { display: none; }
+  .design-slot.selected .design-label .check { display: inline; }
+
+  .phone-frame {
+    padding: 16px;
+    background: var(--bg);
+  }
+
+  /* ── shared card base ── */
+  .hero-card {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  /* ── Stat row (shared) ── */
+  .stat-row {
+    display: flex;
+    border-top: 1px solid var(--border);
+  }
+  .stat-cell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px;
+    gap: 3px;
+  }
+  .stat-cell + .stat-cell {
+    border-left: 1px solid var(--border);
+  }
+  .stat-val {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    color: white;
+    line-height: 1;
+  }
+  .stat-lbl {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--ink2);
+    text-transform: uppercase;
+  }
+  .stat-icon { font-size: 12px; line-height: 1; }
+
+  /* progress bar base */
+  .prog-track {
+    background: rgba(255,255,255,0.07);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--volt);
+    transition: width 0.3s;
+  }
+  .prog-fill.amber { background: var(--amber); }
+  .prog-fill.gradient { background: linear-gradient(90deg, var(--amber), var(--volt)); }
+
+  /* badge pill */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 11px;
+    color: var(--bg);
+    background: var(--volt);
+  }
+  .badge.amber-fill { background: var(--amber); }
+  .badge.outline {
+    background: transparent;
+    border: 1.5px solid var(--volt);
+    color: var(--volt);
+  }
+  .badge.ghost {
+    background: rgba(212,255,58,0.12);
+    color: var(--volt);
+  }
+
+  /* ══════════════════════════════════════════════
+     DESIGN 1 — XP SPOTLIGHT
+     ══════════════════════════════════════════════ */
+  .d1 .inner { padding: 14px 16px 0; }
+  .d1 .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .d1 .xp-big {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 58px;
+    color: var(--volt);
+    line-height: 0.9;
+    letter-spacing: -1px;
+  }
+  .d1 .xp-label { font-size: 13px; color: var(--ink2); font-weight: 600; margin-top: 4px; }
+  .d1 .right-col { text-align: right; }
+  .d1 .tier-label {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    color: var(--amber);
+  }
+  .d1 .season-label { font-size: 10px; color: var(--ink2); margin-bottom: 4px; }
+  .d1 .next-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: var(--ink2); margin-bottom: 4px; }
+  .d1 .prog-wrap { margin-bottom: 12px; }
+
+  /* ══════════════════════════════════════════════
+     DESIGN 2 — TIER SHIELD CARD
+     ══════════════════════════════════════════════ */
+  .d2 .inner { padding: 14px 16px 0; }
+  .d2 .top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .d2 .shield {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: rgba(255,181,71,0.12);
+    border: 2px solid rgba(255,181,71,0.5);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .d2 .shield-letter {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 26px; color: var(--amber);
+  }
+  .d2 .info .tier-name {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 22px; color: var(--amber);
+  }
+  .d2 .info .sub { font-size: 11px; color: var(--ink2); }
+  .d2 .xp-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px; }
+  .d2 .xp-num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 32px; color: var(--volt);
+  }
+  .d2 .xp-suffix { font-size: 12px; color: var(--ink2); font-weight: 600; }
+  .d2 .next-tier { font-size: 10px; color: var(--ink2); text-align: right; }
+  .d2 .next-tier span { color: var(--volt); font-weight: 700; }
+
+  /* ══════════════════════════════════════════════
+     DESIGN 3 — LEVEL JOURNEY
+     ══════════════════════════════════════════════ */
+  .d3 .inner { padding: 14px 16px 0; }
+  .d3 .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .d3 .xp-block .num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 44px; color: white; line-height: 0.9;
+  }
+  .d3 .xp-block .lbl { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--volt); text-transform: uppercase; }
+  .d3 .streak-badge {
+    text-align: right;
+  }
+  .d3 .tier-path {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 12px;
+  }
+  .d3 .tier-node {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    flex: 1;
+  }
+  .d3 .tier-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 10px;
+  }
+  .d3 .tier-dot.done { background: rgba(212,255,58,0.2); border: 2px solid var(--volt); color: var(--volt); }
+  .d3 .tier-dot.active { background: rgba(255,181,71,0.2); border: 2px solid var(--amber); color: var(--amber); }
+  .d3 .tier-dot.locked { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--ink3); }
+  .d3 .tier-line { flex: 1; height: 2px; background: var(--border); margin-top: -14px; position: relative; top: -1px; }
+  .d3 .tier-line.done { background: var(--volt); }
+  .d3 .tier-name { font-size: 8px; color: var(--ink2); font-weight: 600; text-transform: uppercase; }
+  .d3 .tier-name.active { color: var(--amber); }
+  .d3 .tier-name.done { color: var(--volt); }
+  .d3 .next-label { font-size: 10px; color: var(--ink2); display: flex; justify-content: space-between; margin-bottom: 4px; }
+
+  /* ══════════════════════════════════════════════
+     DESIGN 4 — SPLIT FOCUS
+     ══════════════════════════════════════════════ */
+  .d4 .inner { padding: 14px 16px 0; }
+  .d4 .top { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 0; margin-bottom: 14px; }
+  .d4 .divider { background: var(--border); }
+  .d4 .left, .d4 .right { padding: 0 12px; }
+  .d4 .left { padding-left: 0; }
+  .d4 .right { padding-right: 0; }
+  .d4 .block-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--ink2); text-transform: uppercase; margin-bottom: 6px; }
+  .d4 .big-xp {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 40px; color: var(--volt); line-height: 0.9;
+  }
+  .d4 .xp-sub { font-size: 10px; color: var(--ink2); margin-top: 4px; }
+  .d4 .tier-big {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 22px; color: var(--amber); line-height: 1;
+  }
+  .d4 .season-small { font-size: 10px; color: var(--ink2); margin-top: 3px; }
+  .d4 .rank-small { font-size: 10px; color: var(--volt); font-weight: 700; margin-top: 4px; }
+  .d4 .prog-section { margin-bottom: 12px; }
+
+  /* ══════════════════════════════════════════════
+     DESIGN 5 — FULL-WIDTH GRADIENT BANNER
+     ══════════════════════════════════════════════ */
+  .d5 .banner {
+    background: linear-gradient(135deg, #1a1428 0%, #0d1520 60%, var(--bg) 100%);
+    padding: 16px 16px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .d5 .glow {
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,255,58,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .d5 .glow2 {
+    position: absolute;
+    bottom: 10px; left: -20px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,181,71,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .d5 .top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .d5 .season-chip {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 10px;
+    padding: 3px 9px; border-radius: 99px;
+    background: rgba(255,181,71,0.15); color: var(--amber); border: 1px solid rgba(255,181,71,0.3);
+    letter-spacing: 0.5px;
+  }
+  .d5 .xp-huge {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 52px;
+    line-height: 0.9; color: white;
+  }
+  .d5 .xp-huge span { color: var(--volt); }
+  .d5 .tier-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; margin-bottom: 12px; }
+  .d5 .tier-name-big {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 16px; color: var(--amber);
+  }
+  .d5 .rank-tag { font-size: 10px; color: var(--ink2); }
+  .d5 .prog-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink2); margin-bottom: 4px; }
+  .d5 .prog-label span { color: var(--volt); font-weight: 700; }
+
+  /* ══════════════════════════════════════════════
+     DESIGN 6 — RING + XP
+     ══════════════════════════════════════════════ */
+  .d6 .inner { padding: 14px 16px 0; }
+  .d6 .top { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+  .d6 .ring-wrap { position: relative; width: 68px; height: 68px; flex-shrink: 0; }
+  .d6 .ring-wrap svg { position: absolute; top: 0; left: 0; }
+  .d6 .ring-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .d6 .ring-pct {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 16px;
+    color: var(--volt); line-height: 1;
+  }
+  .d6 .ring-sub { font-size: 7px; color: var(--ink2); font-weight: 600; }
+  .d6 .info { flex: 1; }
+  .d6 .xp-main {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 38px;
+    color: var(--volt); line-height: 0.9;
+  }
+  .d6 .xp-label { font-size: 10px; color: var(--ink2); font-weight: 600; margin-top: 3px; }
+  .d6 .tier-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .d6 .tier-text {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 14px; color: var(--amber);
+  }
+  .d6 .season-text { font-size: 10px; color: var(--ink2); }
+  .d6 .next-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink2); margin-bottom: 4px; }
+
+  /* ══════════════════════════════════════════════
+     DESIGN 7 — MINIMAL LINEAR
+     ══════════════════════════════════════════════ */
+  .d7 .inner { padding: 16px 16px 0; }
+  .d7 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .d7 .left-block .season {
+    font-size: 9px; color: var(--ink2); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;
+  }
+  .d7 .left-block .tier {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 24px; color: var(--amber);
+  }
+  .d7 .right-block { text-align: right; }
+  .d7 .right-block .xp-num {
+    font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 32px; color: var(--volt);
+  }
+  .d7 .right-block .xp-lbl { font-size: 9px; color: var(--ink2); font-weight: 600; letter-spacing: 0.5px; }
+  .d7 .prog-section { margin-bottom: 14px; }
+  .d7 .prog-meta { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 6px; }
+  .d7 .prog-meta .current { color: var(--volt); font-weight: 700; }
+  .d7 .prog-meta .next { color: var(--ink2); }
+  .d7 .milestone-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .d7 .milestone {
+    display: flex; align-items: center; gap: 4px; padding: 3px 8px;
+    border-radius: 6px; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    font-size: 9px; color: var(--ink2);
+  }
+  .d7 .milestone.done { background: rgba(212,255,58,0.08); border-color: rgba(212,255,58,0.2); color: var(--volt); }
+  .d7 .milestone .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ink3); }
+  .d7 .milestone.done .dot { background: var(--volt); }
+
+  /* ══════════════════════════════════════════════
+     DESIGN 8 — SEASON PASS STYLE
+     ══════════════════════════════════════════════ */
+  .d8 .banner {
+    background: linear-gradient(160deg, #1e1408 0%, var(--bg) 50%);
+    padding: 14px 16px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .d8 .bg-tier-text {
+    position: absolute;
+    right: -8px; top: -4px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 80px;
+    color: rgba(255,181,71,0.05);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+  .d8 .row1 { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .d8 .tier-pill {
+    background: linear-gradient(90deg, rgba(255,181,71,0.2), rgba(255,181,71,0.05));
+    border: 1px solid rgba(255,181,71,0.35);
+    border-radius: 8px; padding: 6px 12px;
+  }
+  .d8 .tier-pill .lbl { font-size: 9px; color: rgba(255,181,71,0.6); font-weight: 700; letter-spacing: 1px; margin-bottom: 2px; }
+  .d8 .tier-pill .val {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 20px; color: var(--amber);
+  }
+  .d8 .xp-col { text-align: right; }
+  .d8 .xp-col .lbl { font-size: 9px; color: var(--ink2); font-weight: 700; letter-spacing: 1px; margin-bottom: 2px; }
+  .d8 .xp-col .val {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 36px; color: var(--volt); line-height: 0.9;
+  }
+  .d8 .prog-section { margin-bottom: 14px; }
+  .d8 .prog-top { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 5px; }
+  .d8 .prog-top .label { color: var(--ink2); }
+  .d8 .prog-top .goal { color: var(--amber); font-weight: 700; }
+  .d8 .tier-ladder { display: flex; gap: 4px; margin-top: 8px; flex-wrap: nowrap; }
+  .d8 .ladder-step {
+    flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.08);
+  }
+  .d8 .ladder-step.done { background: var(--volt); }
+  .d8 .ladder-step.current { background: var(--amber); }
+
+  /* ══════════════════════════════════════════════
+     DESIGN 9 — COMPACT POWER CARD
+     ══════════════════════════════════════════════ */
+  .d9 .inner { padding: 14px 16px 0; }
+  .d9 .top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .d9 .avatar-stack { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
+  .d9 .avatar-ring {
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 2px solid var(--volt);
+    background: rgba(212,255,58,0.08);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .d9 .avatar-letter {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 22px; color: var(--volt);
+  }
+  .d9 .tier-badge-float {
+    position: absolute; bottom: -4px; right: -4px;
+    background: var(--amber); border-radius: 6px;
+    padding: 1px 5px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 8px; color: var(--bg);
+    border: 1.5px solid var(--bg);
+  }
+  .d9 .info-block { flex: 1; }
+  .d9 .name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  .d9 .season-season { font-size: 10px; color: var(--ink2); }
+  .d9 .xp-main {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 30px; color: var(--volt); line-height: 1;
+  }
+  .d9 .xp-sub { font-size: 10px; color: var(--ink2); }
+  .d9 .prog-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .d9 .prog-row .prog-track { flex: 1; height: 6px; }
+  .d9 .prog-row .next-lbl { font-size: 10px; color: var(--volt); font-weight: 700; white-space: nowrap; }
+
+  /* ══════════════════════════════════════════════
+     DESIGN 10 — DARK ENERGY (full bleed gradient)
+     ══════════════════════════════════════════════ */
+  .d10 .card-body {
+    background: linear-gradient(145deg, #10102a 0%, #0a0a18 40%, #050510 100%);
+    padding: 16px 16px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .d10 .volt-orb {
+    position: absolute;
+    bottom: -20px; left: -20px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,255,58,0.08) 0%, transparent 70%);
+  }
+  .d10 .amber-orb {
+    position: absolute;
+    top: -10px; right: 20px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,181,71,0.1) 0%, transparent 70%);
+  }
+  .d10 .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .d10 .xp-giant {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 62px; color: var(--volt);
+    line-height: 0.85; letter-spacing: -2px;
+    text-shadow: 0 0 30px rgba(212,255,58,0.3);
+  }
+  .d10 .right-info { text-align: right; }
+  .d10 .season-tag {
+    font-size: 9px; font-weight: 700; letter-spacing: 1px;
+    color: var(--ink2); text-transform: uppercase; margin-bottom: 4px;
+  }
+  .d10 .tier-glow {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 20px;
+    background: linear-gradient(90deg, var(--amber), #FFD580);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .d10 .rank-tag { font-size: 10px; color: var(--ink2); margin-top: 2px; }
+  .d10 .prog-label { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 5px; }
+  .d10 .prog-label .from { color: var(--volt); font-weight: 700; }
+  .d10 .prog-label .to { color: var(--ink2); }
+  .d10 .next-tier-hint {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 8px; margin-bottom: 14px;
+    font-size: 10px; color: var(--ink2);
+  }
+  .d10 .next-tier-hint .arrow {
+    color: var(--volt); font-size: 12px; font-weight: 900;
+  }
+  .d10 .next-tier-hint .goal-label { color: var(--volt); font-weight: 700; }
+
+  /* Selection indicator */
+  #selection-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(13,13,26,0.95);
+    border-top: 1px solid rgba(212,255,58,0.2);
+    padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; color: var(--ink2);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+  }
+  #selection-bar strong { color: var(--volt); font-weight: 900; font-family: 'Big Shoulders Display', sans-serif; font-size: 15px; }
+  #selection-bar .hint { font-size: 11px; color: var(--ink3); }
+</style>
+</head>
+<body>
+
+<h1>Hero Section Redesigns</h1>
+<p class="subtitle">XP + Season Tier focus · Steps moved to stats row · Select your favourites (multi-select)</p>
+
+<div class="grid" id="designs">
+
+  <!-- ══ DESIGN 1: XP SPOTLIGHT ══ -->
+  <div class="design-slot" data-choice="1" onclick="toggle(this)">
+    <div class="design-label">DESIGN 1 — XP SPOTLIGHT <span class="check">✓</span></div>
+    <div class="phone-frame">
+      <div class="hero-card d1">
+        <div class="inner">
+          <div class="top-row">
+            <div>
+              <div class="badge">⭐ 7D STREAK</div>
+            </div>
+            <div class="right-col">
+              <div class="season-label">SEASON 3</div>
+              <div class="tier-label">GOLD TIER</div>
+            </div>
+          </div>
+          <div class="xp-big">2,840</div>
+          <div class="xp-label">XP THIS SEASON</div>
+          <div style="height:12px"></div>
+          <div class="next-row"><span>→ PLATINUM</span><span style="color:var(--volt);font-weight:700">3,000 XP</span></div>
+          <div class="prog-track prog-wrap" style="height:4px">
+            <div class="prog-fill" style="width:63%"></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-cell"><div class="stat-icon">👟</div><div class="stat-val">287</div><div class="stat-lbl">STEPS</div></div>
+          <div class="stat-cell"><div class="stat-icon">⚡</div><div class="stat-val">0.2</div><div class="stat-lbl">KM</div></div>
+          <div class="stat-cell"><div class="stat-icon">🔥</div><div class="stat-val">138</div><div class="stat-lbl">KCAL</div></div>
+          <div class="stat-cell"><div class="stat-icon">⏱</div><div class="stat-val">0</div><div class="stat-lbl">MIN</div></div>
+          <div class="stat-cell"><div class="stat-icon">❤️</div><div class="stat-val">71</div><div class="stat-lbl">BPM</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESIGN 2: TIER SHIELD ══ -->
+  <div class="design-slot" data-choice="2" onclick="toggle(this)">
+    <div class="design-label">DESIGN 2 — TIER SHIELD <span class="check">✓</span></div>
+    <div class="phone-frame">
+      <div class="hero-card d2">
+        <div class="inner">
+          <div class="top">
+            <div class="shield"><div class="shield-letter">G</div></div>
+            <div class="info">
+              <div class="tier-name">GOLD TIER</div>
+              <div class="sub">Season 3 · Rank 12 of 340</div>
+            </div>
+            <div class="badge">⭐ 7D</div>
+          </div>
+          <div class="xp-row">
+            <div>
+              <div class="xp-num">2,840 <span class="xp-suffix">XP</span></div>
+            </div>
+            <div class="next-tier">NEXT TIER<br><span>PLATINUM — 160 XP away</span></div>
+          </div>
+          <div style="height:6px"></div>
+          <div class="prog-track" style="height:5px;margin-bottom:12px">
+            <div class="prog-fill amber" style="width:63%"></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-cell"><div class="stat-icon">👟</div><div class="stat-val">287</div><div class="stat-lbl">STEPS</div></div>
+          <div class="stat-cell"><div class="stat-icon">⚡</div><div class="stat-val">0.2</div><div class="stat-lbl">KM</div></div>
+          <div class="stat-cell"><div class="stat-icon">🔥</div><div class="stat-val">138</div><div class="stat-lbl">KCAL</div></div>
+          <div class="stat-cell"><div class="stat-icon">⏱</div><div class="stat-val">0</div><div class="stat-lbl">MIN</div></div>
+          <div class="stat-cell"><div class="stat-icon">❤️</div><div class="stat-val">71</div><div class="stat-lbl">BPM</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESIGN 3: LEVEL JOURNEY ══ -->
+  <div class="design-slot" data-choice="3" onclick="toggle(this)">
+    <div class="design-label">DESIGN 3 — LEVEL JOURNEY <span class="check">✓</span></div>
+    <div class="phone-frame">
+      <div class="hero-card d3">
+        <div class="inner">
+          <div class="top">
+            <div class="xp-block">
+              <div class="num">2,840</div>
+              <div class="lbl">XP</div>
+            </div>
+            <div class="streak-badge">
+              <div class="badge">⭐ 7D STREAK</div>
+              <div style="font-size:10px;color:var(--ink2);margin-top:5px;text-align:right">SEASON 3</div>
+            </div>
+          </div>
+
+          <!-- Tier path: Bronze → Silver → Gold (current) → Platinum → Diamond -->
+          <div class="tier-path">
+            <div class="tier-node">
+              <div class="tier-dot done">B</div>
+              <div class="tier-name done">BRNZ</div>
+            </div>
+            <div class="tier-line done"></div>
+            <div class="tier-node">
+              <div class="tier-dot done">S</div>
+              <div class="tier-name done">SLVR</div>
+            </div>
+            <div class="tier-line done"></div>
+            <div class="tier-node">
+              <div class="tier-dot active">G</div>
+              <div class="tier-name active">GOLD</div>
+            </div>
+            <div class="tier-line"></div>
+            <div class="tier-node">
+              <div class="tier-dot locked">P</div>
+              <div class="tier-name">PLAT</div>
+            </div>
+            <div class="tier-line"></div>
+            <div class="tier-node">
+              <div class="tier-dot locked">D</div>
+              <div class="tier-name">DMND</div>
+            </div>
+          </div>
+
+          <div class="next-label"><span>GOLD → PLATINUM</span><span style="color:var(--volt);font-weight:700">160 XP to go</span></div>
+          <div class="prog-track" style="height:4px;margin-bottom:12px">
+            <div class="prog-fill" style="width:63%"></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-cell"><div class="stat-icon">👟</div><div class="stat-val">287</div><div class="stat-lbl">STEPS</div></div>
+          <div class="stat-cell"><div class="stat-icon">⚡</div><div class="stat-val">0.2</div><div class="stat-lbl">KM</div></div>
+          <div class="stat-cell"><div class="stat-icon">🔥</div><div class="stat-val">138</div><div class="stat-lbl">KCAL</div></div>
+          <div class="stat-cell"><div class="stat-icon">⏱</div><div class="stat-val">0</div><div class="stat-lbl">MIN</div></div>
+          <div class="stat-cell"><div class="stat-icon">❤️</div><div class="stat-val">71</div><div class="stat-lbl">BPM</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESIGN 4: SPLIT FOCUS ══ -->
+  <div class="design-slot" data-choice="4" onclick="toggle(this)">
+    <div class="design-label">DESIGN 4 — SPLIT FOCUS <span class="check">✓</span></div>
+    <div class="phone-frame">
+      <div class="hero-card d4">
+        <div class="inner">
+          <div class="top">
+            <div class="left">
+              <div class="block-label">This Season</div>
+              <div class="big-xp">2,840</div>
+              <div class="xp-sub">XP earned · S3</div>
+            </div>
+            <div class="divider"></div>
+            <div class="right">
+              <div class="block-label">Your Tier</div>
+              <div class="tier-big">GOLD</div>
+              <div class="season-small">Season 3</div>
+              <div class="rank-small">⭐ 7D STREAK</div>
+            </div>
+          </div>
+          <div class="prog-section">
+            <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:5px">
+              <span style="color:var(--ink2)">Progress to PLATINUM</span>
+              <span style="color:var(--volt);font-weight:700">63%</span>
+            </div>
+            <div class="prog-track" style="height:5px">
+              <div class="prog-fill gradient" style="width:63%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-cell"><div class="stat-icon">👟</div><div class="stat-val">287</div><div class="stat-lbl">STEPS</div></div>
+          <div class="stat-cell"><div class="stat-icon">⚡</div><div class="stat-val">0.2</div><div class="stat-lbl">KM</div></div>
+          <div class="stat-cell"><div class="stat-icon">🔥</div><div class="stat-val">138</div><div class="stat-lbl">KCAL</div></div>
+          <div class="stat-cell"><div class="stat-icon">⏱</div><div class="stat-val">0</div><div class="stat-lbl">MIN</div></div>
+          <div class="stat-cell"><div class="stat-icon">❤️</div><div class="stat-val">71</div><div class="stat-lbl">BPM</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESIGN 5: GRADIENT BANNER ══ -->
+  <div class="design-slot" data-choice="5" onclick="toggle(this)">
+    <div class="design-label">DESIGN 5 — GRADIENT BANNER <span class="check">✓</span></div>
+    <div class="phone-frame">
+      <div class="hero-card d5" style="padding:0;border:none;overflow:hidden">
+        <div class="banner">
+          <div class="glow"></div>
+          <div class="glow2"></div>
+          <div class="top">
+            <div class="badge">⭐ 7D STREAK</div>
+            <div class="season-chip">SEASON 3</div>
+          </div>
+          <div class="xp-huge"><span>2,840</span> XP</div>
+          <div class="tier-row">
+            <div class="badge amber-fill">GOLD TIER</div>
+            <div class="rank-tag">Rank 12 · 340 members</div>
+          </div>
+          <div class="prog-label">
+            <span>GOLD → <span>PLATINUM</span></span>
+            <span style="color:var(--ink2)">160 XP left</span>
+          </div>
+          <div class="prog-track" style="height:5px;margin-bottom:12px">
+            <div class="prog-fill gradient" style="width:63%"></div>
+          </div>
+        </div>
+        <div class="stat-row" style="background:var(--surface)">
+          <div class="stat-cell"><div class="stat-icon">👟</div><div class="stat-val">287</div><div class="stat-lbl">STEPS</div></div>
+          <div class="stat-cell"><div class="stat-icon">⚡</div><div class="stat-val">0.2</div><div class="stat-lbl">KM</div></div>
+          <div class="stat-cell"><div class="stat-icon">🔥</div><div class="stat-val">138</div><div class="stat-lbl">KCAL</div></div>
+          <div class="stat-cell"><div class="stat-icon">⏱</div><div class="stat-val">0</div><div class="stat-lbl">MIN</div></div>
+          <div class="stat-cell"><div class="stat-icon">❤️</div><div class="stat-val">71</div><div class="stat-lbl">BPM</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESIGN 6: RING + XP ══ -->
+  <div class="design-slot" data-choice="6" onclick="toggle(this)">
+    <div class="design-label">DESIGN 6 — PROGRESS RING <span class="check">✓</span></div>
+    <div class="phone-frame">
+      <div class="hero-card d6">
+        <div class="inner">
+          <div class="top">
+            <div class="ring-wrap">
+              <svg width="68" height="68" viewBox="0 0 68 68">
+                <circle cx="34" cy="34" r="28" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="5"/>
+                <circle cx="34" cy="34" r="28" fill="none" stroke="#D4FF3A" stroke-width="5"
+                  stroke-dasharray="175.9" stroke-dashoffset="65"
+                  stroke-linecap="round"
+                  transform="rotate(-90 34 34)"/>
+              </svg>
+              <div class="ring-center">
+                <div class="ring-pct">63%</div>
+                <div class="ring-sub">TO NEXT</div>
+              </div>
+            </div>
+            <div class="info">
+              <div class="xp-main">2,840</div>
+              <div class="xp-label">XP THIS SEASON</div>
+              <div class="tier-row">
+                <div class="badge ghost">GOLD</div>
+                <div class="season-text">Season 3</div>
+              </div>
+            </div>
+          </div>
+          <div class="next-row"><span>NEXT: PLATINUM</span><span style="color:var(--volt);font-weight:700">3,000 XP</span></div>
+          <div class="prog-track" style="height:4px;margin-bottom:12px">
+            <div class="prog-fill" style="width:63%"></div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-cell"><div class="stat-icon">👟</div><div class="stat-val">287</div><div class="stat-lbl">STEPS</div></div>
+          <div class="stat-cell"><div class="stat-icon">⚡</div><div class="stat-val">0.2</div><div class="stat-lbl">KM</div></div>
+          <div class="stat-cell"><div class="stat-icon">🔥</div><div class="stat-val">138</div><div class="stat-lbl">KCAL</div></div>
+          <div class="stat-cell"><div class="stat-icon">⏱</div><div class="stat-val">0</div><div class="stat-lbl">MIN</div></div>
+          <div class="stat-cell"><div class="stat-icon">❤️</div><div class="stat-val">71</div><div class="stat-lbl">BPM</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESIGN 7: MINIMAL LINEAR ══ -->
+  <div class="design-slot" data-choice="7" onclick="toggle(this)">
+    <div class="design-label">DESIGN 7 — MINIMAL LINEAR <span class="check">✓</span></div>
+    <div class="phone-frame">
+      <div class="hero-card d7">
+        <div class="inner">
+          <div class="header">
+            <div class="left-block">
+              <div class="season">SEASON 3 · TIER</div>
+              <div class="tier">GOLD</div>
+            </div>
+            <div class="right-block">
+              <div class="xp-num">2,840</div>
+              <div class="xp-lbl">XP EARNED</div>
+            </div>
+          </div>
+          <div class="prog-section">
+            <div class="prog-meta">
+              <span class="current">GOLD 2,840</span>
+              <span class="next">PLATINUM 3,000 →</span>
+            </div>
+            <div class="prog-track" style="height:6px">
+              <div class="prog-fill gradient" style="width:63%"></div>
+            </div>
+          </div>
+          <div class="milestone-row" style="margin-bottom:12px">
+            <div class="milestone done"><div class="dot"></div>Bronze</div>
+            <div class="milestone done"><div class="dot"></div>Silver</div>
+            <div class="milestone done"><div class="dot"></div>Gold</div>
+            <div class="milestone"><div class="dot"></div>Platinum</div>
+            <div class="milestone"><div class="dot"></div>Diamond</div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-cell"><div class="stat-icon">👟</div><div class="stat-val">287</div><div class="stat-lbl">STEPS</div></div>
+          <div class="stat-cell"><div class="stat-icon">⚡</div><div class="stat-val">0.2</div><div class="stat-lbl">KM</div></div>
+          <div class="stat-cell"><div class="stat-icon">🔥</div><div class="stat-val">138</div><div class="stat-lbl">KCAL</div></div>
+          <div class="stat-cell"><div class="stat-icon">⏱</div><div class="stat-val">0</div><div class="stat-lbl">MIN</div></div>
+          <div class="stat-cell"><div class="stat-icon">❤️</div><div class="stat-val">71</div><div class="stat-lbl">BPM</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESIGN 8: SEASON PASS ══ -->
+  <div class="design-slot" data-choice="8" onclick="toggle(this)">
+    <div class="design-label">DESIGN 8 — SEASON PASS <span class="check">✓</span></div>
+    <div class="phone-frame">
+      <div class="hero-card d8" style="padding:0;border:none;overflow:hidden">
+        <div class="banner">
+          <div class="bg-tier-text">GOLD</div>
+          <div class="row1">
+            <div class="tier-pill">
+              <div class="lbl">CURRENT TIER</div>
+              <div class="val">GOLD</div>
+            </div>
+            <div class="xp-col">
+              <div class="lbl">SEASON 3 XP</div>
+              <div class="val">2,840</div>
+            </div>
+          </div>
+          <div class="prog-section">
+            <div class="prog-top">
+              <span class="label">→ PLATINUM TIER</span>
+              <span class="goal">3,000 XP goal</span>
+            </div>
+            <div class="prog-track" style="height:7px">
+              <div class="prog-fill gradient" style="width:63%"></div>
+            </div>
+            <div class="tier-ladder" style="margin-top:8px">
+              <div class="ladder-step done"></div>
+              <div class="ladder-step done"></div>
+              <div class="ladder-step done"></div>
+              <div class="ladder-step current"></div>
+              <div class="ladder-step"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-row" style="background:var(--surface)">
+          <div class="stat-cell"><div class="stat-icon">👟</div><div class="stat-val">287</div><div class="stat-lbl">STEPS</div></div>
+          <div class="stat-cell"><div class="stat-icon">⚡</div><div class="stat-val">0.2</div><div class="stat-lbl">KM</div></div>
+          <div class="stat-cell"><div class="stat-icon">🔥</div><div class="stat-val">138</div><div class="stat-lbl">KCAL</div></div>
+          <div class="stat-cell"><div class="stat-icon">⏱</div><div class="stat-val">0</div><div class="stat-lbl">MIN</div></div>
+          <div class="stat-cell"><div class="stat-icon">❤️</div><div class="stat-val">71</div><div class="stat-lbl">BPM</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESIGN 9: COMPACT POWER CARD ══ -->
+  <div class="design-slot" data-choice="9" onclick="toggle(this)">
+    <div class="design-label">DESIGN 9 — AVATAR + XP CARD <span class="check">✓</span></div>
+    <div class="phone-frame">
+      <div class="hero-card d9">
+        <div class="inner">
+          <div class="top">
+            <div class="avatar-stack">
+              <div class="avatar-ring"><div class="avatar-letter">H</div></div>
+              <div class="tier-badge-float">GOLD</div>
+            </div>
+            <div class="info-block">
+              <div class="name-row">
+                <div class="badge ghost">⭐ 7D STREAK</div>
+                <div class="season-season">S3</div>
+              </div>
+              <div class="xp-main">2,840 <span style="font-size:14px;color:var(--ink2)">XP</span></div>
+              <div class="xp-sub">160 XP to Platinum</div>
+            </div>
+          </div>
+          <div class="prog-row">
+            <div class="prog-track" style="height:6px">
+              <div class="prog-fill gradient" style="width:63%"></div>
+            </div>
+            <div class="next-lbl">PLATINUM →</div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-cell"><div class="stat-icon">👟</div><div class="stat-val">287</div><div class="stat-lbl">STEPS</div></div>
+          <div class="stat-cell"><div class="stat-icon">⚡</div><div class="stat-val">0.2</div><div class="stat-lbl">KM</div></div>
+          <div class="stat-cell"><div class="stat-icon">🔥</div><div class="stat-val">138</div><div class="stat-lbl">KCAL</div></div>
+          <div class="stat-cell"><div class="stat-icon">⏱</div><div class="stat-val">0</div><div class="stat-lbl">MIN</div></div>
+          <div class="stat-cell"><div class="stat-icon">❤️</div><div class="stat-val">71</div><div class="stat-lbl">BPM</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESIGN 10: DARK ENERGY ══ -->
+  <div class="design-slot" data-choice="10" onclick="toggle(this)">
+    <div class="design-label">DESIGN 10 — DARK ENERGY <span class="check">✓</span></div>
+    <div class="phone-frame">
+      <div class="hero-card d10" style="padding:0;border:none;overflow:hidden">
+        <div class="card-body">
+          <div class="volt-orb"></div>
+          <div class="amber-orb"></div>
+          <div class="top-row">
+            <div>
+              <div class="xp-giant">2,840</div>
+              <div style="font-size:11px;color:var(--ink2);font-weight:700;letter-spacing:1px;margin-top:2px">XP THIS SEASON</div>
+            </div>
+            <div class="right-info">
+              <div class="season-tag">SEASON 3</div>
+              <div class="tier-glow">GOLD</div>
+              <div class="rank-tag">Rank 12 / 340</div>
+              <div style="margin-top:6px"><div class="badge">⭐ 7D</div></div>
+            </div>
+          </div>
+          <div class="next-tier-hint">
+            <span class="arrow">→</span>
+            <span>Next: <span class="goal-label">PLATINUM</span></span>
+            <span style="color:var(--ink3)">160 XP away</span>
+          </div>
+          <div class="prog-label">
+            <span class="from">2,840</span>
+            <span class="to">3,000</span>
+          </div>
+          <div class="prog-track" style="height:6px;margin-bottom:14px">
+            <div class="prog-fill gradient" style="width:63%"></div>
+          </div>
+        </div>
+        <div class="stat-row" style="background:var(--surface)">
+          <div class="stat-cell"><div class="stat-icon">👟</div><div class="stat-val">287</div><div class="stat-lbl">STEPS</div></div>
+          <div class="stat-cell"><div class="stat-icon">⚡</div><div class="stat-val">0.2</div><div class="stat-lbl">KM</div></div>
+          <div class="stat-cell"><div class="stat-icon">🔥</div><div class="stat-val">138</div><div class="stat-lbl">KCAL</div></div>
+          <div class="stat-cell"><div class="stat-icon">⏱</div><div class="stat-val">0</div><div class="stat-lbl">MIN</div></div>
+          <div class="stat-cell"><div class="stat-icon">❤️</div><div class="stat-val">71</div><div class="stat-lbl">BPM</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+
+<div id="selection-bar">
+  <span id="sel-text">Click any design to select it — you can pick multiple</span>
+  <span class="hint" id="sel-count"></span>
+</div>
+
+<script>
+const selected = new Set();
+
+function toggle(el) {
+  const choice = el.dataset.choice;
+  if (selected.has(choice)) {
+    selected.delete(choice);
+    el.classList.remove('selected');
+  } else {
+    selected.add(choice);
+    el.classList.add('selected');
+  }
+  updateBar();
+  // Record to events
+  const ev = { type: 'click', choice: Array.from(selected).join(','), text: 'Selected designs: ' + Array.from(selected).join(', '), timestamp: Date.now() };
+  try { fetch('/event', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(ev) }); } catch(e) {}
+}
+
+function updateBar() {
+  const bar = document.getElementById('sel-text');
+  const cnt = document.getElementById('sel-count');
+  if (selected.size === 0) {
+    bar.textContent = 'Click any design to select it — you can pick multiple';
+    cnt.textContent = '';
+  } else {
+    bar.innerHTML = '<strong>Selected: Design ' + Array.from(selected).join(', ') + '</strong>';
+    cnt.textContent = selected.size + ' selected';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/theme.dart';
 
@@ -25,15 +24,10 @@ class NotificationsScreen extends ConsumerStatefulWidget {
       _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tab = TabController(length: 4, vsync: this);
+class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
+  int _tab = 0; // 0=All, 1=Challenges, 2=Friends, 3=Coins
 
-  @override
-  void dispose() {
-    _tab.dispose();
-    super.dispose();
-  }
+  static const _tabs = ['All', 'Challenges', 'Friends', 'Coins'];
 
   @override
   Widget build(BuildContext context) {
@@ -43,45 +37,54 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-            child: Row(children: [
-              GestureDetector(
-                onTap: () => context.pop(),
-                child: const Icon(Icons.arrow_back_rounded,
-                    color: Colors.white, size: 22),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              // Header: "Activity" + "Mark all read"
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Activity', style: AppTheme.bigNum(28)),
+                  GestureDetector(
+                    onTap: () {},
+                    child: Text('Mark all read',
+                        style: AppTheme.label(12, color: AppTheme.ink2)),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-              Text('Notifications', style: AppTheme.bigNum(24)),
+              const SizedBox(height: 12),
+              // Filter chips
+              Row(children: List.generate(_tabs.length, (i) {
+                final active = _tab == i;
+                return GestureDetector(
+                  onTap: () => setState(() => _tab = i),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: active ? AppTheme.voltLime : AppTheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: active ? AppTheme.voltLime : AppTheme.border,
+                      ),
+                    ),
+                    child: Text(_tabs[i],
+                        style: AppTheme.label(12).copyWith(
+                          color: active ? AppTheme.bg : AppTheme.ink2,
+                          fontWeight: FontWeight.w700,
+                        )),
+                  ),
+                );
+              })),
             ]),
           ),
-          TabBar(
-            controller: _tab,
-            labelColor: AppTheme.bg,
-            unselectedLabelColor: AppTheme.ink3,
-            labelStyle: AppTheme.label(11)
-                .copyWith(fontWeight: FontWeight.w700),
-            indicator: BoxDecoration(
-              color: AppTheme.voltLime,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            indicatorSize: TabBarIndicatorSize.tab,
-            dividerColor: Colors.transparent,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            tabs: const [
-              Tab(text: 'All'),
-              Tab(text: 'Challenges'),
-              Tab(text: 'Friends'),
-              Tab(text: 'Coins'),
-            ],
-          ),
-          const SizedBox(height: 8),
           Expanded(
             child: ref.watch(notificationsProvider).when(
               loading: () => const Center(
                   child: CircularProgressIndicator(color: AppTheme.voltLime)),
-              error: (_, __) => _MockNotificationsList(),
+              error: (_, __) => const _MockNotifList(),
               data: (list) => list.isEmpty
-                  ? _MockNotificationsList()
-                  : _NotificationsList(notifications: list),
+                  ? const _MockNotifList()
+                  : _NotifList(notifications: list, tab: _tab),
             ),
           ),
         ]),
@@ -90,133 +93,153 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
   }
 }
 
-class _NotificationsList extends StatelessWidget {
+class _NotifList extends StatelessWidget {
   final List<Map<String, dynamic>> notifications;
-  const _NotificationsList({required this.notifications});
+  final int tab;
+  const _NotifList({required this.notifications, required this.tab});
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: notifications.length,
-      separatorBuilder: (_, __) => Divider(
-          color: Colors.white.withValues(alpha: 0.06), height: 1),
+    final filtered = tab == 0
+        ? notifications
+        : notifications.where((n) {
+            final type = n['type'] as String? ?? '';
+            final tabType = ['all', 'challenge', 'friend', 'coin'][tab];
+            return type.contains(tabType);
+          }).toList();
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      itemCount: filtered.length,
       itemBuilder: (_, i) {
-        final n = notifications[i];
+        final n = filtered[i];
         final read = n['read'] as bool? ?? false;
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          color: read
-              ? Colors.transparent
-              : AppTheme.voltLime.withValues(alpha: 0.03),
-          child: Row(children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: AppTheme.surface,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.border),
-              ),
-              child: const Icon(Icons.notifications_rounded,
-                  color: AppTheme.ink2, size: 18),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(n['title'] as String,
-                      style: AppTheme.label(13, color: Colors.white)
-                          .copyWith(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 2),
-                  Text(n['body'] as String,
-                      style: AppTheme.label(12, color: AppTheme.ink2)),
-                ],
-              ),
-            ),
-            if (!read)
-              Container(
-                width: 7,
-                height: 7,
-                decoration: const BoxDecoration(
-                    color: AppTheme.voltLime, shape: BoxShape.circle),
-              ),
-          ]),
+        final title = n['title'] as String? ?? '';
+        final body = n['body'] as String? ?? '';
+        final createdAt = n['created_at'] as String? ?? '';
+        return _NotifRow(
+          title: title,
+          body: body,
+          time: _fmtTime(createdAt),
+          isUnread: !read,
+          coinAmount: null,
         );
       },
+    );
+  }
+
+  static String _fmtTime(String s) {
+    try {
+      final d = DateTime.parse(s);
+      final diff = DateTime.now().difference(d);
+      if (diff.inMinutes < 1) return 'Just now';
+      if (diff.inHours < 1) return '${diff.inMinutes}m ago';
+      if (diff.inDays < 1) return '${diff.inHours}h ago';
+      if (diff.inDays == 1) return 'Yest.';
+      return '${diff.inDays}d ago';
+    } catch (_) {
+      return 'Recently';
+    }
+  }
+}
+
+class _NotifRow extends StatelessWidget {
+  final String title, body, time;
+  final bool isUnread;
+  final String? coinAmount;
+  final IconData? icon;
+  const _NotifRow({
+    required this.title,
+    required this.body,
+    required this.time,
+    required this.isUnread,
+    this.coinAmount,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final ic = icon ?? Icons.notifications_rounded;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: isUnread
+            ? AppTheme.voltLime.withValues(alpha: 0.06)
+            : Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: isUnread
+                ? AppTheme.voltLime.withValues(alpha: 0.12)
+                : Colors.white.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(ic,
+              size: 18,
+              color: isUnread ? AppTheme.voltLime : AppTheme.ink2),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title,
+                style: AppTheme.label(13, color: Colors.white)
+                    .copyWith(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 2),
+            Text(time, style: AppTheme.label(11, color: AppTheme.ink2)),
+          ]),
+        ),
+        if (coinAmount != null) ...[
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppTheme.amber.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border:
+                  Border.all(color: AppTheme.amber.withValues(alpha: 0.3)),
+            ),
+            child: Text(coinAmount!,
+                style: AppTheme.label(11, color: AppTheme.amber)
+                    .copyWith(fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ]),
     );
   }
 }
 
-class _MockNotificationsList extends StatelessWidget {
+class _MockNotifList extends StatelessWidget {
+  const _MockNotifList();
+
   static const _items = [
-    ['Challenge started!', 'Your "7-Day Gym Consistency" starts tomorrow.', true, Icons.emoji_events_rounded, false],
-    ['Goal achieved 🎉', 'You hit 10,000 steps today. Keep it up!', true, Icons.directions_walk_rounded, false],
-    ['Coin reward', 'You earned +200¢ for finishing top 50%.', false, Icons.monetization_on_rounded, true],
-    ['Friend joined', 'Priya S joined your "Sunrise Squad" challenge.', true, Icons.person_rounded, false],
-    ['Streak alert 🔥', 'Don\'t break your 12-day streak today!', true, Icons.local_fire_department_rounded, true],
-    ['New rival match', 'You\'ve been matched with Aarav M for a weekly battle.', false, Icons.sports_mma_rounded, false],
-    ['Mission complete', 'Walk 8,000 steps mission done · +15¢ added.', false, Icons.check_circle_rounded, false],
+    ['You finished "10k Steps" — top 50%!', 'Just now', '+150 ¢', true, Icons.emoji_events_rounded],
+    ['You hit a 12-day streak!', '1h ago', '+20 ¢', true, Icons.local_fire_department_rounded],
+    ['Time to log your gym session', '3h ago', null, false, Icons.fitness_center_rounded],
+    ['Priya joined "7-day Gym Consistency"', 'Yest.', null, false, Icons.person_rounded],
+    ['Aarav passed you on the leaderboard', 'Yest.', null, false, Icons.bar_chart_rounded],
+    ['500 coins added — referred Megha', '2d ago', '+500 ¢', false, Icons.monetization_on_rounded],
+    ['New gift card: Cult.fit ₹250 added', '3d ago', null, false, Icons.card_giftcard_rounded],
   ];
 
   @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: _items.length,
-      separatorBuilder: (_, __) => Divider(
-          color: Colors.white.withValues(alpha: 0.06), height: 1),
-      itemBuilder: (_, i) {
-        final item = _items[i];
-        final isCoins = item[3] == Icons.monetization_on_rounded;
-        final unread = item[4] as bool;
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          color: unread
-              ? AppTheme.voltLime.withValues(alpha: 0.03)
-              : Colors.transparent,
-          child: Row(children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: isCoins
-                    ? AppTheme.amber.withValues(alpha: 0.12)
-                    : AppTheme.surface,
-                shape: BoxShape.circle,
-                border: Border.all(
-                    color: isCoins
-                        ? AppTheme.amber.withValues(alpha: 0.3)
-                        : AppTheme.border),
-              ),
-              child: Icon(item[3] as IconData,
-                  color: isCoins ? AppTheme.amber : AppTheme.ink2, size: 18),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item[0] as String,
-                      style: AppTheme.label(13, color: Colors.white)
-                          .copyWith(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 2),
-                  Text(item[1] as String,
-                      style: AppTheme.label(12, color: AppTheme.ink2)),
-                ],
-              ),
-            ),
-            if (unread)
-              Container(
-                width: 7,
-                height: 7,
-                decoration: const BoxDecoration(
-                    color: AppTheme.voltLime, shape: BoxShape.circle),
-              ),
-          ]),
-        );
-      },
-    );
-  }
+  Widget build(BuildContext context) => ListView.builder(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        itemCount: _items.length,
+        itemBuilder: (_, i) {
+          final item = _items[i];
+          return _NotifRow(
+            title: item[0] as String,
+            body: '',
+            time: item[1] as String,
+            coinAmount: item[2] as String?,
+            isUnread: item[3] as bool,
+            icon: item[4] as IconData,
+          );
+        },
+      );
 }

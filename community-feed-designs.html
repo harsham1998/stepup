@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>StepUp — Community Feed · Strava Pulse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:ital,wght@0,700;0,800;0,900;1,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+/* ── App font helpers (mirrors Flutter theme.dart) ── */
+/* bigNum → Big Shoulders Display 900 */
+/* label  → Inter */
+
+:root{
+  --lime:   #D4FF3A;
+  --amber:  #FFB547;
+  --bg:     #050510;
+  --surf:   #0D0D1A;
+  --surf2:  #13131F;
+  --ink2:   #A3A3B3;
+  --ink3:   #4B5563;
+  --bord:   rgba(255,255,255,0.08);
+  --orange: #FC4C02;   /* Strava accent */
+  --red:    #EF4444;
+}
+
+body{
+  background:#020208;
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:32px 20px 80px;
+  font-family:'Inter',sans-serif;
+  color:#fff;
+}
+
+.pg-title{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-weight:900;font-size:14px;letter-spacing:4px;
+  color:var(--lime);text-transform:uppercase;margin-bottom:8px;
+}
+.pg-sub{
+  font-family:'Inter',sans-serif;font-size:12px;
+  color:var(--ink3);margin-bottom:36px;
+}
+
+/* ── Two phones side by side ── */
+.phones{
+  display:flex;gap:40px;align-items:flex-start;
+  flex-wrap:wrap;justify-content:center;
+}
+.phone-col{display:flex;flex-direction:column;align-items:center;gap:12px;}
+.phone-lbl{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-weight:700;font-size:10px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--ink3);
+}
+
+/* ── Phone shell ── */
+.phone{
+  width:390px;height:844px;
+  background:var(--bg);
+  border-radius:50px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.07),
+    0 50px 100px rgba(0,0,0,.9);
+}
+.notch{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:126px;height:34px;background:#000;
+  border-radius:0 0 22px 22px;z-index:100;
+}
+.sb{
+  height:50px;min-height:50px;
+  display:flex;align-items:flex-end;
+  padding:0 22px 8px;
+  justify-content:space-between;
+  flex-shrink:0;position:relative;z-index:10;
+}
+.sb-time{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;}
+.sb-r{display:flex;gap:5px;align-items:center;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.8);}
+
+/* scrollable area */
+.scr{flex:1;overflow-y:auto;scrollbar-width:none;}
+.scr::-webkit-scrollbar{display:none;}
+
+/* ══════════════════════════════════════════════
+   TOP BAR
+══════════════════════════════════════════════ */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 20px 8px;
+}
+.logo{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-weight:900;font-size:22px;
+  color:var(--lime);letter-spacing:1px;
+}
+.topbar-icons{display:flex;gap:18px;}
+.topbar-icon{font-size:20px;cursor:pointer;}
+
+/* ══════════════════════════════════════════════
+   STORIES
+══════════════════════════════════════════════ */
+.stories{
+  display:flex;gap:12px;
+  padding:6px 20px 14px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.stories::-webkit-scrollbar{display:none;}
+.sw{display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;}
+.sr{
+  width:58px;height:58px;border-radius:50%;padding:2.5px;
+  background:conic-gradient(var(--orange),var(--lime),var(--orange));
+  position:relative;
+}
+.sr.dim{background:rgba(255,255,255,.1);}
+.sav{
+  width:100%;height:100%;border-radius:50%;
+  background:#1A1A26;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:22px;font-weight:900;
+}
+.s-add{
+  position:absolute;bottom:-2px;right:-2px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--lime);color:#000;
+  font-size:14px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Big Shoulders Display',sans-serif;
+}
+.sname{
+  font-family:'Inter',sans-serif;font-size:10px;
+  color:rgba(255,255,255,.55);font-weight:500;
+}
+
+/* ══════════════════════════════════════════════
+   POST CARD
+══════════════════════════════════════════════ */
+.post{
+  border-bottom:8px solid #020208;
+  background:var(--bg);
+}
+
+/* Post header */
+.post-hd{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 18px 10px;
+}
+.pav{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--lime),var(--amber));
+  padding:1.5px;flex-shrink:0;
+}
+.pav-i{
+  width:100%;height:100%;border-radius:50%;
+  background:#1A1A26;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:18px;font-weight:900;
+}
+.pav.orange{background:linear-gradient(135deg,var(--orange),var(--amber));}
+.pav.purple{background:linear-gradient(135deg,#8B5CF6,#EC4899);}
+.pmeta{flex:1;}
+.pname{
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:700;
+  color:#fff;
+}
+.psub{
+  display:flex;align-items:center;gap:6px;margin-top:2px;
+}
+.ptime{font-family:'Inter',sans-serif;font-size:11px;color:var(--ink2);}
+.pdot{width:3px;height:3px;border-radius:50%;background:var(--ink2);}
+.act-chip{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:.5px;
+  padding:2px 7px;border-radius:4px;
+}
+.chip-run{background:var(--orange);color:#fff;}
+.chip-gym{background:#6366F1;color:#fff;}
+.chip-prog{background:#059669;color:#fff;}
+.chip-walk{background:#0EA5E9;color:#fff;}
+.chip-meal{background:#D97706;color:#fff;}
+.more-btn{font-size:20px;color:var(--ink2);cursor:pointer;line-height:1;}
+
+/* Photo area */
+.post-photo{
+  width:100%;position:relative;overflow:hidden;
+}
+
+/* Photo overlay gradient bottom */
+.photo-fog{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(5,5,16,.9) 0%,rgba(5,5,16,.3) 40%,transparent 70%);
+}
+
+/* Activity card (run/walk) */
+.act-card{
+  margin:0 18px 12px;
+  background:var(--surf);
+  border-radius:16px;
+  border:1px solid var(--bord);
+  overflow:hidden;
+}
+.act-title-row{padding:14px 16px 10px;}
+.act-title{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:28px;font-weight:900;font-style:italic;
+  color:#fff;line-height:1;
+}
+.stats-row{display:flex;margin-top:12px;}
+.stat{flex:1;}
+.stat-l{
+  font-family:'Inter',sans-serif;font-size:10px;
+  color:var(--ink2);letter-spacing:.3px;
+}
+.stat-v{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:22px;font-weight:900;color:#fff;line-height:1.1;
+}
+.stat-u{
+  font-family:'Inter',sans-serif;font-size:11px;
+  color:var(--ink2);margin-left:2px;
+}
+
+/* Map */
+.map-area{
+  margin:0 14px 12px;height:100px;
+  background:#0D1A0D;border-radius:10px;
+  border:1px solid rgba(212,255,58,.12);
+  position:relative;overflow:hidden;
+}
+.map-pill{
+  position:absolute;bottom:8px;right:10px;
+  background:var(--lime);color:var(--bg);
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:11px;font-weight:900;letter-spacing:.5px;
+  padding:3px 8px;border-radius:6px;
+}
+
+/* Achievement banner */
+.achiev{
+  margin:0 14px 10px;
+  background:rgba(255,181,71,.07);
+  border:1px solid rgba(255,181,71,.25);
+  border-radius:10px;
+  padding:9px 12px;
+  display:flex;align-items:center;gap:8px;
+  font-family:'Inter',sans-serif;font-size:12px;
+  font-weight:600;color:var(--amber);
+}
+
+/* Caption */
+.caption{
+  padding:0 18px 10px;
+  font-family:'Inter',sans-serif;font-size:13px;
+  color:rgba(255,255,255,.85);line-height:1.5;
+}
+.caption .mention{color:var(--lime);font-weight:600;}
+.caption .hashtag{color:var(--orange);}
+
+/* League pill */
+.league-pill{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:9px;font-weight:700;letter-spacing:.5px;
+  padding:2px 7px;border-radius:10px;
+}
+.lp-lime{background:rgba(212,255,58,.1);border:1px solid rgba(212,255,58,.25);color:var(--lime);}
+.lp-amber{background:rgba(255,181,71,.1);border:1px solid rgba(255,181,71,.25);color:var(--amber);}
+.lp-blue{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);color:#60A5FA;}
+
+/* Post actions */
+.post-act{
+  display:flex;align-items:center;
+  padding:10px 18px 14px;gap:14px;
+  border-top:1px solid var(--bord);
+}
+.kudos-btn{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(252,76,2,.1);
+  border:1px solid rgba(252,76,2,.3);
+  border-radius:6px;padding:7px 14px;
+  font-family:'Inter',sans-serif;font-size:13px;
+  font-weight:700;color:var(--orange);cursor:pointer;
+}
+.pa{
+  display:flex;align-items:center;gap:5px;
+  font-family:'Inter',sans-serif;font-size:13px;
+  font-weight:600;color:var(--ink2);cursor:pointer;
+}
+.pa-icon{font-size:20px;line-height:1;}
+.pa-r{margin-left:auto;font-size:20px;color:var(--ink2);cursor:pointer;}
+
+/* Likes text */
+.likes-txt{
+  padding:0 18px 4px;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:600;
+}
+
+/* ══════════════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════════════ */
+.bnav{
+  height:70px;
+  background:var(--surf);
+  border-top:1px solid var(--bord);
+  display:flex;align-items:center;justify-content:space-around;
+  padding-bottom:10px;flex-shrink:0;
+}
+.bn{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;}
+.bn-i{font-size:20px;line-height:1;}
+.bn-l{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:10px;font-weight:700;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--ink3);
+}
+.bn.on .bn-l{color:var(--lime);}
+.bn.on .bn-i{filter:drop-shadow(0 0 6px rgba(212,255,58,.5));}
+
+/* ══════════════════════════════════════════════
+   CREATE POST SCREEN
+══════════════════════════════════════════════ */
+.cp-topbar{
+  display:flex;align-items:center;
+  padding:10px 18px 10px;
+  gap:12px;
+  border-bottom:1px solid var(--bord);
+  flex-shrink:0;
+}
+.cp-back{font-size:22px;cursor:pointer;color:#fff;}
+.cp-heading{
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:20px;font-weight:900;letter-spacing:.5px;
+  flex:1;
+}
+.cp-post-btn{
+  background:var(--orange);color:#fff;border:none;
+  padding:8px 20px;border-radius:6px;
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:15px;font-weight:900;letter-spacing:.5px;
+  cursor:pointer;
+}
+
+/* Type chips */
+.type-row{
+  display:flex;gap:8px;padding:12px 18px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.type-row::-webkit-scrollbar{display:none;}
+.type-chip{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:999px;
+  border:1px solid var(--bord);
+  background:var(--surf2);
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:12px;font-weight:700;letter-spacing:.3px;
+  color:var(--ink2);cursor:pointer;white-space:nowrap;
+  transition:all .15s;
+}
+.type-chip.on{
+  background:rgba(252,76,2,.1);
+  border-color:rgba(252,76,2,.4);
+  color:var(--orange);
+}
+
+/* User + textarea */
+.cp-user-row{
+  display:flex;gap:10px;
+  padding:12px 18px 0;align-items:flex-start;
+}
+.cp-av{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--lime),var(--amber));
+  padding:1.5px;flex-shrink:0;
+}
+.cp-av-i{
+  width:100%;height:100%;border-radius:50%;
+  background:#1A1A26;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:18px;font-weight:900;
+}
+.cp-name{
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:700;
+}
+.cp-name span{color:var(--lime);font-weight:700;}
+.audience-btn{
+  margin-top:4px;display:flex;align-items:center;gap:4px;
+  background:var(--surf2);border:1px solid var(--bord);
+  border-radius:999px;padding:3px 10px;width:fit-content;cursor:pointer;
+  font-family:'Inter',sans-serif;font-size:11px;font-weight:600;
+  color:rgba(255,255,255,.5);
+}
+
+.cp-textarea{
+  background:transparent;border:none;outline:none;
+  color:#fff;font-family:'Inter',sans-serif;
+  font-size:14px;line-height:1.55;resize:none;
+  width:100%;padding:10px 18px 0 66px;min-height:72px;
+}
+.cp-textarea::placeholder{color:var(--ink3);}
+
+/* Section label */
+.sec-label{
+  padding:12px 18px 8px;
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;color:var(--ink3);
+}
+
+/* Photo grid */
+.photo-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:3px;margin:0 18px 14px;
+  border-radius:12px;overflow:hidden;
+}
+.ph-thumb{
+  height:86px;position:relative;overflow:hidden;cursor:pointer;
+}
+.ph-thumb .bg{width:100%;height:100%;}
+.ph-thumb.sel::after{
+  content:'✓';
+  position:absolute;top:6px;right:6px;
+  width:20px;height:20px;border-radius:50%;
+  background:var(--lime);color:#000;
+  font-family:'Big Shoulders Display',sans-serif;
+  font-size:11px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+}
+.ph-thumb.sel{border:2px solid var(--lime);}
+.ph-add{
+  background:var(--surf2);border:1px dashed rgba(255,255,255,.12);
+  border-radius:4px;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:4px;cursor:pointer;
+}
+.ph-add-icon{font-size:22px;}
+.ph-add-lbl{
+  font-family:'Inter',sans-serif;font-size:10px;
+  color:var(--ink3);font-weight:500;
+}
+
+/* Preview selected photo */
+.cp-preview{
+  margin:0 18px 12px;border-radius:12px;overflow:hidden;
+  height:180px;position:relative;
+}
+
+/* Option rows */
+.opt-row{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 18px;border-top:1px solid var(--bord);
+  cursor:pointer;
+}
+.opt-icon{font-size:18px;width:24px;text-align:center;}
+.opt-label{
+  font-family:'Inter',sans-serif;font-size:14px;
+  color:rgba(255,255,255,.65);flex:1;
+}
+.opt-val{
+  font-family:'Inter',sans-serif;font-size:12px;
+  color:var(--ink2);
+}
+.opt-arrow{
+  font-family:'Inter',sans-serif;font-size:14px;
+  color:var(--ink3);
+}
+
+/* Toolbar */
+.cp-toolbar{
+  display:flex;gap:20px;align-items:center;
+  padding:11px 18px;
+  border-top:1px solid var(--bord);
+  background:var(--surf);
+  flex-shrink:0;
+}
+.tool-btn{
+  font-size:22px;cursor:pointer;
+  color:var(--ink2);line-height:1;
+}
+.char-count{
+  margin-left:auto;
+  font-family:'Inter',sans-serif;font-size:12px;
+  color:var(--ink3);font-weight:500;
+}
+
+/* ── Photo BG helpers ── */
+.bg1{background:linear-gradient(145deg,#0C1020,#141828);}
+.bg2{background:linear-gradient(145deg,#140820,#200A30);}
+.bg3{background:linear-gradient(145deg,#0A180A,#0E2010);}
+.bg4{background:linear-gradient(145deg,#1A0808,#280E0E);}
+.bg5{background:linear-gradient(145deg,#080818,#10102A);}
+.bg6{background:linear-gradient(145deg,#181208,#281E08);}
+</style>
+</head>
+<body>
+
+<div class="pg-title">StepUp · Community Feed</div>
+<div class="pg-sub">Strava Pulse design · Big Shoulders Display + Inter</div>
+
+<div class="phones">
+
+<!-- ══════════════════════════════════════════
+     PHONE 1 · FEED
+══════════════════════════════════════════ -->
+<div class="phone-col">
+  <div class="phone-lbl">Community Feed</div>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="sb">
+      <span class="sb-time">9:41</span>
+      <div class="sb-r">▲▲▲ WiFi 🔋</div>
+    </div>
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <span class="logo">STEPUP</span>
+      <div class="topbar-icons">
+        <span class="topbar-icon">🔔</span>
+        <span class="topbar-icon">✉️</span>
+      </div>
+    </div>
+
+    <div class="scr">
+      <!-- Stories -->
+      <div class="stories">
+        <div class="sw" style="position:relative;">
+          <div class="sr"><div class="sav">H</div></div>
+          <div class="s-add">+</div>
+          <span class="sname">You</span>
+        </div>
+        <div class="sw"><div class="sr"><div class="sav">A</div></div><span class="sname">Aarav</span></div>
+        <div class="sw"><div class="sr"><div class="sav">P</div></div><span class="sname">Priya</span></div>
+        <div class="sw"><div class="sr dim"><div class="sav">R</div></div><span class="sname">Raj</span></div>
+        <div class="sw"><div class="sr"><div class="sav">N</div></div><span class="sname">Neha</span></div>
+        <div class="sw"><div class="sr dim"><div class="sav">V</div></div><span class="sname">Vikram</span></div>
+      </div>
+
+      <!-- POST 1 — Gym photo -->
+      <div class="post">
+        <div class="post-hd">
+          <div class="pav"><div class="pav-i">A</div></div>
+          <div class="pmeta">
+            <div class="pname">Aarav M</div>
+            <div class="psub">
+              <span class="ptime">1h ago</span>
+              <div class="pdot"></div>
+              <span class="act-chip chip-gym">💪 GYM</span>
+              <span class="league-pill lp-lime">Gold III</span>
+            </div>
+          </div>
+          <span class="more-btn">···</span>
+        </div>
+
+        <!-- Gym photo placeholder -->
+        <div class="post-photo" style="height:280px;">
+          <svg viewBox="0 0 390 280" style="width:100%;height:100%;display:block;">
+            <defs>
+              <radialGradient id="gym1" cx="48%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="#1C2438"/>
+                <stop offset="100%" stop-color="#060810"/>
+              </radialGradient>
+            </defs>
+            <rect width="390" height="280" fill="url(#gym1)"/>
+            <!-- gym lights -->
+            <ellipse cx="195" cy="-20" rx="120" ry="60" fill="rgba(255,255,255,.03)"/>
+            <!-- floor line -->
+            <line x1="0" y1="248" x2="390" y2="248" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+            <!-- Barbell rack silhouette -->
+            <rect x="55" y="150" width="280" height="10" rx="5" fill="rgba(255,255,255,.12)"/>
+            <rect x="40" y="132" width="32" height="44" rx="5" fill="rgba(255,255,255,.09)"/>
+            <rect x="318" y="132" width="32" height="44" rx="5" fill="rgba(255,255,255,.09)"/>
+            <!-- Weight plates -->
+            <rect x="40" y="120" width="32" height="16" rx="3" fill="rgba(255,255,255,.07)"/>
+            <rect x="318" y="120" width="32" height="16" rx="3" fill="rgba(255,255,255,.07)"/>
+            <!-- Bench -->
+            <rect x="145" y="190" width="100" height="20" rx="6" fill="rgba(255,255,255,.08)"/>
+            <rect x="170" y="208" width="12" height="36" rx="4" fill="rgba(255,255,255,.06)"/>
+            <rect x="208" y="208" width="12" height="36" rx="4" fill="rgba(255,255,255,.06)"/>
+            <!-- Person - bench pressing (lying down) -->
+            <ellipse cx="195" cy="162" rx="26" ry="26" fill="rgba(235,195,145,.14)"/>
+            <path d="M170 186 Q195 225 220 186 L214 245 L176 245Z" fill="rgba(235,195,145,.1)"/>
+            <!-- Arms up holding bar -->
+            <path d="M170 176 L95 160 L92 145 L168 162Z" fill="rgba(235,195,145,.1)"/>
+            <path d="M220 176 L295 160 L298 145 L222 162Z" fill="rgba(235,195,145,.1)"/>
+            <!-- subtle lime glow underneath person -->
+            <ellipse cx="195" cy="215" rx="70" ry="30" fill="rgba(212,255,58,.04)"/>
+          </svg>
+          <div class="photo-fog"></div>
+          <div style="position:absolute;bottom:14px;left:18px;right:18px;z-index:2;">
+            <div style="font-family:'Big Shoulders Display',sans-serif;font-size:20px;font-weight:900;font-style:italic;color:#fff;line-height:1;">BENCH PRESS</div>
+            <div style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,.55);margin-top:2px;">3 sets · 12 reps · 80kg</div>
+          </div>
+        </div>
+
+        <div class="likes-txt" style="padding-top:10px;">
+          <span style="color:var(--orange);">👊</span> <strong>84 kudos</strong>
+        </div>
+        <div class="caption">chest pump hitting different today 🔥 cable flys finally clicking after weeks. consistency is literally the cheat code <span class="mention">@priya</span> <span class="hashtag">#ChestDay #Gains</span></div>
+        <div class="post-act">
+          <div class="kudos-btn">👊 Kudos · 84</div>
+          <div class="pa"><span class="pa-icon">💬</span><span>17</span></div>
+          <span class="pa-r">📤</span>
+        </div>
+      </div>
+
+      <!-- POST 2 — Progress / transformation -->
+      <div class="post">
+        <div class="post-hd">
+          <div class="pav orange"><div class="pav-i">P</div></div>
+          <div class="pmeta">
+            <div class="pname">Priya S</div>
+            <div class="psub">
+              <span class="ptime">3h ago</span>
+              <div class="pdot"></div>
+              <span class="act-chip chip-prog">📈 PROGRESS</span>
+              <span class="league-pill lp-amber">Platinum I</span>
+            </div>
+          </div>
+          <span class="more-btn">···</span>
+        </div>
+
+        <!-- Progress / body check photo -->
+        <div class="post-photo" style="height:300px;">
+          <svg viewBox="0 0 390 300" style="width:100%;height:100%;display:block;">
+            <defs>
+              <linearGradient id="prog1" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#180828"/>
+                <stop offset="50%" stop-color="#0C0418"/>
+                <stop offset="100%" stop-color="#1E0A32"/>
+              </linearGradient>
+            </defs>
+            <rect width="390" height="300" fill="url(#prog1)"/>
+            <!-- Split divider -->
+            <line x1="195" y1="0" x2="195" y2="300" stroke="rgba(255,255,255,.1)" stroke-width="1" stroke-dasharray="7,5"/>
+            <!-- Labels -->
+            <text x="97" y="32" text-anchor="middle" fill="rgba(255,255,255,.2)" font-size="11" font-family="sans-serif" font-weight="700" letter-spacing="3">BEFORE</text>
+            <text x="293" y="32" text-anchor="middle" fill="#D4FF3A" font-size="11" font-family="sans-serif" font-weight="700" letter-spacing="3">AFTER</text>
+            <!-- Before silhouette -->
+            <ellipse cx="97" cy="105" rx="28" ry="28" fill="rgba(235,195,145,.1)"/>
+            <path d="M70 132 Q97 178 124 132 L118 290 L76 290Z" fill="rgba(235,195,145,.08)"/>
+            <path d="M72 142 L28 162 L22 140 L69 132Z" fill="rgba(235,195,145,.07)"/>
+            <path d="M122 142 L166 162 L172 140 L125 132Z" fill="rgba(235,195,145,.07)"/>
+            <!-- After silhouette (toned, upright) -->
+            <ellipse cx="293" cy="96" rx="27" ry="27" fill="rgba(235,195,145,.18)"/>
+            <path d="M267 121 Q293 165 319 121 L312 290 L274 290Z" fill="rgba(235,195,145,.14)"/>
+            <path d="M270 131 L222 148 L216 126 L267 122Z" fill="rgba(235,195,145,.14)"/>
+            <path d="M316 131 L362 148 L368 126 L319 122Z" fill="rgba(235,195,145,.14)"/>
+            <!-- Glow on after figure -->
+            <ellipse cx="293" cy="200" rx="60" ry="80" fill="rgba(212,255,58,.05)"/>
+          </svg>
+          <div class="photo-fog"></div>
+          <div style="position:absolute;bottom:14px;left:18px;right:18px;z-index:2;display:flex;justify-content:space-around;">
+            <div style="text-align:center;">
+              <div style="font-family:'Big Shoulders Display',sans-serif;font-size:26px;font-weight:900;color:#D4FF3A;">-6kg</div>
+              <div style="font-family:'Inter',sans-serif;font-size:10px;color:rgba(255,255,255,.5);">weight</div>
+            </div>
+            <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+            <div style="text-align:center;">
+              <div style="font-family:'Big Shoulders Display',sans-serif;font-size:26px;font-weight:900;color:#fff;">68</div>
+              <div style="font-family:'Inter',sans-serif;font-size:10px;color:rgba(255,255,255,.5);">workouts</div>
+            </div>
+            <div style="width:1px;background:rgba(255,255,255,.1);"></div>
+            <div style="text-align:center;">
+              <div style="font-family:'Big Shoulders Display',sans-serif;font-size:26px;font-weight:900;color:var(--amber);">42 🔥</div>
+              <div style="font-family:'Inter',sans-serif;font-size:10px;color:rgba(255,255,255,.5);">day streak</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="likes-txt" style="padding-top:10px;">
+          <span style="color:var(--orange);">👊</span> <strong>312 kudos</strong> — <span style="color:var(--ink2);font-weight:400;font-size:12px;">Aarav, Neha +310 others</span>
+        </div>
+        <div class="caption">3 months ago I could barely do 5 push-ups. today — 3 sets of 20 and -6kg. if you're just starting, trust the process 💪✦ <span class="mention">@aarav</span> <span class="hashtag">#Progress #Transformation #StepUp</span></div>
+        <div class="post-act">
+          <div class="kudos-btn" style="background:rgba(212,255,58,.08);border-color:rgba(212,255,58,.25);color:var(--lime);">👊 Kudos · 312</div>
+          <div class="pa"><span class="pa-icon">💬</span><span>48</span></div>
+          <span class="pa-r">📤</span>
+        </div>
+      </div>
+
+      <!-- POST 3 — Run with map (strava style) -->
+      <div class="post">
+        <div class="post-hd">
+          <div class="pav" style="background:linear-gradient(135deg,#60A5FA,#A78BFA);"><div class="pav-i">V</div></div>
+          <div class="pmeta">
+            <div class="pname">Vikram K</div>
+            <div class="psub">
+              <span class="ptime">6h ago</span>
+              <div class="pdot"></div>
+              <span class="act-chip chip-run">🏃 RUN</span>
+              <span class="league-pill lp-blue">Silver II</span>
+            </div>
+          </div>
+          <span class="more-btn">···</span>
+        </div>
+
+        <div class="act-card">
+          <div class="act-title-row">
+            <div class="act-title">Morning Run</div>
+            <div class="stats-row">
+              <div class="stat">
+                <div class="stat-l">Distance</div>
+                <div><span class="stat-v">8.4</span><span class="stat-u">km</span></div>
+              </div>
+              <div class="stat">
+                <div class="stat-l">Time</div>
+                <div><span class="stat-v">38:22</span></div>
+              </div>
+              <div class="stat">
+                <div class="stat-l">Pace</div>
+                <div><span class="stat-v">4:34</span><span class="stat-u">/km</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="map-area">
+            <svg viewBox="0 0 354 100" style="width:100%;height:100%;display:block;">
+              <rect width="354" height="100" fill="#0D1A0D"/>
+              <line x1="0" y1="33" x2="354" y2="33" stroke="rgba(212,255,58,.05)" stroke-width="1"/>
+              <line x1="0" y1="66" x2="354" y2="66" stroke="rgba(212,255,58,.05)" stroke-width="1"/>
+              <path d="M10,80 C45,58 65,32 108,46 C148,60 172,18 218,32 C256,44 272,72 320,54 C335,48 346,41 354,38" fill="none" stroke="rgba(212,255,58,.12)" stroke-width="10" stroke-linecap="round"/>
+              <path d="M10,80 C45,58 65,32 108,46 C148,60 172,18 218,32 C256,44 272,72 320,54 C335,48 346,41 354,38" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="10" cy="80" r="5" fill="#D4FF3A" stroke="#fff" stroke-width="1.5"/>
+              <circle cx="354" cy="38" r="5" fill="#FC4C02" stroke="#fff" stroke-width="1.5"/>
+            </svg>
+            <div class="map-pill">8.4 km</div>
+          </div>
+        </div>
+
+        <div class="caption">running comeback day 7 🚀 lungs burning but feeling alive again. slowly getting there <span class="hashtag">#Running #Comeback #Day7</span></div>
+        <div class="post-act">
+          <div class="kudos-btn">👊 Kudos · 56</div>
+          <div class="pa"><span class="pa-icon">💬</span><span>9</span></div>
+          <span class="pa-r">📤</span>
+        </div>
+      </div>
+
+      <!-- POST 4 — Post workout meal (lifestyle) -->
+      <div class="post">
+        <div class="post-hd">
+          <div class="pav purple"><div class="pav-i">R</div></div>
+          <div class="pmeta">
+            <div class="pname">Raj T</div>
+            <div class="psub">
+              <span class="ptime">8h ago</span>
+              <div class="pdot"></div>
+              <span class="act-chip chip-meal">🥗 NUTRITION</span>
+              <span class="league-pill" style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);color:#A78BFA;">Diamond I</span>
+            </div>
+          </div>
+          <span class="more-btn">···</span>
+        </div>
+        <div class="post-photo" style="height:260px;">
+          <svg viewBox="0 0 390 260" style="width:100%;height:100%;display:block;">
+            <defs>
+              <radialGradient id="meal1" cx="50%" cy="40%" r="65%">
+                <stop offset="0%" stop-color="#0E1520"/>
+                <stop offset="100%" stop-color="#06080E"/>
+              </radialGradient>
+            </defs>
+            <rect width="390" height="260" fill="url(#meal1)"/>
+            <!-- Table surface -->
+            <rect x="0" y="200" width="390" height="60" rx="0" fill="rgba(255,255,255,.03)"/>
+            <!-- Plate -->
+            <ellipse cx="195" cy="175" rx="110" ry="28" fill="rgba(255,255,255,.05)"/>
+            <ellipse cx="195" cy="155" rx="102" ry="90" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <!-- Food color spots -->
+            <ellipse cx="175" cy="148" rx="38" ry="32" fill="rgba(239,68,68,.1)"/>
+            <ellipse cx="215" cy="158" rx="34" ry="28" fill="rgba(34,197,94,.12)"/>
+            <ellipse cx="192" cy="135" rx="28" ry="22" fill="rgba(255,181,71,.1)"/>
+            <ellipse cx="165" cy="168" rx="22" ry="16" fill="rgba(96,165,250,.08)"/>
+            <!-- Fork -->
+            <line x1="94" y1="90" x2="94" y2="238" stroke="rgba(255,255,255,.18)" stroke-width="3" stroke-linecap="round"/>
+            <line x1="88" y1="90" x2="88" y2="120" stroke="rgba(255,255,255,.12)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="100" y1="90" x2="100" y2="120" stroke="rgba(255,255,255,.12)" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Spoon -->
+            <line x1="296" y1="90" x2="296" y2="238" stroke="rgba(255,255,255,.15)" stroke-width="3" stroke-linecap="round"/>
+            <ellipse cx="296" cy="84" rx="10" ry="16" fill="rgba(255,255,255,.12)"/>
+            <!-- Glow -->
+            <ellipse cx="195" cy="155" rx="115" ry="100" fill="rgba(212,255,58,.03)"/>
+          </svg>
+          <div class="photo-fog"></div>
+          <div style="position:absolute;top:14px;left:18px;">
+            <div style="font-family:'Big Shoulders Display',sans-serif;font-size:20px;font-weight:900;font-style:italic;color:#fff;">POST-WORKOUT FUEL</div>
+          </div>
+          <div style="position:absolute;bottom:14px;left:18px;right:18px;z-index:2;display:flex;gap:12px;">
+            <div style="background:rgba(0,0,0,.5);backdrop-filter:blur(6px);border-radius:8px;padding:6px 10px;border:1px solid rgba(255,255,255,.1);">
+              <div style="font-family:'Big Shoulders Display',sans-serif;font-size:16px;font-weight:900;color:#D4FF3A;">40g</div>
+              <div style="font-family:'Inter',sans-serif;font-size:9px;color:rgba(255,255,255,.5);">protein</div>
+            </div>
+            <div style="background:rgba(0,0,0,.5);backdrop-filter:blur(6px);border-radius:8px;padding:6px 10px;border:1px solid rgba(255,255,255,.1);">
+              <div style="font-family:'Big Shoulders Display',sans-serif;font-size:16px;font-weight:900;color:#FFB547;">58g</div>
+              <div style="font-family:'Inter',sans-serif;font-size:9px;color:rgba(255,255,255,.5);">carbs</div>
+            </div>
+            <div style="background:rgba(0,0,0,.5);backdrop-filter:blur(6px);border-radius:8px;padding:6px 10px;border:1px solid rgba(255,255,255,.1);">
+              <div style="font-family:'Big Shoulders Display',sans-serif;font-size:16px;font-weight:900;color:#60A5FA;">12g</div>
+              <div style="font-family:'Inter',sans-serif;font-size:9px;color:rgba(255,255,255,.5);">fat</div>
+            </div>
+          </div>
+        </div>
+        <div class="caption">post workout nutrition is not optional 🥗 protein bowl after heavy leg day. what's everyone's go-to recovery meal? <span class="hashtag">#Nutrition #PostWorkout #FuelRight</span></div>
+        <div class="post-act">
+          <div class="kudos-btn" style="background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.3);color:#A78BFA;">👊 Kudos · 93</div>
+          <div class="pa"><span class="pa-icon">💬</span><span>22</span></div>
+          <span class="pa-r">📤</span>
+        </div>
+      </div>
+
+    </div><!-- /scr -->
+
+    <div class="bnav">
+      <div class="bn"><span class="bn-i">🏠</span><span class="bn-l">Home</span></div>
+      <div class="bn"><span class="bn-i">🏋️</span><span class="bn-l">Activity</span></div>
+      <div class="bn on"><span class="bn-i">👥</span><span class="bn-l">Community</span></div>
+      <div class="bn"><span class="bn-i">🏆</span><span class="bn-l">League</span></div>
+      <div class="bn"><span class="bn-i">👤</span><span class="bn-l">Profile</span></div>
+    </div>
+  </div>
+</div><!-- /phone-col feed -->
+
+<!-- ══════════════════════════════════════════
+     PHONE 2 · CREATE POST
+══════════════════════════════════════════ -->
+<div class="phone-col">
+  <div class="phone-lbl">Create Post</div>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="sb">
+      <span class="sb-time">9:41</span>
+      <div class="sb-r">▲▲▲ WiFi 🔋</div>
+    </div>
+
+    <!-- Top bar -->
+    <div class="cp-topbar">
+      <span class="cp-back">←</span>
+      <span class="cp-heading">NEW POST</span>
+      <button class="cp-post-btn">SHARE</button>
+    </div>
+
+    <div class="scr">
+      <!-- Post type -->
+      <div class="type-row">
+        <div class="type-chip on">📸 Photo / Flex</div>
+        <div class="type-chip">🏃 Activity</div>
+        <div class="type-chip">📈 Progress</div>
+        <div class="type-chip">💬 Question</div>
+        <div class="type-chip">🎯 Milestone</div>
+      </div>
+
+      <!-- User + caption -->
+      <div class="cp-user-row">
+        <div class="cp-av"><div class="cp-av-i">H</div></div>
+        <div>
+          <div class="cp-name">Harsha <span>· Gold II</span></div>
+          <div class="audience-btn">🌍 Everyone ▾</div>
+        </div>
+      </div>
+      <textarea class="cp-textarea" placeholder="Share your flex, progress, workout… what's the vibe today?" rows="3"></textarea>
+
+      <!-- Selected photo preview -->
+      <div class="sec-label">Selected Photo</div>
+      <div class="cp-preview">
+        <svg viewBox="0 0 354 180" style="width:100%;height:100%;display:block;">
+          <defs>
+            <radialGradient id="prev1" cx="48%" cy="36%" r="60%">
+              <stop offset="0%" stop-color="#1C2438"/>
+              <stop offset="100%" stop-color="#060810"/>
+            </radialGradient>
+          </defs>
+          <rect width="354" height="180" fill="url(#prev1)"/>
+          <ellipse cx="177" cy="70" rx="28" ry="28" fill="rgba(235,195,145,.14)"/>
+          <path d="M150 96 Q177 132 204 96 L198 175 L156 175Z" fill="rgba(235,195,145,.1)"/>
+          <path d="M152 104 L110 120 L104 100 L149 96Z" fill="rgba(235,195,145,.1)"/>
+          <path d="M202 104 L244 120 L250 100 L205 96Z" fill="rgba(235,195,145,.1)"/>
+          <ellipse cx="177" cy="135" rx="65" ry="45" fill="rgba(212,255,58,.04)"/>
+        </svg>
+        <div class="photo-fog"></div>
+        <div style="position:absolute;top:8px;right:10px;background:var(--lime);color:var(--bg);font-family:'Big Shoulders Display',sans-serif;font-size:10px;font-weight:900;padding:3px 9px;border-radius:5px;letter-spacing:.5px;">✓ SELECTED</div>
+        <div style="position:absolute;bottom:10px;right:12px;display:flex;gap:6px;">
+          <div style="background:rgba(0,0,0,.6);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:5px 10px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">✂️ Edit</div>
+          <div style="background:rgba(0,0,0,.6);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:5px 10px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">+ Add</div>
+        </div>
+      </div>
+
+      <!-- Photo grid -->
+      <div class="sec-label">Gallery</div>
+      <div class="photo-grid">
+        <div class="ph-thumb sel"><div class="bg bg1" style="width:100%;height:100%;"></div></div>
+        <div class="ph-thumb"><div class="bg bg2" style="width:100%;height:100%;"></div></div>
+        <div class="ph-thumb"><div class="bg bg3" style="width:100%;height:100%;"></div></div>
+        <div class="ph-thumb"><div class="bg bg4" style="width:100%;height:100%;"></div></div>
+        <div class="ph-thumb"><div class="bg bg5" style="width:100%;height:100%;"></div></div>
+        <div class="ph-add">
+          <span class="ph-add-icon">📷</span>
+          <span class="ph-add-lbl">Camera</span>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="opt-row" style="border-top:1px solid var(--bord);">
+        <span class="opt-icon">👤</span>
+        <span class="opt-label">Tag People</span>
+        <span class="opt-arrow">›</span>
+      </div>
+      <div class="opt-row">
+        <span class="opt-icon">📍</span>
+        <span class="opt-label">Add Location</span>
+        <span class="opt-val">Bengaluru</span>
+        <span class="opt-arrow" style="margin-left:6px;">›</span>
+      </div>
+      <div class="opt-row">
+        <span class="opt-icon">🏋️</span>
+        <span class="opt-label">Link Activity</span>
+        <span class="opt-val" style="color:var(--lime);">Morning Run</span>
+        <span class="opt-arrow" style="margin-left:6px;">›</span>
+      </div>
+      <div class="opt-row">
+        <span class="opt-icon">🎯</span>
+        <span class="opt-label">Challenge Tag</span>
+        <span class="opt-val">None</span>
+        <span class="opt-arrow" style="margin-left:6px;">›</span>
+      </div>
+      <div class="opt-row">
+        <span class="opt-icon">🌍</span>
+        <span class="opt-label">Audience</span>
+        <span class="opt-val">Everyone</span>
+        <span class="opt-arrow" style="margin-left:6px;">›</span>
+      </div>
+    </div><!-- /scr -->
+
+    <div class="cp-toolbar">
+      <span class="tool-btn">@</span>
+      <span class="tool-btn">#</span>
+      <span class="tool-btn">😊</span>
+      <span class="tool-btn">📍</span>
+      <span class="tool-btn">🏆</span>
+      <div class="char-count">280</div>
+    </div>
+  </div>
+</div><!-- /phone-col create -->
+
+</div><!-- /phones -->
+</body>
+</html>

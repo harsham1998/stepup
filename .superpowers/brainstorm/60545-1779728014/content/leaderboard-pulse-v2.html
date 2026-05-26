@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StepUp — Pulse Ring v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:     #050510;
+  --surf:   #0D0D1A;
+  --surf2:  #13131F;
+  --lime:   #D4FF3A;
+  --amber:  #FFB547;
+  --ink2:   #A3A3B3;
+  --ink3:   #4B5563;
+  --green:  #34D399;
+  --red:    #EF4444;
+  --gold:   #FFD700;
+  --silver: #C0C0C0;
+  --bronze: #CD7F32;
+}
+
+body {
+  background: #02020c;
+  font-family: 'Inter', sans-serif;
+  color: #fff;
+  padding: 40px 32px 80px;
+}
+
+.page-title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 32px; font-weight: 900; color: var(--lime); margin-bottom: 3px;
+}
+.page-sub { font-size: 12px; color: var(--ink3); margin-bottom: 36px; }
+
+.phones-row { display: flex; gap: 36px; flex-wrap: wrap; align-items: flex-start; }
+
+/* ── PHONE SHELL ── */
+.phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.phone-shell {
+  width: 218px;
+  height: 472px;
+  border-radius: 40px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: radial-gradient(ellipse at 50% 10%, #0a0a1c 0%, #050510 55%);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 14px 56px rgba(0,0,0,0.75);
+  transition: transform .25s, box-shadow .25s;
+}
+.phone-shell:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 64px rgba(212,255,58,0.12);
+}
+
+/* ── STATUS BAR ── */
+.sbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 18px 0; font-size: 9px; font-weight: 700; color: #fff;
+}
+.sbar-r { display: flex; gap: 5px; align-items: center; }
+
+/* ── NAV: single context bar ── */
+.ctx-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 15px 5px;
+}
+.ctx-league {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px 4px 8px; border-radius: 20px;
+  background: rgba(212,255,58,0.1); border: 1px solid rgba(212,255,58,0.28);
+  font-size: 8.5px; font-weight: 800; color: var(--lime);
+}
+.ctx-filter {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 8px; font-weight: 700; color: var(--ink2);
+}
+.ctx-filter b { color: #fff; font-weight: 700; }
+
+/* swipe dot indicator */
+.swipe-dots {
+  display: flex; gap: 3px; align-items: center;
+  padding: 0 15px 4px;
+}
+.swipe-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+}
+.swipe-dot.active {
+  width: 14px; border-radius: 3px;
+  background: var(--lime);
+}
+
+/* ── HERO CARD — COMPACT ── */
+.hero {
+  margin: 0 13px 5px;
+  border-radius: 14px;
+  background: rgba(212,255,58,0.04);
+  border: 1px solid rgba(212,255,58,0.16);
+  padding: 9px 11px 8px;
+}
+.hero-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 7px;
+}
+.hero-left {}
+.hero-eyebrow { font-size: 7px; color: var(--ink3); font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 1px; }
+.hero-rank {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 26px; font-weight: 900; color: var(--lime); line-height: 1;
+}
+.hero-tier { font-size: 9px; font-weight: 700; color: var(--ink2); margin-top: 1px; }
+.hero-badge {
+  padding: 5px 9px; border-radius: 10px;
+  background: rgba(255,181,71,0.12); border: 1px solid rgba(255,181,71,0.26);
+  text-align: center;
+}
+.hero-badge-top { font-size: 9px; font-weight: 800; color: var(--amber); }
+.hero-badge-bot { font-size: 6.5px; color: rgba(255,181,71,0.6); font-weight: 600; }
+
+.hero-bar { height: 3px; background: rgba(255,255,255,0.07); border-radius: 3px; }
+.hero-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--lime), #a8ff00); }
+
+/* ── RADAR ── */
+.radar-lbl {
+  font-size: 6.5px; font-weight: 800; color: var(--ink3);
+  letter-spacing: 0.5px; text-align: center;
+  padding: 0 15px 2px;
+}
+.radar-wrap {
+  position: relative;
+  width: 192px;
+  height: 150px;
+  margin: 0 auto;
+}
+/* concentric rings */
+.r-ring {
+  position: absolute; border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+/* orbit member dots */
+.m-dot {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  line-height: 1;
+}
+/* medal badge floats above dot */
+.m-crown {
+  position: absolute; top: -9px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px; line-height: 1;
+}
+/* floating rank label next to dot */
+.m-lbl {
+  position: absolute;
+  font-size: 5.5px; font-weight: 700; color: var(--ink3);
+  white-space: nowrap; line-height: 1;
+}
+/* YOU dot — center */
+.you-dot {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 10;
+}
+
+/* ── LIST ── */
+.lb-list { padding: 0 13px; display: flex; flex-direction: column; gap: 2px; }
+.lb-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 7px; border-radius: 8px;
+}
+.lb-row.me {
+  background: rgba(212,255,58,0.05);
+  border: 1px solid rgba(212,255,58,0.18);
+}
+.lb-row.dim { opacity: 0.45; }
+.lb-num {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 12px; font-weight: 900;
+  width: 32px; flex-shrink: 0;
+  white-space: nowrap;
+}
+.lb-av {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--surf2);
+  font-size: 8px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink2); flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+}
+.lb-name { font-size: 9.5px; font-weight: 600; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.lb-pct  { font-size: 10px; font-weight: 800; flex-shrink: 0; }
+
+.cutoff-line {
+  display: flex; align-items: center; gap: 5px;
+  padding: 2px 7px;
+  font-size: 6.5px; font-weight: 700; color: var(--red);
+}
+.cutoff-line::before, .cutoff-line::after {
+  content: ''; flex: 1; height: 1px; background: rgba(239,68,68,0.28);
+}
+
+/* ── BOTTOM NAV ── */
+.bot-nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 48px;
+  background: rgba(8,8,20,0.97);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-around;
+}
+.bn-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 7.5px; color: var(--ink3);
+}
+.bn-item.active { color: var(--lime); }
+.bn-bar { display: flex; gap: 2px; align-items: flex-end; height: 13px; }
+.bn-bar span { background: currentColor; border-radius: 1px; width: 3px; }
+
+/* ── DESIGN LABELS ── */
+.d-label { font-family: 'Big Shoulders Display', sans-serif; font-size: 12px; font-weight: 900; color: var(--ink3); }
+.d-name  { font-family: 'Big Shoulders Display', sans-serif; font-size: 19px; font-weight: 900; color: #fff; margin-top: -5px; }
+.d-desc  { font-size: 10.5px; color: var(--ink3); text-align: center; max-width: 186px; line-height: 1.5; }
+
+svg { display: block; }
+</style>
+</head>
+<body>
+
+<div class="page-title">Pulse Ring — Refined</div>
+<div class="page-sub">Compact hero · rank numbers on orbit · scales to 10,000+</div>
+
+<div class="phones-row">
+
+
+<!-- ══════════════════════════════════
+     PHONE 1 — Normal scale (92 ppl)
+══════════════════════════════════ -->
+<div class="phone-wrap">
+<div class="phone-shell">
+
+  <!-- radial glow -->
+  <div style="position:absolute;top:140px;left:50%;transform:translateX(-50%);width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(212,255,58,0.06) 0%,transparent 70%);pointer-events:none;z-index:0;"></div>
+
+  <div style="position:relative;z-index:1;height:100%;">
+
+  <!-- status -->
+  <div class="sbar">
+    <span>10:08</span>
+    <div class="sbar-r">
+      <svg width="12" height="8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+      <svg width="10" height="8"><path d="M5 2C2.5 2 0.5 3.5 0 5.5L1.5 5.5C2 4.3 3.4 3.5 5 3.5S8 4.3 8.5 5.5L10 5.5C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+      <svg width="21" height="9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".4"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".4"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+    </div>
+  </div>
+
+  <!-- NAV: league + filter in one bar -->
+  <div class="ctx-bar">
+    <div class="ctx-league">🏆 League</div>
+    <div class="ctx-filter">
+      <b>This challenge</b>
+      <svg width="8" height="5" viewBox="0 0 8 5"><path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <!-- swipe dots (filter indicator) -->
+  <div class="swipe-dots">
+    <div class="swipe-dot active"></div>
+    <div class="swipe-dot"></div>
+    <div class="swipe-dot"></div>
+    <span style="font-size:6.5px;color:var(--ink3);margin-left:3px;">Friends · Global</span>
+  </div>
+
+  <!-- HERO CARD — compact -->
+  <div class="hero">
+    <div class="hero-top">
+      <div class="hero-left">
+        <div class="hero-eyebrow">Your rank</div>
+        <div class="hero-rank">#14</div>
+        <div class="hero-tier">Top 16% ★  ·  of 92</div>
+      </div>
+      <div class="hero-badge">
+        <div class="hero-badge-top">+200¢</div>
+        <div class="hero-badge-bot">on track</div>
+      </div>
+    </div>
+    <div class="hero-bar"><div class="hero-bar-fill" style="width:84%;"></div></div>
+  </div>
+
+  <!-- RADAR -->
+  <div class="radar-lbl">ORBIT VIEW</div>
+  <div class="radar-wrap">
+
+    <!-- conic sweep glow -->
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:124px;height:124px;border-radius:50%;background:conic-gradient(from -90deg,rgba(212,255,58,0.07) 0deg,rgba(212,255,58,0) 110deg,rgba(212,255,58,0) 360deg);pointer-events:none;"></div>
+
+    <!-- rings -->
+    <div class="r-ring" style="width:138px;height:138px;border:1px solid rgba(212,255,58,0.07);"></div>
+    <div class="r-ring" style="width:96px;height:96px;border:1px solid rgba(212,255,58,0.06);"></div>
+    <div class="r-ring" style="width:52px;height:52px;border:1px solid rgba(212,255,58,0.13);"></div>
+
+    <!--
+      Orbit radius = 62px from center (96px/2 = 48, but we use 62 for outer ring)
+      Center of radar-wrap: (96, 75)
+
+      12 o'clock:  left=50%,           top=calc(50% - 62px)
+      10 o'clock:  left=calc(50% - 54px), top=calc(50% - 31px)   [sin-60=-0.866, cos60=0.5 → -54, -31]
+       2 o'clock:  left=calc(50% + 54px), top=calc(50% - 31px)
+       3 o'clock:  left=calc(50% + 62px), top=50%
+       9 o'clock:  left=calc(50% - 62px), top=50%
+       4 o'clock:  left=calc(50% + 54px), top=calc(50% + 31px)
+       8 o'clock:  left=calc(50% - 54px), top=calc(50% + 31px)
+    -->
+
+    <!-- #1 — 12 o'clock — GOLD — crown badge -->
+    <div class="m-dot" style="
+      top:calc(50% - 62px); left:50%;
+      width:30px; height:30px; font-size:11px;
+      background:rgba(255,215,0,0.13);
+      border:2px solid rgba(255,215,0,0.65);
+      box-shadow:0 0 12px rgba(255,215,0,0.3),0 0 24px rgba(255,215,0,0.06);
+      color:var(--gold);">
+      <div class="m-crown">👑</div>
+      1
+    </div>
+    <div class="m-lbl" style="top:calc(50% - 83px);left:50%;transform:translateX(-50%);color:rgba(255,215,0,0.55);font-size:6px;">Aarav M</div>
+
+    <!-- #2 — 10 o'clock — SILVER -->
+    <div class="m-dot" style="
+      top:calc(50% - 31px); left:calc(50% - 54px);
+      width:25px; height:25px; font-size:10px;
+      background:rgba(192,192,192,0.1);
+      border:1.5px solid rgba(192,192,192,0.6);
+      box-shadow:0 0 7px rgba(192,192,192,0.15);
+      color:var(--silver);">
+      2
+    </div>
+
+    <!-- #3 — 2 o'clock — BRONZE -->
+    <div class="m-dot" style="
+      top:calc(50% - 31px); left:calc(50% + 54px);
+      width:25px; height:25px; font-size:10px;
+      background:rgba(205,127,50,0.1);
+      border:1.5px solid rgba(205,127,50,0.6);
+      box-shadow:0 0 7px rgba(205,127,50,0.15);
+      color:var(--bronze);">
+      3
+    </div>
+
+    <!-- #5 — 3 o'clock (RIGHT) -->
+    <div class="m-dot" style="
+      top:50%; left:calc(50% + 62px);
+      width:20px; height:20px; font-size:7.5px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.13);
+      color:var(--ink3);">
+      5
+    </div>
+
+    <!-- #8 — 4 o'clock -->
+    <div class="m-dot" style="
+      top:calc(50% + 31px); left:calc(50% + 54px);
+      width:19px; height:19px; font-size:7px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.1);
+      color:var(--ink3);">
+      8
+    </div>
+
+    <!-- #46 last top 50% — 9 o'clock (LEFT) — amber warning -->
+    <div class="m-dot" style="
+      top:50%; left:calc(50% - 62px);
+      width:20px; height:20px; font-size:6.5px;
+      background:rgba(255,181,71,0.07);
+      border:1px solid rgba(255,181,71,0.3);
+      color:rgba(255,181,71,0.65);">
+      46
+    </div>
+    <div class="m-lbl" style="top:calc(50% + 12px);left:calc(50% - 72px);color:rgba(255,181,71,0.4);">cutoff</div>
+
+    <!-- #47 — 8 o'clock — red (below cutoff) -->
+    <div class="m-dot" style="
+      top:calc(50% + 31px); left:calc(50% - 54px);
+      width:18px; height:18px; font-size:6.5px;
+      background:rgba(239,68,68,0.05);
+      border:1px solid rgba(239,68,68,0.2);
+      color:rgba(239,68,68,0.45);">
+      47
+    </div>
+
+    <!-- YOU — center — lime glow -->
+    <div class="you-dot" style="
+      width:36px; height:36px;
+      background:rgba(212,255,58,0.11);
+      border:2px solid rgba(212,255,58,0.6);
+      box-shadow:0 0 16px rgba(212,255,58,0.3),0 0 32px rgba(212,255,58,0.06);">
+      <div style="font-family:'Big Shoulders Display',sans-serif;font-size:12px;font-weight:900;color:var(--lime);line-height:1;">14</div>
+      <div style="font-size:5.5px;color:rgba(212,255,58,0.65);font-weight:700;letter-spacing:0.3px;">YOU</div>
+    </div>
+    <!-- outer pulse ring -->
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;border:1px solid rgba(212,255,58,0.15);pointer-events:none;"></div>
+
+  </div><!-- /radar-wrap -->
+
+  <!-- LIST -->
+  <div class="lb-list">
+    <div class="lb-row">
+      <div class="lb-num" style="color:var(--gold);">#1</div>
+      <div class="lb-av" style="background:rgba(255,215,0,0.12);color:var(--gold);">A</div>
+      <div class="lb-name">Aarav M</div>
+      <div class="lb-pct" style="color:var(--gold);">100%</div>
+    </div>
+    <div class="lb-row me">
+      <div class="lb-num" style="color:var(--lime);">#14</div>
+      <div class="lb-av" style="background:rgba(212,255,58,0.15);color:var(--lime);">Y</div>
+      <div class="lb-name" style="color:var(--lime);">You</div>
+      <div class="lb-pct" style="color:var(--lime);">100%</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-num" style="color:var(--ink3);">#46</div>
+      <div class="lb-av">L</div>
+      <div class="lb-name" style="color:var(--ink2);">Last top 50%</div>
+      <div class="lb-pct" style="color:var(--ink3);">75%</div>
+    </div>
+    <div class="cutoff-line">Top 50% cutoff</div>
+    <div class="lb-row dim">
+      <div class="lb-num" style="color:var(--ink3);">#47</div>
+      <div class="lb-av">R</div>
+      <div class="lb-name" style="color:var(--ink3);">Rohit S</div>
+      <div class="lb-pct" style="color:var(--ink3);">71%</div>
+    </div>
+    <div class="lb-row dim" style="opacity:0.3;">
+      <div class="lb-num" style="color:var(--ink3);">#48</div>
+      <div class="lb-av">K</div>
+      <div class="lb-name" style="color:var(--ink3);">Kavya P</div>
+      <div class="lb-pct" style="color:var(--ink3);">71%</div>
+    </div>
+  </div>
+
+  <!-- bottom nav -->
+  <div class="bot-nav">
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Home</span></div>
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Chat</span></div>
+    <div class="bn-item active">
+      <div class="bn-bar"><span style="height:5px;"></span><span style="height:9px;"></span><span style="height:13px;"></span></div>
+      <span>Lead</span>
+    </div>
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Coins</span></div>
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Me</span></div>
+  </div>
+
+  </div>
+</div>
+</div>
+<div class="d-label">PULSE RING v2</div>
+<div class="d-name">Normal scale · 92 players</div>
+<div class="d-desc">Compact hero card · rank numbers on dots · left + right members visible</div>
+</div><!-- /phone-wrap -->
+
+
+<!-- ══════════════════════════════════
+     PHONE 2 — Large scale (10,000 ppl)
+     Numbers use K format: 5.2K, 10K
+══════════════════════════════════ -->
+<div class="phone-wrap">
+<div class="phone-shell">
+
+  <div style="position:absolute;top:140px;left:50%;transform:translateX(-50%);width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(212,255,58,0.05) 0%,transparent 70%);pointer-events:none;z-index:0;"></div>
+
+  <div style="position:relative;z-index:1;height:100%;">
+
+  <div class="sbar">
+    <span>10:08</span>
+    <div class="sbar-r">
+      <svg width="12" height="8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+      <svg width="10" height="8"><path d="M5 2C2.5 2 0.5 3.5 0 5.5L1.5 5.5C2 4.3 3.4 3.5 5 3.5S8 4.3 8.5 5.5L10 5.5C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+      <svg width="21" height="9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".4"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".4"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+    </div>
+  </div>
+
+  <div class="ctx-bar">
+    <div class="ctx-league">🏆 League</div>
+    <div class="ctx-filter">
+      <b>This challenge</b>
+      <svg width="8" height="5" viewBox="0 0 8 5"><path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <div class="swipe-dots">
+    <div class="swipe-dot active"></div>
+    <div class="swipe-dot"></div>
+    <div class="swipe-dot"></div>
+    <span style="font-size:6.5px;color:var(--ink3);margin-left:3px;">Friends · Global</span>
+  </div>
+
+  <!-- HERO — large number variant -->
+  <div class="hero">
+    <div class="hero-top">
+      <div class="hero-left">
+        <div class="hero-eyebrow">Your rank</div>
+        <!-- Large rank number: uses 4-digit, still fits in Big Shoulders Display -->
+        <div class="hero-rank" style="font-size:22px;">#1,247</div>
+        <div class="hero-tier">Top 12% ★  ·  of 10,000</div>
+      </div>
+      <div class="hero-badge">
+        <div class="hero-badge-top">+200¢</div>
+        <div class="hero-badge-bot">on track</div>
+      </div>
+    </div>
+    <div class="hero-bar"><div class="hero-bar-fill" style="width:88%;"></div></div>
+  </div>
+
+  <!-- RADAR — large scale, K-formatted numbers -->
+  <div class="radar-lbl">ORBIT VIEW</div>
+  <div class="radar-wrap">
+
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:124px;height:124px;border-radius:50%;background:conic-gradient(from -90deg,rgba(212,255,58,0.07) 0deg,rgba(212,255,58,0) 110deg,rgba(212,255,58,0) 360deg);pointer-events:none;"></div>
+
+    <div class="r-ring" style="width:138px;height:138px;border:1px solid rgba(212,255,58,0.07);"></div>
+    <div class="r-ring" style="width:96px;height:96px;border:1px solid rgba(212,255,58,0.06);"></div>
+    <div class="r-ring" style="width:52px;height:52px;border:1px solid rgba(212,255,58,0.13);"></div>
+
+    <!-- #1 — 12 o'clock — GOLD — same treatment -->
+    <div class="m-dot" style="
+      top:calc(50% - 62px); left:50%;
+      width:30px; height:30px; font-size:11px;
+      background:rgba(255,215,0,0.13);
+      border:2px solid rgba(255,215,0,0.65);
+      box-shadow:0 0 12px rgba(255,215,0,0.3),0 0 24px rgba(255,215,0,0.06);
+      color:var(--gold);">
+      <div class="m-crown">👑</div>
+      1
+    </div>
+
+    <!-- #2 — 10 o'clock — SILVER -->
+    <div class="m-dot" style="
+      top:calc(50% - 31px); left:calc(50% - 54px);
+      width:25px; height:25px; font-size:10px;
+      background:rgba(192,192,192,0.1);
+      border:1.5px solid rgba(192,192,192,0.6);
+      color:var(--silver);">
+      2
+    </div>
+
+    <!-- #3 — 2 o'clock — BRONZE -->
+    <div class="m-dot" style="
+      top:calc(50% - 31px); left:calc(50% + 54px);
+      width:25px; height:25px; font-size:10px;
+      background:rgba(205,127,50,0.1);
+      border:1.5px solid rgba(205,127,50,0.6);
+      color:var(--bronze);">
+      3
+    </div>
+
+    <!-- #500 — 3 o'clock (RIGHT) — shows "500" at small size -->
+    <div class="m-dot" style="
+      top:50%; left:calc(50% + 62px);
+      width:22px; height:22px; font-size:6px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.12);
+      color:var(--ink3);">
+      500
+    </div>
+
+    <!-- #800 — 4 o'clock — shows abbreviated -->
+    <div class="m-dot" style="
+      top:calc(50% + 31px); left:calc(50% + 54px);
+      width:20px; height:20px; font-size:6px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.1);
+      color:var(--ink3);">
+      800
+    </div>
+
+    <!-- #5K last top 50% — 9 o'clock (LEFT) — amber -->
+    <div class="m-dot" style="
+      top:50%; left:calc(50% - 62px);
+      width:22px; height:22px; font-size:7px;
+      background:rgba(255,181,71,0.07);
+      border:1px solid rgba(255,181,71,0.3);
+      color:rgba(255,181,71,0.65);">
+      5K
+    </div>
+    <div class="m-lbl" style="top:calc(50% + 13px);left:calc(50% - 73px);color:rgba(255,181,71,0.4);">cutoff</div>
+
+    <!-- #5.1K — 8 o'clock — red -->
+    <div class="m-dot" style="
+      top:calc(50% + 31px); left:calc(50% - 54px);
+      width:20px; height:20px; font-size:6px;
+      background:rgba(239,68,68,0.05);
+      border:1px solid rgba(239,68,68,0.2);
+      color:rgba(239,68,68,0.45);">
+      5.1K
+    </div>
+
+    <!-- YOU #1,247 — center — K format in dot -->
+    <div class="you-dot" style="
+      width:40px; height:40px;
+      background:rgba(212,255,58,0.11);
+      border:2px solid rgba(212,255,58,0.6);
+      box-shadow:0 0 16px rgba(212,255,58,0.3),0 0 32px rgba(212,255,58,0.06);">
+      <!-- 4-digit ranks use smaller font + K abbr -->
+      <div style="font-family:'Big Shoulders Display',sans-serif;font-size:9px;font-weight:900;color:var(--lime);line-height:1;">1.2K</div>
+      <div style="font-size:5.5px;color:rgba(212,255,58,0.65);font-weight:700;letter-spacing:0.3px;">YOU</div>
+    </div>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;border-radius:50%;border:1px solid rgba(212,255,58,0.14);pointer-events:none;"></div>
+
+  </div><!-- /radar-wrap -->
+
+  <!-- LIST — large numbers -->
+  <div class="lb-list">
+    <div class="lb-row">
+      <div class="lb-num" style="color:var(--gold);">#1</div>
+      <div class="lb-av" style="background:rgba(255,215,0,0.12);color:var(--gold);">A</div>
+      <div class="lb-name">Aarav M</div>
+      <div class="lb-pct" style="color:var(--gold);">100%</div>
+    </div>
+    <div class="lb-row me">
+      <!-- large rank number in list: use smaller font to fit -->
+      <div class="lb-num" style="color:var(--lime);font-size:9px;">#1,247</div>
+      <div class="lb-av" style="background:rgba(212,255,58,0.15);color:var(--lime);">Y</div>
+      <div class="lb-name" style="color:var(--lime);">You</div>
+      <div class="lb-pct" style="color:var(--lime);">82%</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-num" style="color:var(--ink3);font-size:9px;">#5,000</div>
+      <div class="lb-av">L</div>
+      <div class="lb-name" style="color:var(--ink2);">Last top 50%</div>
+      <div class="lb-pct" style="color:var(--ink3);">54%</div>
+    </div>
+    <div class="cutoff-line">Top 50% cutoff · #5,000</div>
+    <div class="lb-row dim">
+      <div class="lb-num" style="color:var(--ink3);font-size:9px;">#5,001</div>
+      <div class="lb-av">R</div>
+      <div class="lb-name" style="color:var(--ink3);">Rohit S</div>
+      <div class="lb-pct" style="color:var(--ink3);">53%</div>
+    </div>
+    <div class="lb-row dim" style="opacity:0.3;">
+      <div class="lb-num" style="color:var(--ink3);font-size:9px;">#5,002</div>
+      <div class="lb-av">K</div>
+      <div class="lb-name" style="color:var(--ink3);">Kavya P</div>
+      <div class="lb-pct" style="color:var(--ink3);">53%</div>
+    </div>
+  </div>
+
+  <div class="bot-nav">
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Home</span></div>
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Chat</span></div>
+    <div class="bn-item active">
+      <div class="bn-bar"><span style="height:5px;"></span><span style="height:9px;"></span><span style="height:13px;"></span></div>
+      <span>Lead</span>
+    </div>
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Coins</span></div>
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Me</span></div>
+  </div>
+
+  </div>
+</div>
+<div class="d-label">PULSE RING v2</div>
+<div class="d-name">Large scale · 10,000 players</div>
+<div class="d-desc">#1,247 → "1.2K" in dot · 5,000 → "5K" on orbit · hero rank shrinks to fit</div>
+</div><!-- /phone-wrap -->
+
+
+<!-- ══════════════════════════════════
+     PHONE 3 — Extra-minimal hero card
+     Even less text, just the number
+══════════════════════════════════ -->
+<div class="phone-wrap">
+<div class="phone-shell">
+
+  <div style="position:absolute;top:140px;left:50%;transform:translateX(-50%);width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(212,255,58,0.055) 0%,transparent 70%);pointer-events:none;z-index:0;"></div>
+
+  <div style="position:relative;z-index:1;height:100%;">
+
+  <div class="sbar">
+    <span>10:08</span>
+    <div class="sbar-r">
+      <svg width="12" height="8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+      <svg width="10" height="8"><path d="M5 2C2.5 2 0.5 3.5 0 5.5L1.5 5.5C2 4.3 3.4 3.5 5 3.5S8 4.3 8.5 5.5L10 5.5C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+      <svg width="21" height="9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".4"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".4"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+    </div>
+  </div>
+
+  <div class="ctx-bar">
+    <div class="ctx-league">🏆 League</div>
+    <div class="ctx-filter">
+      <b>This challenge</b>
+      <svg width="8" height="5" viewBox="0 0 8 5"><path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+  <div class="swipe-dots">
+    <div class="swipe-dot active"></div>
+    <div class="swipe-dot"></div>
+    <div class="swipe-dot"></div>
+    <span style="font-size:6.5px;color:var(--ink3);margin-left:3px;">Friends · Global</span>
+  </div>
+
+  <!-- HERO — even more minimal: just 2 rows -->
+  <div class="hero" style="padding:8px 11px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div>
+        <div style="font-family:'Big Shoulders Display',sans-serif;font-size:28px;font-weight:900;color:var(--lime);line-height:1;">#14</div>
+        <div style="font-size:8px;font-weight:700;color:var(--ink2);margin-top:1px;">Top 16% ★ · of 92</div>
+      </div>
+      <!-- small thin bar vertical -->
+      <div style="width:1px;height:32px;background:rgba(255,255,255,0.07);"></div>
+      <div style="flex:1;">
+        <div style="font-size:6.5px;color:var(--ink3);margin-bottom:3px;font-weight:700;letter-spacing:0.3px;">COINS</div>
+        <div style="font-size:11px;font-weight:800;color:var(--amber);">+200¢</div>
+        <div style="font-size:6px;color:rgba(255,181,71,0.5);font-weight:600;">on track</div>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:6.5px;color:var(--ink3);margin-bottom:3px;font-weight:700;letter-spacing:0.3px;">CUTOFF</div>
+        <div style="font-size:11px;font-weight:800;color:var(--ink2);">#46</div>
+        <div style="font-size:6px;color:rgba(52,211,153,0.7);font-weight:600;">safe ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RADAR -->
+  <div class="radar-lbl">ORBIT VIEW</div>
+  <div class="radar-wrap">
+
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:124px;height:124px;border-radius:50%;background:conic-gradient(from -90deg,rgba(212,255,58,0.07) 0deg,rgba(212,255,58,0) 110deg,rgba(212,255,58,0) 360deg);pointer-events:none;"></div>
+
+    <div class="r-ring" style="width:138px;height:138px;border:1px solid rgba(212,255,58,0.07);"></div>
+    <div class="r-ring" style="width:96px;height:96px;border:1px solid rgba(212,255,58,0.06);"></div>
+    <div class="r-ring" style="width:52px;height:52px;border:1px solid rgba(212,255,58,0.13);"></div>
+
+    <!-- #1 — 12 o'clock — GOLD -->
+    <div class="m-dot" style="top:calc(50% - 62px);left:50%;width:30px;height:30px;font-size:11px;background:rgba(255,215,0,0.13);border:2px solid rgba(255,215,0,0.65);box-shadow:0 0 12px rgba(255,215,0,0.3);color:var(--gold);">
+      <div class="m-crown">👑</div>
+      1
+    </div>
+    <!-- #2 — 10 o'clock — SILVER -->
+    <div class="m-dot" style="top:calc(50% - 31px);left:calc(50% - 54px);width:25px;height:25px;font-size:10px;background:rgba(192,192,192,0.1);border:1.5px solid rgba(192,192,192,0.6);color:var(--silver);">2</div>
+    <!-- #3 — 2 o'clock — BRONZE -->
+    <div class="m-dot" style="top:calc(50% - 31px);left:calc(50% + 54px);width:25px;height:25px;font-size:10px;background:rgba(205,127,50,0.1);border:1.5px solid rgba(205,127,50,0.6);color:var(--bronze);">3</div>
+    <!-- #5 — 3 o'clock (RIGHT) -->
+    <div class="m-dot" style="top:50%;left:calc(50% + 62px);width:20px;height:20px;font-size:7.5px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.13);color:var(--ink3);">5</div>
+    <!-- #8 — 4 o'clock -->
+    <div class="m-dot" style="top:calc(50% + 31px);left:calc(50% + 54px);width:19px;height:19px;font-size:7px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);color:var(--ink3);">8</div>
+    <!-- #46 — 9 o'clock (LEFT) — amber -->
+    <div class="m-dot" style="top:50%;left:calc(50% - 62px);width:20px;height:20px;font-size:6.5px;background:rgba(255,181,71,0.07);border:1px solid rgba(255,181,71,0.3);color:rgba(255,181,71,0.65);">46</div>
+    <div class="m-lbl" style="top:calc(50% + 12px);left:calc(50% - 72px);color:rgba(255,181,71,0.4);">cutoff</div>
+    <!-- #47 — 8 o'clock — red -->
+    <div class="m-dot" style="top:calc(50% + 31px);left:calc(50% - 54px);width:18px;height:18px;font-size:6.5px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);color:rgba(239,68,68,0.45);">47</div>
+
+    <!-- YOU — center -->
+    <div class="you-dot" style="width:36px;height:36px;background:rgba(212,255,58,0.11);border:2px solid rgba(212,255,58,0.6);box-shadow:0 0 16px rgba(212,255,58,0.3),0 0 32px rgba(212,255,58,0.06);">
+      <div style="font-family:'Big Shoulders Display',sans-serif;font-size:12px;font-weight:900;color:var(--lime);line-height:1;">14</div>
+      <div style="font-size:5.5px;color:rgba(212,255,58,0.65);font-weight:700;letter-spacing:0.3px;">YOU</div>
+    </div>
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;border:1px solid rgba(212,255,58,0.15);pointer-events:none;"></div>
+  </div>
+
+  <!-- LIST -->
+  <div class="lb-list">
+    <div class="lb-row">
+      <div class="lb-num" style="color:var(--gold);">#1</div>
+      <div class="lb-av" style="background:rgba(255,215,0,0.12);color:var(--gold);">A</div>
+      <div class="lb-name">Aarav M</div>
+      <div class="lb-pct" style="color:var(--gold);">100%</div>
+    </div>
+    <div class="lb-row me">
+      <div class="lb-num" style="color:var(--lime);">#14</div>
+      <div class="lb-av" style="background:rgba(212,255,58,0.15);color:var(--lime);">Y</div>
+      <div class="lb-name" style="color:var(--lime);">You</div>
+      <div class="lb-pct" style="color:var(--lime);">100%</div>
+    </div>
+    <div class="lb-row">
+      <div class="lb-num" style="color:var(--ink3);">#46</div>
+      <div class="lb-av">L</div>
+      <div class="lb-name" style="color:var(--ink2);">Last top 50%</div>
+      <div class="lb-pct" style="color:var(--ink3);">75%</div>
+    </div>
+    <div class="cutoff-line">Top 50% cutoff</div>
+    <div class="lb-row dim">
+      <div class="lb-num" style="color:var(--ink3);">#47</div>
+      <div class="lb-av">R</div>
+      <div class="lb-name" style="color:var(--ink3);">Rohit S</div>
+      <div class="lb-pct" style="color:var(--ink3);">71%</div>
+    </div>
+    <div class="lb-row dim" style="opacity:0.3;">
+      <div class="lb-num" style="color:var(--ink3);">#48</div>
+      <div class="lb-av">K</div>
+      <div class="lb-name" style="color:var(--ink3);">Kavya P</div>
+      <div class="lb-pct" style="color:var(--ink3);">71%</div>
+    </div>
+  </div>
+
+  <div class="bot-nav">
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Home</span></div>
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Chat</span></div>
+    <div class="bn-item active">
+      <div class="bn-bar"><span style="height:5px;"></span><span style="height:9px;"></span><span style="height:13px;"></span></div>
+      <span>Lead</span>
+    </div>
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Coins</span></div>
+    <div class="bn-item"><div class="bn-bar"><span style="height:9px;"></span></div><span>Me</span></div>
+  </div>
+
+  </div>
+</div>
+<div class="d-label">PULSE RING v2</div>
+<div class="d-name">Minimal hero · 3 stats</div>
+<div class="d-desc">Rank + coins + cutoff in one row · no paragraph text · same orbit</div>
+</div><!-- /phone-wrap -->
+
+
+</div><!-- /phones-row -->
+</body>
+</html>

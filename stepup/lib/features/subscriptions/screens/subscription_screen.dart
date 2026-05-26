@@ -5,11 +5,18 @@ import '../providers/subscription_provider.dart';
 import '../../../shared/models/subscription_plan.dart';
 import '../../../core/theme.dart';
 
-class SubscriptionScreen extends ConsumerWidget {
+class SubscriptionScreen extends ConsumerStatefulWidget {
   const SubscriptionScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SubscriptionScreen> createState() => _SubscriptionScreenState();
+}
+
+class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
+  bool _yearly = false;
+
+  @override
+  Widget build(BuildContext context) {
     final plansAsync = ref.watch(subscriptionPlansProvider);
     final mySubAsync = ref.watch(mySubscriptionProvider);
 
@@ -18,170 +25,266 @@ class SubscriptionScreen extends ConsumerWidget {
       body: SafeArea(
         child: plansAsync.when(
           loading: () => const Center(
-              child: CircularProgressIndicator(
-                  color: AppTheme.voltLime)),
-          error: (e, _) => Center(
-              child: Text('$e',
-                  style:
-                      const TextStyle(color: Colors.white))),
-          data: (plans) {
-            final mySub = mySubAsync.value;
-            return CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  padding:
-                      const EdgeInsets.fromLTRB(20, 16, 20, 40),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      Row(children: [
-                        IconButton(
-                          onPressed: () => context.pop(),
-                          icon: const Icon(
-                              Icons.arrow_back_rounded,
-                              color: Colors.white),
-                        ),
-                        const SizedBox(width: 4),
-                        Text('Pick Your Plan',
-                            style: AppTheme.bigNum(26)),
-                      ]),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 52, bottom: 20),
-                        child: Text(
-                            'Upgrade anytime · Cancel anytime',
-                            style: AppTheme.label(13)),
-                      ),
-                      ...plans.map((p) => _PlanCard(
-                            plan: p,
-                            isCurrent:
-                                mySub?.planSlug == p.slug,
-                            isRecommended: p.slug == 'beginner',
-                          )),
-                    ]),
-                  ),
-                ),
-              ],
-            );
-          },
+              child: CircularProgressIndicator(color: AppTheme.voltLime)),
+          error: (_, __) => _SubBody(
+            yearly: _yearly,
+            onToggleBilling: (v) => setState(() => _yearly = v),
+            plans: const [],
+            currentPlan: null,
+          ),
+          data: (plans) => _SubBody(
+            yearly: _yearly,
+            onToggleBilling: (v) => setState(() => _yearly = v),
+            plans: plans,
+            currentPlan: mySubAsync.value?.planSlug,
+          ),
         ),
       ),
     );
   }
 }
 
-class _PlanCard extends StatelessWidget {
-  final SubscriptionPlan plan;
-  final bool isCurrent, isRecommended;
-  const _PlanCard({
-    required this.plan,
-    required this.isCurrent,
-    required this.isRecommended,
+class _SubBody extends StatelessWidget {
+  final bool yearly;
+  final ValueChanged<bool> onToggleBilling;
+  final List<SubscriptionPlan> plans;
+  final String? currentPlan;
+  const _SubBody({
+    required this.yearly,
+    required this.onToggleBilling,
+    required this.plans,
+    required this.currentPlan,
   });
 
   @override
   Widget build(BuildContext context) {
-    final accent = isRecommended
-        ? AppTheme.voltLime
-        : (plan.slug == 'pro'
-            ? AppTheme.amber
-            : Colors.white.withOpacity(0.3));
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        // Header
+        Row(children: [
+          GestureDetector(
+            onTap: () => context.pop(),
+            child: const Icon(Icons.arrow_back_rounded,
+                color: Colors.white, size: 22),
+          ),
+          const Spacer(),
+          Text('Plans', style: AppTheme.label(13, color: AppTheme.ink2)),
+        ]),
+        const SizedBox(height: 16),
+        Text('Choose a plan', style: AppTheme.bigNum(28)),
+        const SizedBox(height: 4),
+        Text('Consistency rewards · cancel anytime',
+            style: AppTheme.label(13, color: AppTheme.ink2)),
+        const SizedBox(height: 12),
+
+        // Billing toggle
+        Row(children: [
+          GestureDetector(
+            onTap: () => onToggleBilling(false),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: !yearly ? AppTheme.voltLime : Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: !yearly ? AppTheme.voltLime : Colors.white.withValues(alpha: 0.08),
+                ),
+              ),
+              child: Text('Monthly',
+                  style: AppTheme.label(12).copyWith(
+                    color: !yearly ? AppTheme.bg : AppTheme.ink2,
+                    fontWeight: FontWeight.w700,
+                  )),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => onToggleBilling(true),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              decoration: BoxDecoration(
+                color: yearly ? AppTheme.voltLime : Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: yearly ? AppTheme.voltLime : Colors.white.withValues(alpha: 0.08),
+                ),
+              ),
+              child: Text('Yearly (save 20%)',
+                  style: AppTheme.label(12).copyWith(
+                    color: yearly ? AppTheme.bg : AppTheme.ink2,
+                    fontWeight: FontWeight.w700,
+                  )),
+            ),
+          ),
+        ]),
+        const SizedBox(height: 16),
+
+        // Plan cards — use live data if available, else mock
+        if (plans.isNotEmpty)
+          ...plans.map((p) => _PlanCard(
+                label: p.label,
+                price: yearly ? (p.priceInr * 0.8).round() : p.priceInr,
+                desc: p.priceInr == 0 ? 'Forever' : 'Consistency rewards',
+                features: p.features,
+                isCurrent: currentPlan == p.slug,
+                isRecommended: p.slug == 'beginner',
+                isComingSoon: p.slug == 'pro',
+              ))
+        else ...[
+          _PlanCard(
+            label: 'Free',
+            price: 0,
+            desc: 'Forever',
+            features: const [
+              '✓ Track all activities',
+              '✓ Free challenges',
+              '✗ No coin rewards',
+            ],
+            isCurrent: currentPlan == null || currentPlan == 'free',
+            isRecommended: false,
+            isComingSoon: false,
+          ),
+          const SizedBox(height: 12),
+          _PlanCard(
+            label: 'Beginner',
+            price: yearly ? 119 : 149,
+            desc: 'Consistency rewards',
+            features: const [
+              '✓ 2 Paid challenges / month',
+              '✓ Earn coins for consistency',
+              '✓ Top 50% bonus',
+              '✓ Gift card redemption',
+            ],
+            isCurrent: currentPlan == 'beginner',
+            isRecommended: true,
+            isComingSoon: false,
+          ),
+          const SizedBox(height: 12),
+          _PlanCard(
+            label: 'Pro',
+            price: yearly ? 239 : 299,
+            desc: 'Unlimited · coming soon',
+            features: const [],
+            isCurrent: currentPlan == 'pro',
+            isRecommended: false,
+            isComingSoon: true,
+          ),
+        ],
+
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () {},
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: AppTheme.amber.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.amber.withValues(alpha: 0.4)),
+            ),
+            child: Center(
+              child: Text(
+                'Start Beginner — ₹${yearly ? 119 : 149}/mo',
+                style: AppTheme.label(14, color: AppTheme.amber)
+                    .copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+class _PlanCard extends StatelessWidget {
+  final String label, desc;
+  final int price;
+  final List<String> features;
+  final bool isCurrent, isRecommended, isComingSoon;
+  const _PlanCard({
+    required this.label,
+    required this.price,
+    required this.desc,
+    required this.features,
+    required this.isCurrent,
+    required this.isRecommended,
+    required this.isComingSoon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
         Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(18),
+          margin: const EdgeInsets.only(bottom: 0),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: isRecommended
-                ? AppTheme.voltLime.withOpacity(0.06)
-                : AppTheme.surface,
-            borderRadius: BorderRadius.circular(16),
+                ? AppTheme.voltLime.withValues(alpha: 0.06)
+                : Colors.white.withValues(alpha: 0.03),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
-                color: accent, width: isRecommended ? 1.5 : 1),
-          ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    plan.label,
-                    style: AppTheme.bigNum(22,
-                        color: isCurrent
-                            ? AppTheme.voltLime
-                            : Colors.white),
-                  ),
-                  Row(children: [
-                    Text(
-                      plan.priceInr == 0
-                          ? '₹0'
-                          : '₹${plan.priceInr}',
-                      style:
-                          AppTheme.bigNum(22, color: accent),
-                    ),
-                    if (plan.priceInr > 0)
-                      Text('/mo', style: AppTheme.label(12)),
-                  ]),
-                ]),
-            const SizedBox(height: 12),
-            ...plan.features.map((f) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(children: [
-                    Icon(Icons.check_rounded,
-                        color: accent, size: 14),
-                    const SizedBox(width: 8),
-                    Expanded(
-                        child: Text(f,
-                            style: AppTheme.label(13,
-                                color: Colors.white))),
-                  ]),
-                )),
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isCurrent ? null : () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isCurrent
-                      ? Colors.white.withOpacity(0.08)
-                      : (isRecommended ? AppTheme.voltLime : accent),
-                  foregroundColor:
-                      isCurrent ? AppTheme.ink3 : AppTheme.bg,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999)),
-                ),
-                child: Text(
-                  isCurrent
-                      ? 'Current Plan'
-                      : (plan.priceInr == 0
-                          ? 'Stay Free'
-                          : 'Start ${plan.label}'),
-                  style: AppTheme.label(14).copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: isCurrent ? AppTheme.ink3 : AppTheme.bg,
-                  ),
-                ),
-              ),
+              color: isRecommended
+                  ? AppTheme.voltLime.withValues(alpha: 0.5)
+                  : AppTheme.border,
+              style: isComingSoon ? BorderStyle.solid : BorderStyle.solid,
             ),
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(label, style: AppTheme.bigNum(22)),
+                Row(children: [
+                  Text(price == 0 ? '₹0' : '₹$price',
+                      style: AppTheme.bigNum(22,
+                          color: isRecommended ? AppTheme.voltLime : Colors.white)),
+                  if (price > 0)
+                    Text('/Mo', style: AppTheme.label(12, color: AppTheme.ink2)),
+                ]),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(desc, style: AppTheme.label(12, color: AppTheme.ink2)),
+            if (features.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              ...features.map((f) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(f,
+                        style: AppTheme.label(12,
+                            color: f.startsWith('✗') ? AppTheme.ink3 : Colors.white)),
+                  )),
+            ],
+            if (isCurrent) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: Text('Current plan',
+                    style: AppTheme.label(11, color: AppTheme.ink2)),
+              ),
+            ],
           ]),
         ),
         if (isRecommended)
           Positioned(
             top: -10,
-            right: 20,
+            right: 14,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: AppTheme.voltLime,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text(
-                'Recommended',
-                style: AppTheme.label(10, color: AppTheme.bg).copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.3),
-              ),
+              child: Text('★ Recommended',
+                  style: AppTheme.label(9, color: AppTheme.bg)
+                      .copyWith(fontWeight: FontWeight.w800)),
             ),
           ),
       ],

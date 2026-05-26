@@ -1,82 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/missions_provider.dart';
-import '../../../shared/models/mission.dart';
+import '../providers/health_missions_provider.dart';
 import '../../../core/theme.dart';
 
-// Type alias to avoid direct dependency on ProviderListenable which
-// is not exported by default from flutter_riverpod 3.x public API.
-typedef _MissionsProvider
-    = FutureProvider<List<Mission>>;
-
-class MissionsScreen extends ConsumerStatefulWidget {
+class MissionsScreen extends ConsumerWidget {
   const MissionsScreen({super.key});
 
   @override
-  ConsumerState<MissionsScreen> createState() => _MissionsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(healthMissionsProvider);
 
-class _MissionsScreenState extends ConsumerState<MissionsScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tab =
-      TabController(length: 3, vsync: this);
+    // Compute hours until midnight for reset label
+    final now = DateTime.now();
+    final midnight = DateTime(now.year, now.month, now.day + 1);
+    final hoursLeft = midnight.difference(now).inHours;
 
-  @override
-  void dispose() {
-    _tab.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.bg,
       body: SafeArea(
         child: Column(children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(children: [
-                    IconButton(
-                      onPressed: () => context.pop(),
-                      icon: const Icon(Icons.arrow_back_rounded,
-                          color: Colors.white),
-                    ),
-                    const SizedBox(width: 4),
-                    Text('Missions', style: AppTheme.bigNum(26)),
-                  ]),
-                  const SizedBox(height: 12),
-                  TabBar(
-                    controller: _tab,
-                    labelColor: AppTheme.bg,
-                    unselectedLabelColor: AppTheme.ink3,
-                    labelStyle: AppTheme.label(13)
-                        .copyWith(fontWeight: FontWeight.w700),
-                    indicator: BoxDecoration(
-                      color: AppTheme.voltLime,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    dividerColor: Colors.transparent,
-                    tabs: const [
-                      Tab(text: 'Daily'),
-                      Tab(text: 'Weekly'),
-                      Tab(text: 'Seasonal'),
-                    ],
+                  GestureDetector(
+                    onTap: () => context.pop(),
+                    child: const Icon(Icons.arrow_back_rounded,
+                        color: Colors.white, size: 22),
                   ),
-                ]),
+                  async.maybeWhen(
+                    data: (missions) {
+                      final done = missions.where((m) => m.completed).length;
+                      final total = missions.length;
+                      final totalReward = missions
+                          .where((m) => !m.completed)
+                          .fold(0, (s, m) => s + m.coinReward);
+                      return _Badge(
+                        label: '$done / $total',
+                        rewardLeft: totalReward,
+                      );
+                    },
+                    orElse: () => const _Badge(label: '– / 5', rewardLeft: 70),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text('Daily Missions', style: AppTheme.bigNum(28)),
+              const SizedBox(height: 6),
+              Row(children: [
+                Icon(Icons.access_time_rounded, color: AppTheme.ink3, size: 13),
+                const SizedBox(width: 5),
+                async.maybeWhen(
+                  data: (missions) {
+                    final remaining = missions
+                        .where((m) => !m.completed)
+                        .fold(0, (s, m) => s + m.coinReward);
+                    return Text(
+                      'Resets in ${hoursLeft}h · finish all for +$remaining ¢',
+                      style: AppTheme.label(12, color: AppTheme.ink2),
+                    );
+                  },
+                  orElse: () => Text(
+                    'Resets in ${hoursLeft}h · finish all for bonus',
+                    style: AppTheme.label(12, color: AppTheme.ink2),
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 16),
+            ]),
           ),
           Expanded(
-            child: TabBarView(
-              controller: _tab,
-              children: [
-                _MissionsList(provider: dailyMissionsProvider),
-                _MissionsList(provider: weeklyMissionsProvider),
-                _MissionsList(provider: seasonalMissionsProvider),
-              ],
+            child: async.when(
+              loading: () => const Center(
+                  child: CircularProgressIndicator(color: AppTheme.voltLime)),
+              error: (e, _) => Center(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.cloud_off_rounded, color: AppTheme.ink3, size: 36),
+                  const SizedBox(height: 8),
+                  Text('Could not load health data',
+                      style: AppTheme.label(13, color: AppTheme.ink2)),
+                ]),
+              ),
+              data: (missions) => ListView.builder(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+                itemCount: missions.length,
+                itemBuilder: (_, i) => _MissionCard(mission: missions[i]),
+              ),
             ),
           ),
         ]),
@@ -85,124 +97,104 @@ class _MissionsScreenState extends ConsumerState<MissionsScreen>
   }
 }
 
-class _MissionsList extends ConsumerWidget {
-  final _MissionsProvider provider;
-  const _MissionsList({required this.provider});
+class _Badge extends StatelessWidget {
+  final String label;
+  final int rewardLeft;
+  const _Badge({required this.label, required this.rewardLeft});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(provider);
-    return async.when(
-      loading: () => const Center(
-          child: CircularProgressIndicator(color: AppTheme.voltLime)),
-      error: (e, _) =>
-          Center(child: Text('$e', style: const TextStyle(color: Colors.white))),
-      data: (missions) => missions.isEmpty
-          ? Center(
-              child: Text('No missions available',
-                  style: AppTheme.label(14)))
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 20, vertical: 8),
-              itemCount: missions.length,
-              itemBuilder: (_, i) =>
-                  _MissionRow(mission: missions[i]),
-            ),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.border),
+        ),
+        child: Text(label, style: AppTheme.label(12, color: Colors.white)
+            .copyWith(fontWeight: FontWeight.w700)),
+      );
 }
 
-class _MissionRow extends StatelessWidget {
-  final Mission mission;
-  const _MissionRow({required this.mission});
+class _MissionCard extends StatelessWidget {
+  final HealthMission mission;
+  const _MissionCard({required this.mission});
 
-  static const _activityIcons = {
-    'walk': Icons.directions_walk_rounded,
-    'gym': Icons.fitness_center_rounded,
-    'yoga': Icons.self_improvement_rounded,
-    'run': Icons.directions_run_rounded,
-    'cycle': Icons.directions_bike_rounded,
-    'sport': Icons.sports_rounded,
+  static const _icons = {
+    'walk':    Icons.directions_walk_rounded,
+    'gym':     Icons.fitness_center_rounded,
+    'yoga':    Icons.self_improvement_rounded,
+    'run':     Icons.directions_run_rounded,
+    'droplet': Icons.water_drop_rounded,
+    'moon':    Icons.bedtime_rounded,
   };
 
   @override
   Widget build(BuildContext context) {
-    final icon =
-        _activityIcons[mission.activity] ?? Icons.directions_walk_rounded;
+    final icon = _icons[mission.activity] ?? Icons.directions_walk_rounded;
+    final done = mission.completed;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       decoration: BoxDecoration(
-        color: mission.completed
+        color: done
             ? AppTheme.voltLime.withValues(alpha: 0.08)
-            : AppTheme.surface,
+            : Colors.white.withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: mission.completed
-              ? AppTheme.voltLime.withValues(alpha: 0.4)
-              : AppTheme.border,
+          color: done
+              ? AppTheme.voltLime.withValues(alpha: 0.55)
+              : Colors.transparent,
+          width: 1.5,
         ),
       ),
       child: Row(children: [
         Container(
-          width: 40,
-          height: 40,
+          width: 44, height: 44,
           decoration: BoxDecoration(
-            color: mission.completed
-                ? AppTheme.voltLime.withValues(alpha: 0.15)
+            color: done
+                ? AppTheme.voltLime.withValues(alpha: 0.18)
                 : Colors.white.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            mission.completed ? Icons.check_circle_rounded : icon,
-            color: mission.completed ? AppTheme.voltLime : AppTheme.ink2,
-            size: 20,
-          ),
+          child: Icon(icon, size: 22,
+              color: done ? AppTheme.voltLime : Colors.white),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 14),
         Expanded(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  mission.title,
-                  style: AppTheme.label(14, color: Colors.white)
-                      .copyWith(fontWeight: FontWeight.w600),
+                Expanded(
+                  child: Text(mission.title,
+                      style: AppTheme.label(14, color: Colors.white)
+                          .copyWith(fontWeight: FontWeight.w700)),
                 ),
-                const SizedBox(height: 2),
-                Text(mission.description, style: AppTheme.label(11)),
-                const SizedBox(height: 8),
-                Row(children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(3),
-                      child: LinearProgressIndicator(
-                        value: mission.progressPct,
-                        minHeight: 4,
-                        backgroundColor: Colors.white.withValues(alpha: 0.08),
-                        valueColor: AlwaysStoppedAnimation(
-                          mission.completed
-                              ? AppTheme.voltLime
-                              : AppTheme.amber,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${(mission.progressPct * 100).toInt()}%',
-                    style: AppTheme.label(10),
-                  ),
-                ]),
-              ]),
+                const SizedBox(width: 8),
+                Text('+${mission.coinReward} ¢',
+                    style: AppTheme.label(13, color: AppTheme.amber)
+                        .copyWith(fontWeight: FontWeight.w700)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                value: mission.progressPct,
+                minHeight: 6,
+                backgroundColor: Colors.white.withValues(alpha: 0.07),
+                valueColor: AlwaysStoppedAnimation(
+                    done ? AppTheme.voltLime : AppTheme.amber),
+              ),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              mission.progressLabel,
+              style: AppTheme.label(11, color: AppTheme.ink2),
+            ),
+          ]),
         ),
-        const SizedBox(width: 10),
-        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Text('+${mission.coinReward}¢',
-              style: AppTheme.bigNum(14, color: AppTheme.amber)),
-          Text('+${mission.xpReward} XP',
-              style: AppTheme.label(10, color: AppTheme.ink3)),
-        ]),
       ]),
     );
   }

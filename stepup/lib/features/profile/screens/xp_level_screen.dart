@@ -89,9 +89,9 @@ class XpLevelScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text('14,200 / 21,000 XP',
-                                style: AppTheme.label(10, color: AppTheme.ink3)),
+                                style: AppTheme.label(10, color: AppTheme.ink2)),
                             Text('6.8K to LV ${currentLevel + 1}',
-                                style: AppTheme.label(10, color: AppTheme.ink3)),
+                                style: AppTheme.label(10, color: AppTheme.ink2)),
                           ],
                         ),
                       ],
@@ -102,7 +102,7 @@ class XpLevelScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               Text('LEVEL PATH',
-                  style: AppTheme.label(10, color: AppTheme.ink3).copyWith(
+                  style: AppTheme.label(10, color: AppTheme.ink2).copyWith(
                       letterSpacing: 1.2, fontWeight: FontWeight.w800)),
               const SizedBox(height: 10),
 

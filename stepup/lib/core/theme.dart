@@ -16,6 +16,8 @@ class AppTheme {
   static const secondary = amber;
   static const green     = Color(0xFF34D399);
   static const pink      = Color(0xFFF472B6);
+  static const purple    = Color(0xFFA78BFA);
+  static const blue      = Color(0xFF63B4FF);
 
   static TextStyle bigNum(double size, {Color color = Colors.white}) =>
       GoogleFonts.bigShouldersDisplay(fontSize: size, fontWeight: FontWeight.w900, color: color);

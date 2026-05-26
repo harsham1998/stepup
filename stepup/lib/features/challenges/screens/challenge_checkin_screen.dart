@@ -69,7 +69,7 @@ class ChallengeCheckinScreen extends StatelessWidget {
               Divider(color: Colors.white.withValues(alpha: 0.08)),
               const SizedBox(height: 16),
 
-              Text('Your week', style: AppTheme.label(11, color: AppTheme.ink3)
+              Text('Your week', style: AppTheme.label(11, color: AppTheme.ink2)
                   .copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.6)),
               const SizedBox(height: 10),
 
@@ -105,7 +105,7 @@ class ChallengeCheckinScreen extends StatelessWidget {
 
                   return Column(children: [
                     Text(weekDays[i],
-                        style: AppTheme.label(10, color: AppTheme.ink3)),
+                        style: AppTheme.label(10, color: AppTheme.ink2)),
                     const SizedBox(height: 4),
                     Container(
                       width: 32,

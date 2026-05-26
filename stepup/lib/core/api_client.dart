@@ -2,6 +2,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+class _ApiError {
+  final String message;
+  final int? statusCode;
+  const _ApiError(this.message, this.statusCode);
+  @override
+  String toString() => message;
+}
+
 class ApiClient {
   static final instance = ApiClient._();
   ApiClient._();
@@ -44,12 +52,24 @@ class ApiClient {
   }
 
   Future<dynamic> post(String path, Map<String, dynamic> body) async {
-    final r = await _dio.post(path, data: body);
-    return r.data;
+    try {
+      final r = await _dio.post(path, data: body);
+      return r.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      final serverMsg = data is Map ? (data['error'] as String?) : null;
+      final statusCode = e.response?.statusCode;
+      throw _ApiError(serverMsg ?? e.message ?? 'Request failed', statusCode);
+    }
   }
 
   Future<dynamic> put(String path, Map<String, dynamic> body) async {
     final r = await _dio.put(path, data: body);
+    return r.data;
+  }
+
+  Future<dynamic> patch(String path, Map<String, dynamic> body) async {
+    final r = await _dio.patch(path, data: body);
     return r.data;
   }
 }

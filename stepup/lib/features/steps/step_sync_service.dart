@@ -5,6 +5,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/api_client.dart';
 
+class HealthDaySummary {
+  final int steps, calories, activeMins, floors;
+  final double distanceKm;
+  const HealthDaySummary({
+    required this.steps,
+    required this.distanceKm,
+    required this.calories,
+    required this.activeMins,
+    required this.floors,
+  });
+}
+
+class HealthWorkout {
+  final String type;
+  final DateTime startTime, endTime;
+  final int durationMins, calories;
+  final double distanceKm;
+  const HealthWorkout({
+    required this.type,
+    required this.startTime,
+    required this.endTime,
+    required this.durationMins,
+    required this.calories,
+    required this.distanceKm,
+  });
+}
+
 // Top-level entry points required by flutter_background_service iOS plugin.
 // These must be top-level (not class methods) and annotated for AOT / native access.
 @pragma('vm:entry-point')
@@ -38,7 +65,6 @@ class StepSyncService {
   final _health = Health();
 
   Future<bool> requestPermissions() async {
-    // Request all health types so the Health screen works immediately
     try {
       return await _health.requestAuthorization([
         HealthDataType.STEPS,
@@ -51,6 +77,11 @@ class StepSyncService {
         HealthDataType.WORKOUT,
         HealthDataType.FLIGHTS_CLIMBED,
         HealthDataType.APPLE_STAND_TIME,
+        HealthDataType.SLEEP_ASLEEP,
+        HealthDataType.SLEEP_DEEP,
+        HealthDataType.SLEEP_LIGHT,
+        HealthDataType.SLEEP_REM,
+        HealthDataType.WATER,
       ]);
     } catch (_) {
       return _health.requestAuthorization([HealthDataType.STEPS]);
@@ -58,17 +89,194 @@ class StepSyncService {
   }
 
   Future<int> getTodaySteps() async {
-    final now = DateTime.now();
-    final midnight = DateTime(now.year, now.month, now.day);
+    return getStepsForDate(DateTime.now());
+  }
+
+  Future<int> getStepsForDate(DateTime date) async {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+    try {
+      // getTotalStepsInInterval uses HealthKit's HKStatisticsQuery — same
+      // aggregation the Health app uses, so Watch + iPhone steps are
+      // deduplicated correctly and totals match exactly.
+      return await _health.getTotalStepsInInterval(start, end) ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<HealthDaySummary> getDaySummary(DateTime date) async {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+    try {
+      final results = await Future.wait([
+        getStepsForDate(date),
+        _preferredSourceTotalDouble(HealthDataType.DISTANCE_WALKING_RUNNING, start, end),
+        _preferredSourceTotalDouble(HealthDataType.ACTIVE_ENERGY_BURNED, start, end),
+        _preferredSourceTotalDouble(HealthDataType.EXERCISE_TIME, start, end),
+        _preferredSourceTotalDouble(HealthDataType.FLIGHTS_CLIMBED, start, end),
+      ]);
+
+      return HealthDaySummary(
+        steps: results[0] as int,
+        distanceKm: (results[1] as double) / 1000, // meters → km
+        calories: (results[2] as double).round(),
+        activeMins: (results[3] as double).round(),
+        floors: (results[4] as double).round(),
+      );
+    } catch (_) {
+      final steps = await getStepsForDate(date);
+      return HealthDaySummary(
+        steps: steps,
+        distanceKm: steps * 0.00076,
+        calories: (steps * 0.053).round(),
+        activeMins: (steps / 150).round(),
+        floors: 0,
+      );
+    }
+  }
+
+  // Returns the total for a type from the preferred source.
+  // Prefers Apple Watch (source name contains "watch") to match what
+  // the Health app shows when a Watch is paired. Falls back to the
+  // source with the highest total (avoids summing Watch + iPhone).
+  Future<int> _preferredSourceTotal(
+      HealthDataType type, DateTime start, DateTime end) async {
     final data = await _health.getHealthDataFromTypes(
-      types: [HealthDataType.STEPS],
-      startTime: midnight,
-      endTime: now,
-    );
-    return data.fold<int>(
-      0,
-      (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toInt(),
-    );
+      types: [type], startTime: start, endTime: end);
+    if (data.isEmpty) return 0;
+    return _pickPreferredSource(data).round();
+  }
+
+  Future<double> _preferredSourceTotalDouble(
+      HealthDataType type, DateTime start, DateTime end) async {
+    try {
+      final data = await _health.getHealthDataFromTypes(
+        types: [type], startTime: start, endTime: end);
+      if (data.isEmpty) return 0;
+      return _pickPreferredSource(data);
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  double _pickPreferredSource(List<HealthDataPoint> data) {
+    // Group totals by sourceId, keep source names for Watch detection
+    final Map<String, double> totals = {};
+    final Map<String, String> names = {};
+    for (final p in data) {
+      final v = (p.value as NumericHealthValue).numericValue.toDouble();
+      totals[p.sourceId] = (totals[p.sourceId] ?? 0) + v;
+      names[p.sourceId] = p.sourceName;
+    }
+    // Prefer Watch source — matches Health app's preferred-source algorithm
+    for (final id in totals.keys) {
+      if ((names[id] ?? '').toLowerCase().contains('watch')) {
+        return totals[id]!;
+      }
+    }
+    // No Watch found: use highest single source to avoid double-counting
+    return totals.values.reduce((a, b) => a > b ? a : b);
+  }
+
+  Future<List<HealthWorkout>> getWorkoutsForDate(DateTime date) async {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+    try {
+      final data = await _health.getHealthDataFromTypes(
+        types: [HealthDataType.WORKOUT],
+        startTime: start,
+        endTime: end,
+      );
+      return data.map((p) {
+        final w = p.value as WorkoutHealthValue;
+        return HealthWorkout(
+          type: w.workoutActivityType.name,
+          startTime: p.dateFrom,
+          endTime: p.dateTo,
+          durationMins: p.dateTo.difference(p.dateFrom).inMinutes,
+          calories: w.totalEnergyBurned?.toInt() ?? 0,
+          distanceKm: (w.totalDistance ?? 0) / 1000,
+        );
+      }).toList()
+        ..sort((a, b) => a.startTime.compareTo(b.startTime));
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<double> getSleepHoursForDate(DateTime date) async {
+    // Night starting the previous day at 6 PM through the given date at noon.
+    // Queries all actual sleep stage types — modern Apple Watch records DEEP,
+    // LIGHT (core), and REM instead of the generic SLEEP_ASLEEP aggregate.
+    // These types don't overlap on the timeline, so summing them is safe.
+    final start = DateTime(date.year, date.month, date.day - 1, 18);
+    final end = DateTime(date.year, date.month, date.day, 12);
+    try {
+      final data = await _health.getHealthDataFromTypes(
+        types: [
+          HealthDataType.SLEEP_ASLEEP,
+          HealthDataType.SLEEP_DEEP,
+          HealthDataType.SLEEP_LIGHT,
+          HealthDataType.SLEEP_REM,
+        ],
+        startTime: start,
+        endTime: end,
+      );
+      final totalMins = data.fold<double>(
+        0,
+        (sum, p) => sum + p.dateTo.difference(p.dateFrom).inMinutes,
+      );
+      return totalMins / 60.0;
+    } catch (_) {
+      return 0.0;
+    }
+  }
+
+  Future<int> getAverageHeartRateForDay(DateTime date) async {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+    try {
+      final data = await _health.getHealthDataFromTypes(
+        types: [HealthDataType.HEART_RATE],
+        startTime: start,
+        endTime: end,
+      );
+      if (data.isEmpty) return 0;
+      final total = data.fold<double>(
+        0, (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toDouble());
+      return (total / data.length).round();
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<double> getWaterLitersForDate(DateTime date) async {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+    try {
+      final data = await _health.getHealthDataFromTypes(
+        types: [HealthDataType.WATER],
+        startTime: start,
+        endTime: end,
+      );
+      return data.fold<double>(
+        0,
+        (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toDouble(),
+      );
+    } catch (_) {
+      return 0.0;
+    }
+  }
+
+  Future<List<int>> getWeekSteps() async {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final futures = List.generate(7, (i) {
+      final day = DateTime(monday.year, monday.month, monday.day + i);
+      return day.isAfter(now) ? Future.value(0) : getStepsForDate(day);
+    });
+    return Future.wait(futures);
   }
 
   Future<void> syncToServer() async {

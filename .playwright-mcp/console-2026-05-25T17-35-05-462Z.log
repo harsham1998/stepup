@@ -1,0 +1,19 @@
+[     463ms] [LOG] Background service init skipped: FlutterBackgroundService is currently supported for Android and iOS Platform only. @ http://localhost:8080/main.dart.js:29339
+[     621ms] [LOG] [API] --> GET /wallet/balance @ http://localhost:8080/main.dart.js:29339
+[     621ms] [LOG] [API] --> GET /challenges @ http://localhost:8080/main.dart.js:29339
+[    1871ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://stepup-production-ebd2.up.railway.app/wallet/balance:0
+[    1873ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://stepup-production-ebd2.up.railway.app/challenges?status=active:0
+[    1875ms] [LOG] [API] ERR 401 /wallet/balance: This exception was thrown because the response has a status code of 401 and RequestOptions.validateStatus was configured to throw for this status code. @ http://localhost:8080/main.dart.js:29339
+[    1876ms] [LOG] The status code of 401 has the following meaning: "Client error - the request contains bad syntax or cannot be fulfilled" @ http://localhost:8080/main.dart.js:29339
+[    1876ms] [LOG] Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status @ http://localhost:8080/main.dart.js:29339
+[    1876ms] [LOG] In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code. @ http://localhost:8080/main.dart.js:29339
+[    1876ms] [LOG]  @ http://localhost:8080/main.dart.js:29339
+[    1877ms] [LOG] [API] ERR 401 /challenges: This exception was thrown because the response has a status code of 401 and RequestOptions.validateStatus was configured to throw for this status code. @ http://localhost:8080/main.dart.js:29339
+[    1877ms] [LOG] The status code of 401 has the following meaning: "Client error - the request contains bad syntax or cannot be fulfilled" @ http://localhost:8080/main.dart.js:29339
+[    1877ms] [LOG] Read more about status codes at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status @ http://localhost:8080/main.dart.js:29339
+[    1877ms] [LOG] In order to resolve this exception you typically have either to verify and fix your request code or you have to fix the server code. @ http://localhost:8080/main.dart.js:29339
+[    1877ms] [LOG]  @ http://localhost:8080/main.dart.js:29339
+[    2097ms] [LOG] [API] --> GET /wallet/balance @ http://localhost:8080/main.dart.js:29339
+[    2098ms] [LOG] [API] --> GET /challenges @ http://localhost:8080/main.dart.js:29339
+[    3375ms] [LOG] [API] <-- 200 /wallet/balance @ http://localhost:8080/main.dart.js:29339
+[    3542ms] [LOG] [API] <-- 200 /challenges @ http://localhost:8080/main.dart.js:29339

@@ -76,7 +76,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     setState(() => _loading = true);
     try {
       await ref.read(authServiceProvider).saveProfile(
-        name: _nameCtrl.text.isNotEmpty ? _nameCtrl.text : 'User',
+        name: _nameCtrl.text.trim().isNotEmpty ? _nameCtrl.text.trim() : 'User',
         city: '',
         language: 'english',
         goalTier: _stepGoal == '5k'
@@ -86,8 +86,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 : 'active',
       );
       if (mounted) context.go('/home');
-    } catch (_) {
+    } catch (e) {
       setState(() => _loading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
     }
   }
 

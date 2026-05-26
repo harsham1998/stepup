@@ -78,9 +78,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _error = null;
     });
     try {
-      final isNewUser =
+      final result =
           await ref.read(authServiceProvider).verifyOtp(_phoneCtrl.text, otp);
-      if (mounted) context.go(isNewUser ? '/onboard' : '/home');
+      final onboardingCompleted = result['onboardingCompleted'] as bool? ?? false;
+      if (mounted) context.go(onboardingCompleted ? '/home' : '/onboard');
     } catch (e) {
       if (mounted)
         setState(() {

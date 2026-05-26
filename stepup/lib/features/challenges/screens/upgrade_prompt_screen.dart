@@ -107,25 +107,39 @@ class UpgradePromptScreen extends StatelessWidget {
 
             const Spacer(),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => context.push('/profile/subscription'),
-                child: const Text('Upgrade — ₹149/mo'),
+            GestureDetector(
+              onTap: () => context.push('/profile/subscription'),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppTheme.amber.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: AppTheme.amber.withValues(alpha: 0.4)),
+                ),
+                child: Center(
+                  child: Text('Upgrade — ₹149/mo',
+                      style: AppTheme.label(14, color: AppTheme.amber)
+                          .copyWith(fontWeight: FontWeight.w700)),
+                ),
               ),
             ),
             const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => context.pop(),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.12)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+            GestureDetector(
+              onTap: () => context.pop(),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.10)),
                 ),
-                child: Text('Maybe later',
-                    style: AppTheme.label(14, color: AppTheme.ink2)),
+                child: Center(
+                  child: Text('Maybe later',
+                      style: AppTheme.label(14, color: AppTheme.ink2)),
+                ),
               ),
             ),
           ]),

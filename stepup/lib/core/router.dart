@@ -20,6 +20,7 @@ import '../features/coins/screens/coins_screen.dart';
 import '../features/rewards/screens/rewards_screen.dart';
 import '../features/battlepass/screens/battlepass_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
+import '../features/profile/screens/profile_edit_screen.dart';
 import '../features/profile/screens/reputation_screen.dart';
 import '../features/profile/screens/xp_level_screen.dart';
 import '../features/profile/screens/achievements_screen.dart';
@@ -82,6 +83,7 @@ final router = GoRouter(
 
         // Profile
         GoRoute(path: '/profile',        builder: (_, __) => const ProfileScreen()),
+        GoRoute(path: '/profile/edit',   builder: (_, __) => const ProfileEditScreen()),
         GoRoute(path: '/profile/subscription', builder: (_, __) => const SubscriptionScreen()),
         GoRoute(path: '/profile/reputation', builder: (_, __) => const ReputationScreen()),
         GoRoute(path: '/profile/xp',     builder: (_, __) => const XpLevelScreen()),
@@ -122,7 +124,7 @@ class AppShell extends StatelessWidget {
   int get _index {
     if (location.startsWith('/challenges')) return 1;
     if (location.startsWith('/leaderboard')) return 2;
-    if (location.startsWith('/coins')) return 3;
+    if (location.startsWith('/community')) return 3;
     if (location.startsWith('/profile')) return 4;
     return 0;
   }
@@ -134,14 +136,14 @@ class AppShell extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (i) {
-          const routes = ['/home', '/challenges', '/leaderboard', '/coins', '/profile'];
+          const routes = ['/home', '/challenges', '/leaderboard', '/community', '/profile'];
           context.go(routes[i]);
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.emoji_events_outlined), label: 'Chal'),
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart_rounded), label: 'Lead'),
-          BottomNavigationBarItem(icon: Icon(Icons.monetization_on_outlined), label: 'Coins'),
+          BottomNavigationBarItem(icon: Icon(Icons.people_outline_rounded), label: 'Community'),
           BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Me'),
         ],
       ),

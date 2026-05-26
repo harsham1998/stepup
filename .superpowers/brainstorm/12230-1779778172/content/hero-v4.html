@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design 4 — Final</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:ital,wght@0,700;0,900;1,900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  :root {
+    --volt:       #D4FF3A;
+    --volt-dim:   rgba(212,255,58,0.10);
+    --volt-line:  rgba(212,255,58,0.22);
+    --amber:      #FFB547;
+    --amber-dim:  rgba(255,181,71,0.10);
+    --amber-line: rgba(255,181,71,0.28);
+    --bg:         #050510;
+    --surface:    #0D0D1A;
+    --ink2:       #A3A3B3;
+    --ink3:       #4B5563;
+    --border:     rgba(255,255,255,0.07);
+    --plat:       #94A3B8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #07071a;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    padding: 40px 20px 100px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  h1 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 22px; text-align: center; margin-bottom: 4px;
+    color: var(--volt);
+  }
+  .sub { color: var(--ink2); font-size: 12px; text-align: center; margin-bottom: 36px; }
+
+  /* ── card shell ── */
+  .card {
+    width: 100%; max-width: 400px;
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  /* ── stat row ── */
+  .stats { display: flex; border-top: 1px solid var(--border); }
+  .sc {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 11px 2px 10px; gap: 3px;
+  }
+  .sc + .sc { border-left: 1px solid var(--border); }
+  .si { font-size: 12px; line-height: 1; }
+  .sv { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 16px; color: #fff; line-height: 1; }
+  .sl { font-size: 7.5px; font-weight: 700; letter-spacing: .6px; color: var(--ink2); text-transform: uppercase; }
+
+  /* ════════════════════════
+     PANELS
+     ════════════════════════ */
+  .panels {
+    display: flex;
+    align-items: stretch;
+    position: relative;
+  }
+
+  /* subtle glow line at the bottom of the panel area */
+  .panels::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--volt-line), transparent);
+  }
+
+  .panel {
+    flex: 1;
+    display: flex; flex-direction: column;
+    padding: 18px 18px 16px;
+  }
+
+  /* glowing divider */
+  .vdiv {
+    width: 1px; flex-shrink: 0;
+    background: linear-gradient(180deg,
+      transparent    0%,
+      var(--volt-line) 18%,
+      var(--volt-line) 82%,
+      transparent   100%);
+    margin: 12px 0;
+  }
+
+  /* eyebrow — both sides identical */
+  .eyebrow {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 9px; font-weight: 700; letter-spacing: 1.2px;
+    color: var(--ink3); text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .edot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+  .ev { background: var(--volt); }
+  .ea { background: var(--amber); }
+
+  /* ── LEFT panel: XP ── */
+
+  /* "2840 XP" inline — number large, unit smaller beside it */
+  .xp-inline {
+    display: flex; align-items: baseline; gap: 6px;
+  }
+  .xp-num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 52px; line-height: .85;
+    color: var(--volt); letter-spacing: -1.5px;
+    text-shadow: 0 0 28px rgba(212,255,58,.2);
+  }
+  .xp-unit {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 18px; line-height: 1;
+    color: rgba(212,255,58,.5);
+  }
+
+  /* streak chip — bottom of left panel */
+  .spacer { flex: 1; min-height: 16px; }
+  .streak-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 11px; border-radius: 99px; align-self: flex-start;
+    background: var(--volt-dim); border: 1px solid var(--volt-line);
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 11px; color: var(--volt);
+    white-space: nowrap;
+  }
+  .streak-chip .fire { font-size: 14px; line-height: 1; }
+
+  /* ── RIGHT panel: Tier ── */
+  .tier-name {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-style: italic; font-size: 34px; line-height: .9;
+    background: linear-gradient(130deg, #FFE082, var(--amber) 55%, #CC7700);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .season-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 6px; align-self: flex-start;
+    background: var(--amber-dim); border: 1px solid var(--amber-line);
+    font-size: 9px; font-weight: 700; color: var(--amber); letter-spacing: .5px;
+    margin-top: 7px;
+  }
+  .rank {
+    display: flex; align-items: baseline; gap: 4px;
+    margin-top: auto; padding-top: 12px;
+  }
+  .rank-num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 22px; color: #fff; line-height: 1;
+  }
+  .rank-lbl { font-size: 10px; color: var(--ink2); }
+
+  /* ════════════════════════
+     PROGRESS FOOTER
+     ════════════════════════ */
+  .prog-foot {
+    padding: 14px 18px 18px;
+  }
+
+  /* "160 XP to reach PLATINUM" label row */
+  .prog-label-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .prog-from { font-size: 10px; font-weight: 700; color: var(--volt); }
+  .prog-target {
+    font-size: 10px; font-weight: 700; color: var(--ink2);
+  }
+  .prog-target strong { color: var(--plat); }
+
+  /* animated progress bar */
+  .prog-track {
+    height: 7px;
+    background: rgba(255,255,255,.06);
+    border-radius: 99px; overflow: visible;
+    position: relative;
+  }
+  .prog-fill {
+    height: 100%; width: 0%;          /* starts at 0, JS animates to 63% */
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--amber) 0%, var(--volt) 100%);
+    position: relative;
+    transition: width 1.4s cubic-bezier(.22,.68,0,1.2);
+  }
+  /* glowing head dot that rides the fill */
+  .prog-fill::after {
+    content: '';
+    position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--volt);
+    box-shadow: 0 0 10px 4px rgba(212,255,58,.45);
+    opacity: 0;
+    transition: opacity .3s .4s;
+  }
+  .prog-fill.active::after { opacity: 1; }
+
+  /* shimmer sweep over the fill */
+  @keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+  }
+  .prog-fill::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 20%, rgba(255,255,255,.3) 50%, transparent 80%);
+    border-radius: 99px;
+    animation: shimmer 2.2s ease-in-out 1.5s infinite;
+    opacity: 0;
+    transition: opacity .1s 1.4s;
+  }
+  .prog-fill.active::before { opacity: 1; }
+
+  /* tier milestone markers below the bar */
+  .milestones {
+    display: flex; margin-top: 10px;
+    position: relative;
+  }
+  .ms {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+
+  /* tick mark on the bar line */
+  .ms-tick {
+    width: 1.5px; height: 6px; border-radius: 1px;
+    background: var(--ink3);
+    transition: background .6s, box-shadow .6s;
+  }
+  .ms-tick.reached { background: var(--volt); box-shadow: 0 0 6px rgba(212,255,58,.5); }
+  .ms-tick.current { background: var(--amber); box-shadow: 0 0 8px rgba(255,181,71,.6); }
+
+  .ms-label {
+    font-size: 8px; font-weight: 700; letter-spacing: .5px;
+    color: var(--ink3); text-transform: uppercase;
+    transition: color .6s;
+  }
+  .ms-label.reached { color: rgba(212,255,58,.6); }
+  .ms-label.current { color: var(--amber); }
+  .ms-label.next    { color: var(--plat); }
+
+  /* ════════════════════════
+     GOLD → PLATINUM ANIMATION
+     Plays once on load after the bar finishes filling.
+     A floating "+XP" burst that rises then fades.
+     ════════════════════════ */
+
+  /* pulse ring on current tier tick */
+  @keyframes ring-pulse {
+    0%   { transform: scale(1);   opacity: .8; }
+    60%  { transform: scale(2.4); opacity: 0;  }
+    100% { transform: scale(2.4); opacity: 0;  }
+  }
+  .ms-ring {
+    position: absolute;
+    width: 1.5px; height: 6px; border-radius: 50%;
+    background: var(--amber);
+    animation: ring-pulse 1.2s ease-out 1.8s 3;
+    pointer-events: none;
+  }
+
+  /* floating XP burst label */
+  @keyframes xp-burst {
+    0%   { opacity: 0; transform: translateY(0) scale(.8); }
+    15%  { opacity: 1; transform: translateY(-6px) scale(1); }
+    70%  { opacity: 1; transform: translateY(-18px) scale(1); }
+    100% { opacity: 0; transform: translateY(-26px) scale(.9); }
+  }
+  .xp-burst {
+    position: absolute;
+    top: -30px;
+    /* JS sets left to match the current node */
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 11px; color: var(--volt);
+    background: rgba(212,255,58,.12); border: 1px solid var(--volt-line);
+    padding: 2px 7px; border-radius: 99px; white-space: nowrap;
+    pointer-events: none;
+    animation: xp-burst 2s ease-out 1.8s both;
+    text-shadow: 0 0 8px rgba(212,255,58,.4);
+  }
+
+  /* "GOLD → PLATINUM" flash hint that appears below the bar briefly */
+  @keyframes tier-flash {
+    0%   { opacity: 0; transform: translateY(4px); }
+    12%  { opacity: 1; transform: translateY(0); }
+    70%  { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-4px); }
+  }
+  .tier-hint {
+    text-align: center; margin-top: 10px;
+    font-size: 10px; font-weight: 700; letter-spacing: .4px; color: var(--ink2);
+    animation: tier-flash 3s ease-out 2.4s both;
+  }
+  .tier-hint .g { color: var(--amber); }
+  .tier-hint .p { color: var(--plat); }
+  .tier-hint .arrow { color: var(--volt); margin: 0 4px; }
+</style>
+</head>
+<body>
+
+<h1>DESIGN 4</h1>
+<p class="sub">Final adjustments · tap to interact</p>
+
+<div class="card">
+
+  <!-- ── Two panels ── -->
+  <div class="panels">
+
+    <!-- LEFT: XP -->
+    <div class="panel">
+      <div class="eyebrow"><div class="edot ev"></div>SEASON 3 XP</div>
+      <div class="xp-inline">
+        <div class="xp-num">2,840</div>
+        <div class="xp-unit">XP</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="streak-chip">
+        <span class="fire">🔥</span>
+        <span>7 Day Streak</span>
+      </div>
+    </div>
+
+    <div class="vdiv"></div>
+
+    <!-- RIGHT: Tier -->
+    <div class="panel">
+      <div class="eyebrow"><div class="edot ea"></div>CURRENT TIER</div>
+      <div class="tier-name">GOLD</div>
+      <div class="season-chip">SEASON 3</div>
+      <div class="rank">
+        <div class="rank-num">#12</div>
+        <div class="rank-lbl">of 340 members</div>
+      </div>
+    </div>
+
+  </div><!-- /panels -->
+
+  <!-- ── Progress footer ── -->
+  <div class="prog-foot">
+
+    <div class="prog-label-row">
+      <span class="prog-from">2,840 XP</span>
+      <span class="prog-target">160 XP to reach <strong>PLATINUM</strong></span>
+    </div>
+
+    <!-- bar + animations -->
+    <div class="prog-track" id="track">
+      <div class="prog-fill" id="fill"></div>
+      <div class="xp-burst" id="burst">+160 XP → PLATINUM</div>
+    </div>
+
+    <!-- milestone ticks -->
+    <div class="milestones" id="miles">
+      <div class="ms">
+        <div class="ms-tick reached" id="tick-0"></div>
+        <div class="ms-label reached">BRONZE</div>
+      </div>
+      <div class="ms">
+        <div class="ms-tick reached" id="tick-1"></div>
+        <div class="ms-label reached">SILVER</div>
+      </div>
+      <div class="ms">
+        <div class="ms-tick current" id="tick-2">
+          <div class="ms-ring"></div>
+        </div>
+        <div class="ms-label current">GOLD</div>
+      </div>
+      <div class="ms">
+        <div class="ms-tick" id="tick-3"></div>
+        <div class="ms-label next">PLATINUM</div>
+      </div>
+      <div class="ms">
+        <div class="ms-tick" id="tick-4"></div>
+        <div class="ms-label">DIAMOND</div>
+      </div>
+    </div>
+
+    <!-- tier journey hint — animates in after fill -->
+    <div class="tier-hint">
+      <span class="g">GOLD</span>
+      <span class="arrow">→</span>
+      <span class="p">PLATINUM</span>
+      &nbsp;·&nbsp; 160 XP away
+    </div>
+
+  </div><!-- /prog-foot -->
+
+  <!-- ── Stats row ── -->
+  <div class="stats">
+    <div class="sc"><div class="si">👟</div><div class="sv">287</div><div class="sl">STEPS</div></div>
+    <div class="sc"><div class="si">⚡</div><div class="sv">0.2</div><div class="sl">KM</div></div>
+    <div class="sc"><div class="si">🔥</div><div class="sv">138</div><div class="sl">KCAL</div></div>
+    <div class="sc"><div class="si">⏱</div><div class="sv">0</div><div class="sl">MIN</div></div>
+    <div class="sc"><div class="si">❤️</div><div class="sv">71</div><div class="sl">BPM</div></div>
+  </div>
+
+</div><!-- /card -->
+
+<!-- position the xp-burst label over the current (Gold) tick -->
+<script>
+window.addEventListener('load', () => {
+  // 1. Animate bar fill after a short delay
+  const fill = document.getElementById('fill');
+  setTimeout(() => {
+    fill.style.width = '63%';
+    fill.classList.add('active');
+  }, 300);
+
+  // 2. Position the XP burst above the GOLD tick (3rd of 5 milestones = 40% across)
+  const track  = document.getElementById('track');
+  const burst  = document.getElementById('burst');
+  const trackW = track.offsetWidth;
+  // Gold tick is at the 3rd node centre in a 5-node even-spaced row
+  // centres: 10%, 30%, 50%, 70%, 90%  → Gold = 50%
+  burst.style.left = (trackW * 0.63 - burst.offsetWidth / 2) + 'px';
+});
+
+// Replay on card tap
+document.querySelector('.card').addEventListener('click', () => {
+  const fill = document.getElementById('fill');
+  fill.style.transition = 'none';
+  fill.style.width = '0%';
+  fill.classList.remove('active');
+  void fill.offsetWidth; // reflow
+  setTimeout(() => {
+    fill.style.transition = 'width 1.4s cubic-bezier(.22,.68,0,1.2)';
+    fill.style.width = '63%';
+    fill.classList.add('active');
+  }, 80);
+});
+</script>
+</body>
+</html>

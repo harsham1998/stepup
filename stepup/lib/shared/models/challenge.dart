@@ -39,8 +39,20 @@ class Challenge {
   bool get isPaid => entryFee > 0;
   bool get isLive => status == 'active';
 
+  String get cadence {
+    const cadenceValues = {'daily', 'weekly', 'monthly', 'seasonal'};
+    if (cadenceValues.contains(type.toLowerCase())) return type.toLowerCase();
+    final days = endTime.difference(startTime).inDays;
+    if (days <= 1) return 'daily';
+    if (days <= 7) return 'weekly';
+    if (days <= 31) return 'monthly';
+    return 'seasonal';
+  }
+
   String get entryFeeInr => entryFee == 0 ? 'Free' : '₹${(entryFee / 100).toStringAsFixed(0)}';
   String get prizePoolInr => '₹${(prizePool / 100).toStringAsFixed(0)}';
+  String get entryFeeCoins => entryFee == 0 ? 'FREE' : '${entryFee ~/ 100}¢';
+  String get prizePoolCoins => '${prizePool ~/ 100}¢';
 
   String get goalLabel {
     switch (activityType) {

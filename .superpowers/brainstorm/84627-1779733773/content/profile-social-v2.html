@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Profile — Social Style Variations</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #080814;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  padding: 32px 24px 80px;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.page-sub {
+  font-size: 14px;
+  color: #A3A3B3;
+  margin-bottom: 36px;
+}
+.page-sub span { color: #D4FF3A; font-weight: 600; }
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 28px;
+  max-width: 1440px;
+}
+
+/* ── Card shell ── */
+.card {
+  border-radius: 20px;
+  border: 1.5px solid #1e1e35;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+  background: #0d0d1c;
+}
+.card:hover {
+  border-color: rgba(212,255,58,0.4);
+  box-shadow: 0 0 32px rgba(212,255,58,0.08);
+  transform: translateY(-3px);
+}
+.card.selected {
+  border-color: #D4FF3A !important;
+  box-shadow: 0 0 40px rgba(212,255,58,0.15) !important;
+}
+
+/* ── Phone mockup frame ── */
+.phone {
+  background: #050510;
+  min-height: 560px;
+  overflow: hidden;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── Label footer ── */
+.card-label {
+  padding: 14px 16px;
+  border-top: 1px solid #1e1e35;
+  background: #080814;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.card-letter {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: #D4FF3A;
+  color: #050510;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.card-label h3 { font-size: 13px; color: #fff; font-weight: 700; margin-bottom: 3px; font-family: 'Space Grotesk', sans-serif; }
+.card-label p { font-size: 11px; color: #A3A3B3; line-height: 1.4; }
+
+/* ── Selection overlay ── */
+.selected-badge {
+  display: none;
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 26px; height: 26px;
+  background: #D4FF3A;
+  border-radius: 50%;
+  align-items: center; justify-content: center;
+  font-size: 13px;
+  color: #050510;
+  font-weight: 900;
+  z-index: 99;
+}
+.card.selected .selected-badge { display: flex; }
+
+/* selection bar */
+#selection-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #0d0d1c;
+  border-top: 1px solid #1e1e35;
+  padding: 14px 24px;
+  font-size: 14px; color: #A3A3B3;
+  display: flex; align-items: center; gap: 12px;
+  z-index: 100;
+}
+#selection-bar strong { color: #D4FF3A; }
+#selection-count { font-weight: 700; color: #fff; }
+
+/* ════════════════════════════════════════
+   SHARED MICRO-COMPONENTS
+════════════════════════════════════════ */
+.chip {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.chip-lime { background: rgba(212,255,58,0.12); color: #D4FF3A; border: 1px solid rgba(212,255,58,0.25); }
+.chip-amber { background: rgba(255,181,71,0.12); color: #FFB547; border: 1px solid rgba(255,181,71,0.25); }
+.chip-gray { background: rgba(255,255,255,0.06); color: #A3A3B3; border: 1px solid rgba(255,255,255,0.1); }
+.chip-purple { background: rgba(139,92,246,0.12); color: #A78BFA; border: 1px solid rgba(139,92,246,0.25); }
+
+.cam-dot {
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 22px; height: 22px;
+  background: #D4FF3A;
+  border-radius: 50%;
+  border: 2.5px solid #050510;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: #050510;
+}
+.cam-dot::after { content: '＋'; font-weight: 900; font-size: 12px; line-height: 1; }
+
+/* ════════════════════════════════════════
+   V1  "NEON GLOW"
+   Glowing avatar rings · frosted stats · dark gradient header
+════════════════════════════════════════ */
+.v1 { padding: 0; }
+
+.v1-header {
+  position: relative;
+  padding: 20px 18px 28px;
+  background: #050510;
+  overflow: hidden;
+}
+.v1-glow {
+  position: absolute;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,255,58,0.12) 0%, transparent 70%);
+  top: -60px; left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.v1-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+  position: relative; z-index: 1;
+}
+.v1-title { font-size: 20px; font-weight: 900; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+.v1-actions { display: flex; gap: 8px; }
+.v1-icon-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: #A3A3B3;
+}
+
+.v1-avatar-block {
+  display: flex; align-items: center; gap: 16px;
+  position: relative; z-index: 1;
+}
+.v1-avatar-wrap { position: relative; flex-shrink: 0; }
+.v1-rings {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(212,255,58,0.2);
+}
+.v1-rings-2 {
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 1px solid rgba(212,255,58,0.08);
+}
+.v1-avatar {
+  width: 66px; height: 66px;
+  border-radius: 50%;
+  background: rgba(212,255,58,0.1);
+  border: 2px solid #D4FF3A;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 900; color: #D4FF3A;
+  font-family: 'Space Grotesk', sans-serif;
+  box-shadow: 0 0 20px rgba(212,255,58,0.25), inset 0 0 20px rgba(212,255,58,0.05);
+}
+
+.v1-info {}
+.v1-name { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 2px; font-family: 'Space Grotesk', sans-serif; }
+.v1-handle { font-size: 12px; color: #A3A3B3; margin-bottom: 8px; }
+.v1-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+
+.v1-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 0 0 1px;
+}
+.v1-stat {
+  background: #050510;
+  padding: 12px 6px;
+  text-align: center;
+}
+.v1-stat .num {
+  display: block;
+  font-size: 18px; font-weight: 900; color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.v1-stat .lbl { font-size: 9px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.v1-badges {
+  padding: 14px 18px;
+}
+.v1-section-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.v1-section-title { font-size: 12px; font-weight: 700; color: #fff; }
+.v1-see-all { font-size: 11px; color: #D4FF3A; font-weight: 600; }
+.v1-badge-scroll { display: flex; gap: 8px; }
+.v1-badge {
+  width: 56px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 10px 6px;
+  text-align: center;
+  font-size: 20px;
+}
+.v1-badge .blbl { font-size: 8px; color: #A3A3B3; display: block; margin-top: 4px; line-height: 1.2; }
+
+.v1-menu { padding: 0 18px; }
+.v1-menu-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.v1-menu-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.v1-menu-txt { font-size: 13px; color: #fff; font-weight: 500; flex: 1; }
+.v1-menu-arr { font-size: 11px; color: #4B5563; }
+
+/* ════════════════════════════════════════
+   V2  "GRADIENT HERO"
+   Top half = rich gradient canvas · stat pills float · bold identity
+════════════════════════════════════════ */
+.v2 { padding: 0; }
+
+.v2-hero {
+  position: relative;
+  padding: 20px 18px 56px;
+  background: linear-gradient(160deg, #0a0a22 0%, #10012a 40%, #001a10 100%);
+  overflow: hidden;
+}
+.v2-blob1 {
+  position: absolute;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,255,58,0.15) 0%, transparent 70%);
+  bottom: -40px; right: -30px;
+}
+.v2-blob2 {
+  position: absolute;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+  top: 10px; right: 30px;
+}
+.v2-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; position: relative; z-index: 1;
+}
+.v2-title { font-size: 18px; font-weight: 900; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+.v2-gear { font-size: 17px; color: rgba(255,255,255,0.4); }
+
+.v2-avatar-row {
+  display: flex; align-items: center; gap: 16px;
+  position: relative; z-index: 1;
+  margin-bottom: 14px;
+}
+.v2-avatar-wrap { position: relative; flex-shrink: 0; }
+.v2-avatar {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 900; color: #050510;
+  background: linear-gradient(135deg, #D4FF3A 0%, #FFB547 100%);
+  font-family: 'Space Grotesk', sans-serif;
+  box-shadow: 0 8px 24px rgba(212,255,58,0.3);
+}
+.v2-info { flex: 1; }
+.v2-name {
+  font-size: 22px; font-weight: 900; color: #fff;
+  font-family: 'Space Grotesk', sans-serif; margin-bottom: 2px;
+  line-height: 1;
+}
+.v2-bio { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 8px; font-style: italic; }
+.v2-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+
+/* Floating pill stats */
+.v2-stat-pills {
+  position: relative; z-index: 1;
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.v2-pill {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 40px;
+  padding: 7px 14px;
+  display: flex; align-items: center; gap: 6px;
+}
+.v2-pill .num { font-size: 15px; font-weight: 900; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+.v2-pill .lbl { font-size: 10px; color: rgba(255,255,255,0.5); }
+
+.v2-body { padding: 16px 18px; }
+.v2-section-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.v2-section-title { font-size: 12px; font-weight: 700; color: #fff; }
+.v2-see-all { font-size: 11px; color: #D4FF3A; font-weight: 600; }
+.v2-badges { display: flex; gap: 7px; margin-bottom: 14px; }
+.v2-badge {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 10px 4px;
+  text-align: center;
+  font-size: 18px;
+}
+.v2-badge .blbl { font-size: 8px; color: #A3A3B3; display: block; margin-top: 3px; line-height: 1.2; }
+
+.v2-menu-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.v2-menu-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+.v2-menu-txt { font-size: 12px; color: #fff; font-weight: 500; flex: 1; }
+.v2-menu-arr { font-size: 11px; color: #4B5563; }
+
+/* ════════════════════════════════════════
+   V3  "BIG NUMBERS"
+   Stats are the hero · Numbers huge and front-center · Rank card
+════════════════════════════════════════ */
+.v3 { padding: 0; }
+.v3-top {
+  padding: 18px 18px 16px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.v3-title { font-size: 19px; font-weight: 900; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+.v3-gear { font-size: 16px; color: #4B5563; }
+
+.v3-profile-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 18px 16px;
+}
+.v3-avatar-wrap { position: relative; flex-shrink: 0; }
+.v3-avatar {
+  width: 62px; height: 62px;
+  border-radius: 50%;
+  background: rgba(212,255,58,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 900; color: #D4FF3A;
+  font-family: 'Space Grotesk', sans-serif;
+  position: relative;
+}
+/* Story-style ring */
+.v3-story-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(#D4FF3A 0% 72%, rgba(255,255,255,0.1) 72% 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
+}
+
+.v3-info { flex: 1; }
+.v3-name { font-size: 18px; font-weight: 800; color: #fff; font-family: 'Space Grotesk', sans-serif; margin-bottom: 2px; }
+.v3-handle { font-size: 11px; color: #A3A3B3; margin-bottom: 7px; }
+.v3-chips { display: flex; gap: 5px; }
+
+/* Rank card */
+.v3-rank-card {
+  margin: 0 18px 16px;
+  background: linear-gradient(135deg, #1a1200 0%, #0d0d00 100%);
+  border: 1px solid rgba(255,181,71,0.2);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.v3-rank-icon { font-size: 28px; }
+.v3-rank-info { flex: 1; }
+.v3-rank-name { font-size: 16px; font-weight: 900; color: #FFB547; font-family: 'Space Grotesk', sans-serif; }
+.v3-rank-sub { font-size: 10px; color: rgba(255,181,71,0.6); }
+.v3-rank-num { font-size: 28px; font-weight: 900; color: #FFB547; font-family: 'Space Grotesk', sans-serif; }
+
+/* Big stat grid */
+.v3-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin: 0 18px 14px;
+}
+.v3-stat-big {
+  background: #0D0D1A;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 14px 14px;
+}
+.v3-stat-big .icon { font-size: 16px; margin-bottom: 4px; display: block; }
+.v3-stat-big .num {
+  font-size: 32px; font-weight: 900; color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  line-height: 1; display: block; margin-bottom: 2px;
+}
+.v3-stat-big .lbl { font-size: 10px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.v3-menu { padding: 0 18px; }
+.v3-menu-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.v3-menu-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+.v3-menu-txt { font-size: 12px; color: #fff; font-weight: 500; flex: 1; }
+.v3-menu-arr { font-size: 11px; color: #4B5563; }
+
+/* ════════════════════════════════════════
+   V4  "ACTIVITY RINGS"
+   Apple Watch ring around avatar · streak progress · clean social header
+════════════════════════════════════════ */
+.v4 { padding: 0; }
+.v4-header { padding: 18px 18px 20px; }
+.v4-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.v4-title { font-size: 19px; font-weight: 900; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+.v4-actions { display: flex; gap: 8px; }
+.v4-action-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: #A3A3B3;
+}
+
+.v4-profile-block { display: flex; align-items: center; gap: 16px; }
+.v4-ring-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+.v4-ring-svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.v4-inner-avatar {
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: rgba(212,255,58,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 900; color: #D4FF3A;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.v4-cam-wrap {
+  position: absolute; bottom: 0; right: -2px;
+  width: 22px; height: 22px;
+  background: #D4FF3A;
+  border-radius: 50%;
+  border: 2px solid #050510;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: #050510; font-weight: 900;
+  z-index: 2;
+}
+
+.v4-info { flex: 1; }
+.v4-name { font-size: 19px; font-weight: 800; color: #fff; font-family: 'Space Grotesk', sans-serif; margin-bottom: 3px; }
+.v4-handle { font-size: 11px; color: #A3A3B3; margin-bottom: 8px; }
+.v4-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+
+/* Horizontal divider stat bar */
+.v4-stat-bar {
+  display: flex;
+  margin: 16px 18px;
+  background: #0D0D1A;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.v4-bar-stat {
+  flex: 1;
+  padding: 12px 8px;
+  text-align: center;
+}
+.v4-bar-stat:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.07); }
+.v4-bar-stat .num { font-size: 19px; font-weight: 900; color: #fff; display: block; font-family: 'Space Grotesk', sans-serif; }
+.v4-bar-stat .lbl { font-size: 9px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* Week rings */
+.v4-week { margin: 0 18px 14px; }
+.v4-week-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.v4-week-title { font-size: 11px; font-weight: 700; color: #fff; }
+.v4-week-sub { font-size: 10px; color: #D4FF3A; font-weight: 600; }
+.v4-day-rings { display: flex; gap: 10px; }
+.v4-day { display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+.v4-ring-mini { position: relative; width: 28px; height: 28px; }
+.v4-ring-mini svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.v4-day-lbl { font-size: 8px; color: #4B5563; }
+.v4-day.today .v4-day-lbl { color: #D4FF3A; font-weight: 700; }
+
+.v4-badge-row { margin: 0 18px 14px; }
+.v4-badge-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.v4-badge-title { font-size: 11px; font-weight: 700; color: #fff; }
+.v4-badge-all { font-size: 10px; color: #D4FF3A; font-weight: 600; }
+.v4-badges { display: flex; gap: 6px; }
+.v4-badge {
+  width: 48px; height: 48px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+
+.v4-menu { padding: 0 18px; }
+.v4-menu-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.v4-menu-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+.v4-menu-txt { font-size: 12px; color: #fff; font-weight: 500; flex: 1; }
+.v4-menu-arr { font-size: 11px; color: #4B5563; }
+
+/* ════════════════════════════════════════
+   V5  "DARK CARD / GLASSMORPHISM"
+   Frosted glass cards · Bold identity block · Stacked metric cards
+════════════════════════════════════════ */
+.v5 { padding: 0; background: #050510; }
+
+.v5-hero {
+  position: relative;
+  padding: 20px 18px 24px;
+  overflow: hidden;
+}
+.v5-mesh {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(212,255,58,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(139,92,246,0.07) 0%, transparent 60%);
+}
+.v5-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 22px; position: relative; z-index: 1;
+}
+.v5-title { font-size: 19px; font-weight: 900; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+.v5-gear { font-size: 16px; color: #4B5563; }
+
+.v5-identity {
+  display: flex; align-items: center; gap: 16px;
+  position: relative; z-index: 1;
+  margin-bottom: 20px;
+}
+.v5-avatar-frame { position: relative; flex-shrink: 0; }
+.v5-avatar {
+  width: 70px; height: 70px;
+  border-radius: 22px;
+  background: rgba(212,255,58,0.1);
+  border: 1.5px solid rgba(212,255,58,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 900; color: #D4FF3A;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.v5-cam-sq {
+  position: absolute;
+  bottom: -4px; right: -4px;
+  width: 22px; height: 22px;
+  background: #D4FF3A;
+  border-radius: 7px;
+  border: 2px solid #050510;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #050510; font-weight: 900;
+}
+.v5-info { flex: 1; }
+.v5-name { font-size: 21px; font-weight: 900; color: #fff; font-family: 'Space Grotesk', sans-serif; margin-bottom: 2px; line-height: 1.1; }
+.v5-sub { font-size: 11px; color: #A3A3B3; margin-bottom: 8px; }
+.v5-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+
+/* Glass stat grid */
+.v5-glass-stats {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 8px; margin-bottom: 4px;
+}
+.v5-glass-stat {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px;
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+}
+.v5-glass-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+.v5-gs-icon { font-size: 14px; margin-bottom: 6px; display: block; }
+.v5-gs-num {
+  font-size: 26px; font-weight: 900; color: #fff;
+  font-family: 'Space Grotesk', sans-serif; line-height: 1;
+  display: block; margin-bottom: 3px;
+}
+.v5-gs-lbl { font-size: 10px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.5px; }
+.v5-gs-trend { font-size: 9px; color: #D4FF3A; font-weight: 600; margin-top: 2px; }
+
+.v5-body { padding: 8px 18px 14px; }
+.v5-section-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.v5-section-title { font-size: 11px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
+.v5-see-all { font-size: 10px; color: #D4FF3A; font-weight: 600; }
+.v5-badges { display: flex; gap: 7px; margin-bottom: 12px; }
+.v5-badge {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 10px 4px;
+  text-align: center;
+  font-size: 18px;
+}
+.v5-badge .blbl { font-size: 8px; color: #A3A3B3; display: block; margin-top: 3px; }
+
+.v5-menu-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.v5-menu-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+.v5-menu-txt { font-size: 12px; color: #fff; font-weight: 500; flex: 1; }
+.v5-menu-arr { font-size: 11px; color: #4B5563; }
+
+/* ── helper script bits ── */
+</style>
+</head>
+<body>
+
+<div class="page-title">Social Style — 5 GenZ Variations</div>
+<p class="page-sub">All dark-theme · <span>Volt-lime accent</span> · Profile photo upload on every design · Click to select</p>
+
+<div id="selection-bar">
+  <span id="selection-count">0 selected</span>
+  <span>— click a design to vote for it</span>
+</div>
+
+<div class="grid">
+
+  <!-- ═══ V1: NEON GLOW ═══ -->
+  <div class="card" data-choice="v1" onclick="toggleCard(this)">
+    <div class="selected-badge">✓</div>
+    <div class="phone v1">
+      <div class="v1-header">
+        <div class="v1-glow"></div>
+        <div class="v1-topbar">
+          <span class="v1-title">Me</span>
+          <div class="v1-actions">
+            <div class="v1-icon-btn">＋</div>
+            <div class="v1-icon-btn">⚙</div>
+          </div>
+        </div>
+        <div class="v1-avatar-block">
+          <div class="v1-avatar-wrap">
+            <div class="v1-rings"></div>
+            <div class="v1-rings-2"></div>
+            <div class="v1-avatar">H<div class="cam-dot"></div></div>
+          </div>
+          <div class="v1-info">
+            <div class="v1-name">Harsha</div>
+            <div class="v1-handle">@harsha_m · India</div>
+            <div class="v1-chips">
+              <span class="chip chip-lime">Free</span>
+              <span class="chip chip-gray">GOLD III</span>
+              <span class="chip chip-purple">LV 23</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="v1-stats">
+        <div class="v1-stat">
+          <span class="num" style="color:#D4FF3A">12D</span>
+          <span class="lbl">Streak</span>
+        </div>
+        <div class="v1-stat">
+          <span class="num">847</span>
+          <span class="lbl">Rep</span>
+        </div>
+        <div class="v1-stat">
+          <span class="num">10</span>
+          <span class="lbl">Challenges</span>
+        </div>
+        <div class="v1-stat">
+          <span class="num" style="color:#FFB547">1.2K</span>
+          <span class="lbl">Coins</span>
+        </div>
+      </div>
+
+      <div class="v1-badges" style="margin-top:2px">
+        <div class="v1-section-row">
+          <span class="v1-section-title">Recent badges</span>
+          <span class="v1-see-all">See all →</span>
+        </div>
+        <div class="v1-badge-scroll">
+          <div class="v1-badge">🔥<span class="blbl">7-day</span></div>
+          <div class="v1-badge">👟<span class="blbl">First 10k</span></div>
+          <div class="v1-badge">🏆<span class="blbl">Winner</span></div>
+          <div class="v1-badge">⚡<span class="blbl">Speed</span></div>
+        </div>
+      </div>
+
+      <div class="v1-menu" style="margin-top:10px">
+        <div class="v1-menu-item">
+          <div class="v1-menu-icon">📊</div>
+          <span class="v1-menu-txt">Fitness Reputation</span>
+          <span class="v1-menu-arr">›</span>
+        </div>
+        <div class="v1-menu-item">
+          <div class="v1-menu-icon">⚡</div>
+          <span class="v1-menu-txt">XP & Level</span>
+          <span class="v1-menu-arr">›</span>
+        </div>
+        <div class="v1-menu-item" style="border:none">
+          <div class="v1-menu-icon">🔥</div>
+          <span class="v1-menu-txt">Streak & Shield</span>
+          <span class="v1-menu-arr">›</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="card-letter">1</div>
+      <div>
+        <h3>Neon Glow</h3>
+        <p>Glowing avatar rings · Full-width 4-stat strip · Icon-boxed menu</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ V2: GRADIENT HERO ═══ -->
+  <div class="card" data-choice="v2" onclick="toggleCard(this)">
+    <div class="selected-badge">✓</div>
+    <div class="phone v2">
+      <div class="v2-hero">
+        <div class="v2-blob1"></div>
+        <div class="v2-blob2"></div>
+        <div class="v2-topbar">
+          <span class="v2-title">Me</span>
+          <span class="v2-gear">⚙</span>
+        </div>
+        <div class="v2-avatar-row">
+          <div class="v2-avatar-wrap">
+            <div class="v2-avatar">H<div class="cam-dot"></div></div>
+          </div>
+          <div class="v2-info">
+            <div class="v2-name">Harsha</div>
+            <div class="v2-bio">"Every rep counts 🔥"</div>
+            <div class="v2-chips">
+              <span class="chip chip-lime">Free</span>
+              <span class="chip chip-gray">GOLD III · LV 23</span>
+            </div>
+          </div>
+        </div>
+        <div class="v2-stat-pills">
+          <div class="v2-pill">
+            <span class="num" style="color:#D4FF3A">12D</span>
+            <span class="lbl">streak</span>
+          </div>
+          <div class="v2-pill">
+            <span class="num">847</span>
+            <span class="lbl">rep</span>
+          </div>
+          <div class="v2-pill">
+            <span class="num" style="color:#FFB547">1.2K</span>
+            <span class="lbl">coins</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="v2-body">
+        <div class="v2-section-row">
+          <span class="v2-section-title">Badges</span>
+          <span class="v2-see-all">See all →</span>
+        </div>
+        <div class="v2-badges">
+          <div class="v2-badge">🔥<span class="blbl">Streak</span></div>
+          <div class="v2-badge">👟<span class="blbl">10k</span></div>
+          <div class="v2-badge">🏆<span class="blbl">Winner</span></div>
+          <div class="v2-badge">⚡<span class="blbl">Speed</span></div>
+          <div class="v2-badge">💪<span class="blbl">Grind</span></div>
+        </div>
+
+        <div class="v2-menu-item">
+          <div class="v2-menu-icon">📊</div>
+          <span class="v2-menu-txt">Fitness Reputation</span>
+          <span class="v2-menu-arr">›</span>
+        </div>
+        <div class="v2-menu-item">
+          <div class="v2-menu-icon">⚡</div>
+          <span class="v2-menu-txt">XP & Level</span>
+          <span class="v2-menu-arr">›</span>
+        </div>
+        <div class="v2-menu-item">
+          <div class="v2-menu-icon">🔥</div>
+          <span class="v2-menu-txt">Streak & Shield</span>
+          <span class="v2-menu-arr">›</span>
+        </div>
+        <div class="v2-menu-item" style="border:none">
+          <div class="v2-menu-icon">📅</div>
+          <span class="v2-menu-txt">Daily Missions</span>
+          <span class="v2-menu-arr">›</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="card-letter">2</div>
+      <div>
+        <h3>Gradient Hero</h3>
+        <p>Rich dark gradient canvas · Bio line · Frosted glass stat pills</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ V3: BIG NUMBERS ═══ -->
+  <div class="card" data-choice="v3" onclick="toggleCard(this)">
+    <div class="selected-badge">✓</div>
+    <div class="phone v3">
+      <div class="v3-top">
+        <span class="v3-title">Me</span>
+        <span class="v3-gear">⚙</span>
+      </div>
+      <div class="v3-profile-row">
+        <div class="v3-avatar-wrap">
+          <div class="v3-story-ring"></div>
+          <div class="v3-avatar">H<div class="cam-dot"></div></div>
+        </div>
+        <div class="v3-info">
+          <div class="v3-name">Harsha</div>
+          <div class="v3-handle">@harsha_m · India · Joined Apr 2024</div>
+          <div class="v3-chips">
+            <span class="chip chip-lime">Free</span>
+            <span class="chip chip-amber">GOLD III</span>
+            <span class="chip chip-purple">LV 23</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="v3-rank-card">
+        <div class="v3-rank-icon">🏅</div>
+        <div class="v3-rank-info">
+          <div class="v3-rank-name">GOLD III</div>
+          <div class="v3-rank-sub">Top 12% this week</div>
+        </div>
+        <div class="v3-rank-num">#47</div>
+      </div>
+
+      <div class="v3-stats">
+        <div class="v3-stat-big">
+          <span class="icon">🔥</span>
+          <span class="num" style="color:#D4FF3A">12D</span>
+          <span class="lbl">Streak</span>
+        </div>
+        <div class="v3-stat-big">
+          <span class="icon">📊</span>
+          <span class="num">847</span>
+          <span class="lbl">Reputation</span>
+        </div>
+        <div class="v3-stat-big">
+          <span class="icon">🏆</span>
+          <span class="num">10</span>
+          <span class="lbl">Challenges</span>
+        </div>
+        <div class="v3-stat-big">
+          <span class="icon">🪙</span>
+          <span class="num" style="color:#FFB547">1.2K</span>
+          <span class="lbl">Coins</span>
+        </div>
+      </div>
+
+      <div class="v3-menu">
+        <div class="v3-menu-item">
+          <div class="v3-menu-icon">📊</div>
+          <span class="v3-menu-txt">Fitness Reputation</span>
+          <span class="v3-menu-arr">›</span>
+        </div>
+        <div class="v3-menu-item">
+          <div class="v3-menu-icon">⚡</div>
+          <span class="v3-menu-txt">XP & Level</span>
+          <span class="v3-menu-arr">›</span>
+        </div>
+        <div class="v3-menu-item" style="border:none">
+          <div class="v3-menu-icon">🔥</div>
+          <span class="v3-menu-txt">Streak & Shield</span>
+          <span class="v3-menu-arr">›</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="card-letter">3</div>
+      <div>
+        <h3>Big Numbers</h3>
+        <p>Story-style progress ring · Rank hero card · Oversized stat grid</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ V4: ACTIVITY RINGS ═══ -->
+  <div class="card" data-choice="v4" onclick="toggleCard(this)">
+    <div class="selected-badge">✓</div>
+    <div class="phone v4">
+      <div class="v4-header">
+        <div class="v4-topbar">
+          <span class="v4-title">Me</span>
+          <div class="v4-actions">
+            <div class="v4-action-btn">＋</div>
+            <div class="v4-action-btn">⚙</div>
+          </div>
+        </div>
+        <div class="v4-profile-block">
+          <!-- SVG ring avatar -->
+          <div class="v4-ring-wrap">
+            <svg class="v4-ring-svg" viewBox="0 0 72 72">
+              <!-- outer ring: streak -->
+              <circle cx="36" cy="36" r="33" fill="none" stroke="rgba(212,255,58,0.12)" stroke-width="3"/>
+              <circle cx="36" cy="36" r="33" fill="none" stroke="#D4FF3A" stroke-width="3"
+                stroke-dasharray="207.3" stroke-dashoffset="58" stroke-linecap="round"/>
+              <!-- inner ring: missions -->
+              <circle cx="36" cy="36" r="27" fill="none" stroke="rgba(255,181,71,0.12)" stroke-width="2.5"/>
+              <circle cx="36" cy="36" r="27" fill="none" stroke="#FFB547" stroke-width="2.5"
+                stroke-dasharray="169.6" stroke-dashoffset="50" stroke-linecap="round"/>
+            </svg>
+            <div class="v4-inner-avatar">H</div>
+            <div class="v4-cam-wrap">+</div>
+          </div>
+          <div class="v4-info">
+            <div class="v4-name">Harsha</div>
+            <div class="v4-handle">@harsha_m · India</div>
+            <div class="v4-chips">
+              <span class="chip chip-lime">Free</span>
+              <span class="chip chip-gray">GOLD III</span>
+              <span class="chip chip-purple">LV 23</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="v4-stat-bar">
+        <div class="v4-bar-stat">
+          <span class="num" style="color:#D4FF3A">12D</span>
+          <span class="lbl">Streak</span>
+        </div>
+        <div class="v4-bar-stat">
+          <span class="num">847</span>
+          <span class="lbl">Rep</span>
+        </div>
+        <div class="v4-bar-stat">
+          <span class="num">10</span>
+          <span class="lbl">Challenges</span>
+        </div>
+        <div class="v4-bar-stat">
+          <span class="num" style="color:#FFB547">1.2K</span>
+          <span class="lbl">Coins</span>
+        </div>
+      </div>
+
+      <!-- Weekly day rings -->
+      <div class="v4-week">
+        <div class="v4-week-header">
+          <span class="v4-week-title">This week</span>
+          <span class="v4-week-sub">↑ 12%</span>
+        </div>
+        <div class="v4-day-rings">
+          <div class="v4-day"><div class="v4-ring-mini"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="62" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="v4-day-lbl">M</span></div>
+          <div class="v4-day"><div class="v4-ring-mini"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="v4-day-lbl">T</span></div>
+          <div class="v4-day"><div class="v4-ring-mini"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="v4-day-lbl">W</span></div>
+          <div class="v4-day today"><div class="v4-ring-mini"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/><circle cx="14" cy="14" r="11" fill="none" stroke="#D4FF3A" stroke-width="2.5" stroke-dasharray="69.1" stroke-dashoffset="20" stroke-linecap="round" transform="rotate(-90 14 14)"/></svg></div><span class="v4-day-lbl">T</span></div>
+          <div class="v4-day"><div class="v4-ring-mini"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="v4-day-lbl">F</span></div>
+          <div class="v4-day"><div class="v4-ring-mini"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="v4-day-lbl">S</span></div>
+          <div class="v4-day"><div class="v4-ring-mini"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="rgba(212,255,58,0.15)" stroke-width="2.5"/></svg></div><span class="v4-day-lbl">S</span></div>
+        </div>
+      </div>
+
+      <div class="v4-badge-row">
+        <div class="v4-badge-header">
+          <span class="v4-badge-title">Badges earned</span>
+          <span class="v4-badge-all">See all →</span>
+        </div>
+        <div class="v4-badges">
+          <div class="v4-badge">🔥</div>
+          <div class="v4-badge">👟</div>
+          <div class="v4-badge">🏆</div>
+          <div class="v4-badge">⚡</div>
+          <div class="v4-badge">💪</div>
+        </div>
+      </div>
+
+      <div class="v4-menu">
+        <div class="v4-menu-item">
+          <div class="v4-menu-icon">📊</div>
+          <span class="v4-menu-txt">Fitness Reputation</span>
+          <span class="v4-menu-arr">›</span>
+        </div>
+        <div class="v4-menu-item" style="border:none">
+          <div class="v4-menu-icon">⚡</div>
+          <span class="v4-menu-txt">XP & Level</span>
+          <span class="v4-menu-arr">›</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="card-letter">4</div>
+      <div>
+        <h3>Activity Rings</h3>
+        <p>Dual SVG progress rings on avatar · Daily ring row · Compact stats band</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ V5: GLASSMORPHISM ═══ -->
+  <div class="card" data-choice="v5" onclick="toggleCard(this)">
+    <div class="selected-badge">✓</div>
+    <div class="phone v5">
+      <div class="v5-hero">
+        <div class="v5-mesh"></div>
+        <div class="v5-topbar">
+          <span class="v5-title">Me</span>
+          <span class="v5-gear">⚙</span>
+        </div>
+        <div class="v5-identity">
+          <div class="v5-avatar-frame">
+            <div class="v5-avatar">H</div>
+            <div class="v5-cam-sq">+</div>
+          </div>
+          <div class="v5-info">
+            <div class="v5-name">Harsha</div>
+            <div class="v5-sub">Joined Apr 2024 · India</div>
+            <div class="v5-chips">
+              <span class="chip chip-lime">Free</span>
+              <span class="chip chip-gray">GOLD III · LV 23</span>
+            </div>
+          </div>
+        </div>
+        <div class="v5-glass-stats">
+          <div class="v5-glass-stat">
+            <span class="v5-gs-icon">🔥</span>
+            <span class="v5-gs-num" style="color:#D4FF3A">12D</span>
+            <span class="v5-gs-lbl">Streak</span>
+            <div class="v5-gs-trend">▲ Best ever</div>
+          </div>
+          <div class="v5-glass-stat">
+            <span class="v5-gs-icon">📊</span>
+            <span class="v5-gs-num">847</span>
+            <span class="v5-gs-lbl">Reputation</span>
+            <div class="v5-gs-trend">▲ +12% this week</div>
+          </div>
+          <div class="v5-glass-stat">
+            <span class="v5-gs-icon">🏆</span>
+            <span class="v5-gs-num">10</span>
+            <span class="v5-gs-lbl">Challenges</span>
+            <div class="v5-gs-trend">3 active now</div>
+          </div>
+          <div class="v5-glass-stat">
+            <span class="v5-gs-icon">🪙</span>
+            <span class="v5-gs-num" style="color:#FFB547">1.2K</span>
+            <span class="v5-gs-lbl">Coins</span>
+            <div class="v5-gs-trend">Spend in shop →</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="v5-body">
+        <div class="v5-section-row" style="margin-top:4px">
+          <span class="v5-section-title">Badges</span>
+          <span class="v5-see-all">See all →</span>
+        </div>
+        <div class="v5-badges">
+          <div class="v5-badge">🔥<span class="blbl">Streak</span></div>
+          <div class="v5-badge">👟<span class="blbl">10k</span></div>
+          <div class="v5-badge">🏆<span class="blbl">Winner</span></div>
+          <div class="v5-badge">⚡<span class="blbl">Speed</span></div>
+        </div>
+
+        <div class="v5-menu-item">
+          <div class="v5-menu-icon">📊</div>
+          <span class="v5-menu-txt">Fitness Reputation</span>
+          <span class="v5-menu-arr">›</span>
+        </div>
+        <div class="v5-menu-item">
+          <div class="v5-menu-icon">⚡</div>
+          <span class="v5-menu-txt">XP & Level</span>
+          <span class="v5-menu-arr">›</span>
+        </div>
+        <div class="v5-menu-item" style="border:none">
+          <div class="v5-menu-icon">🔥</div>
+          <span class="v5-menu-txt">Streak & Shield</span>
+          <span class="v5-menu-arr">›</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="card-letter">5</div>
+      <div>
+        <h3>Glassmorphism</h3>
+        <p>Rounded square avatar · Frosted 2×2 stat cards with trends · Mesh gradient bg</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let selected = new Set();
+
+  function toggleCard(el) {
+    const choice = el.dataset.choice;
+    if (selected.has(choice)) {
+      selected.delete(choice);
+      el.classList.remove('selected');
+    } else {
+      selected.add(choice);
+      el.classList.add('selected');
+    }
+    document.getElementById('selection-count').textContent =
+      selected.size === 0 ? '0 selected' : [...selected].join(', ') + ' selected';
+
+    // emit event for harness
+    if (window.__companion_emit) {
+      window.__companion_emit({ type: 'click', choice: [...selected].join(','), text: [...selected].join(', ') });
+    }
+  }
+</script>
+</body>
+</html>

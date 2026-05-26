@@ -1,0 +1,787 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  body { font-family: 'Inter', sans-serif; }
+
+  h2 { margin-bottom: 4px; }
+  .subtitle { margin-top: 0; margin-bottom: 32px; }
+
+  .design-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1400px;
+  }
+
+  .design-card {
+    background: #111122;
+    border-radius: 16px;
+    border: 2px solid #222244;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .design-card:hover { border-color: #D4FF3A55; transform: translateY(-2px); }
+  .design-card.selected { border-color: #D4FF3A !important; }
+
+  .design-label {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid #222244;
+    background: #0a0a18;
+  }
+  .design-label .letter {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #D4FF3A;
+    color: #050510;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .design-label h3 { margin: 0; font-size: 14px; color: #fff; font-weight: 600; }
+  .design-label p { margin: 2px 0 0; font-size: 11px; color: #A3A3B3; }
+
+  /* ── Phone shell ── */
+  .phone {
+    background: #050510;
+    min-height: 520px;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── Shared micro-components ── */
+  .volt { color: #D4FF3A; }
+  .amber-c { color: #FFB547; }
+  .gray { color: #A3A3B3; }
+  .white { color: #fff; }
+  .surface-card {
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+  }
+
+  /* Camera badge */
+  .cam-badge {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 22px; height: 22px;
+    background: #D4FF3A;
+    border-radius: 50%;
+    border: 2px solid #050510;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    color: #050510;
+    font-weight: 800;
+  }
+
+  /* ──────────────────────────────────────────
+     DESIGN A  — Hero Centered
+  ────────────────────────────────────────── */
+  .a-phone { padding: 18px 16px; }
+  .a-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .a-topbar .title { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
+  .a-topbar .gear { color: #4B5563; font-size: 18px; }
+
+  .a-avatar-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 18px; }
+  .a-avatar {
+    position: relative;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: rgba(212,255,58,0.12);
+    border: 2.5px solid rgba(212,255,58,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; font-weight: 900; color: #D4FF3A;
+    margin-bottom: 4px;
+  }
+  .a-name { font-size: 20px; font-weight: 700; color: #fff; margin: 6px 0 2px; }
+  .a-meta { font-size: 11px; color: #A3A3B3; }
+  .a-chips { display: flex; gap: 6px; margin-top: 8px; justify-content: center; flex-wrap: wrap; }
+  .a-chip {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px; font-weight: 700;
+  }
+  .chip-lime { background: rgba(212,255,58,0.1); color: #D4FF3A; border: 1px solid rgba(212,255,58,0.3); }
+  .chip-amber { background: rgba(255,181,71,0.1); color: #FFB547; border: 1px solid rgba(255,181,71,0.3); }
+  .chip-gray { background: rgba(255,255,255,0.06); color: #A3A3B3; border: 1px solid rgba(255,255,255,0.1); }
+
+  .a-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 14px; }
+  .a-stat {
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 10px 4px;
+    text-align: center;
+  }
+  .a-stat .num { font-size: 18px; font-weight: 900; color: #fff; display: block; }
+  .a-stat .lbl { font-size: 10px; color: #A3A3B3; }
+
+  .a-badges-row { display: flex; gap: 6px; margin-bottom: 14px; overflow: hidden; }
+  .a-badge {
+    flex: 0 0 60px;
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 18px;
+  }
+  .a-badge .blbl { font-size: 9px; color: #A3A3B3; display: block; margin-top: 3px; }
+
+  .a-menu-item {
+    display: flex; align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    gap: 10px;
+  }
+  .a-menu-item .icon { font-size: 14px; color: #A3A3B3; width: 20px; text-align: center; }
+  .a-menu-item .txt { font-size: 13px; color: #fff; font-weight: 500; flex: 1; }
+  .a-menu-item .arr { font-size: 11px; color: #4B5563; }
+
+  /* ──────────────────────────────────────────
+     DESIGN B  — Athlete Card (Cover + Overlap)
+  ────────────────────────────────────────── */
+  .b-cover {
+    height: 110px;
+    background: linear-gradient(135deg, #0D0D2A 0%, #1A0D2E 50%, #0D1A1A 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .b-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(212,255,58,0.08) 0%, transparent 70%);
+  }
+  .b-cover-dots {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(212,255,58,0.15) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.4;
+  }
+  .b-gear {
+    position: absolute; top: 12px; right: 12px;
+    color: rgba(255,255,255,0.4); font-size: 16px;
+  }
+  .b-cover-title {
+    position: absolute; top: 12px; left: 14px;
+    font-size: 18px; font-weight: 900; color: #fff; letter-spacing: -0.3px;
+  }
+  .b-edit-cover {
+    position: absolute; bottom: 8px; right: 10px;
+    font-size: 9px; color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px; padding: 3px 7px;
+  }
+
+  .b-body { padding: 0 14px 14px; }
+  .b-avatar-row { display: flex; align-items: flex-end; gap: 12px; margin-top: -28px; margin-bottom: 10px; }
+  .b-avatar {
+    position: relative;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: rgba(212,255,58,0.12);
+    border: 3px solid #050510;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 900; color: #D4FF3A;
+    flex-shrink: 0;
+  }
+  .b-name-col { padding-bottom: 4px; }
+  .b-name { font-size: 17px; font-weight: 700; color: #fff; }
+  .b-handle { font-size: 11px; color: #A3A3B3; }
+
+  .b-chips { display: flex; gap: 5px; margin-bottom: 12px; }
+  .b-stat-row { display: flex; gap: 0; margin-bottom: 12px; }
+  .b-stat {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .b-stat:first-child { border-radius: 10px 0 0 10px; }
+  .b-stat:last-child { border-radius: 0 10px 10px 0; }
+  .b-stat .num { font-size: 16px; font-weight: 900; color: #fff; display: block; }
+  .b-stat .lbl { font-size: 9px; color: #A3A3B3; }
+
+  .b-week { margin-bottom: 12px; }
+  .b-week-label { font-size: 10px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .b-bars { display: flex; gap: 4px; align-items: flex-end; height: 36px; }
+  .b-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; }
+  .b-bar { width: 100%; background: rgba(212,255,58,0.15); border-radius: 3px; }
+  .b-bar.active { background: #D4FF3A; }
+  .b-bar-lbl { font-size: 8px; color: #4B5563; }
+
+  .b-menu-item {
+    display: flex; align-items: center;
+    padding: 9px 0; gap: 9px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .b-menu-item .icon { font-size: 13px; color: #A3A3B3; width: 18px; text-align: center; }
+  .b-menu-item .txt { font-size: 12px; color: #fff; font-weight: 500; flex: 1; }
+  .b-menu-item .arr { font-size: 10px; color: #4B5563; }
+
+  /* ──────────────────────────────────────────
+     DESIGN C  — Social / Instagram Style
+  ────────────────────────────────────────── */
+  .c-phone { padding: 16px; }
+  .c-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .c-topbar .title { font-size: 20px; font-weight: 900; color: #fff; }
+  .c-topbar .gear { color: #4B5563; font-size: 16px; }
+
+  .c-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .c-avatar {
+    position: relative;
+    flex-shrink: 0;
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(212,255,58,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 900; color: #D4FF3A;
+  }
+  .c-avatar-ring {
+    position: absolute; inset: -3px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    background: linear-gradient(#050510, #050510) padding-box,
+                linear-gradient(135deg, #D4FF3A, #FFB547) border-box;
+  }
+  .c-info { flex: 1; }
+  .c-name { font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 2px; }
+  .c-handle { font-size: 11px; color: #A3A3B3; margin: 0 0 6px; }
+  .c-chips-row { display: flex; gap: 5px; }
+
+  .c-metrics { display: flex; gap: 6px; margin-bottom: 14px; }
+  .c-metric {
+    flex: 1;
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .c-metric .num { font-size: 17px; font-weight: 900; color: #fff; }
+  .c-metric .lbl { font-size: 9px; color: #A3A3B3; }
+
+  .c-badge-section { margin-bottom: 14px; }
+  .c-section-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .c-section-title { font-size: 12px; font-weight: 700; color: #fff; }
+  .c-see-all { font-size: 10px; color: #D4FF3A; }
+  .c-badges { display: flex; gap: 6px; }
+  .c-badge {
+    width: 52px; height: 52px;
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 18px;
+    gap: 2px;
+  }
+  .c-badge .blbl { font-size: 8px; color: #A3A3B3; text-align: center; line-height: 1.2; }
+
+  .c-divider { height: 1px; background: rgba(255,255,255,0.06); margin-bottom: 12px; }
+  .c-menu-item {
+    display: flex; align-items: center;
+    padding: 9px 10px; gap: 10px;
+    background: #0D0D1A;
+    border-radius: 10px;
+    margin-bottom: 5px;
+  }
+  .c-menu-item .icon { font-size: 13px; color: #A3A3B3; }
+  .c-menu-item .txt { font-size: 12px; color: #fff; font-weight: 500; flex: 1; }
+  .c-menu-item .arr { font-size: 10px; color: #4B5563; }
+
+  /* ──────────────────────────────────────────
+     DESIGN D  — Dashboard / XP Focus
+  ────────────────────────────────────────── */
+  .d-phone { padding: 16px; }
+  .d-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .d-topbar .title { font-size: 20px; font-weight: 900; color: #fff; }
+
+  .d-hero { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .d-avatar {
+    position: relative;
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(212,255,58,0.12);
+    border: 2px solid rgba(212,255,58,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 900; color: #D4FF3A;
+    flex-shrink: 0;
+  }
+  .d-info { flex: 1; }
+  .d-name { font-size: 17px; font-weight: 700; color: #fff; margin: 0 0 2px; }
+  .d-sub-row { display: flex; gap: 6px; align-items: center; margin: 0; }
+  .d-sub-row .chip { font-size: 10px; }
+
+  .d-xp-card {
+    background: linear-gradient(135deg, #0D1A0D, #0D0D1A);
+    border: 1px solid rgba(212,255,58,0.15);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .d-xp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .d-xp-label { font-size: 10px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.5px; }
+  .d-xp-val { font-size: 12px; color: #D4FF3A; font-weight: 700; }
+  .d-xp-bar-bg { height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+  .d-xp-bar-fill { height: 100%; width: 68%; background: linear-gradient(90deg, #D4FF3A, #FFB547); border-radius: 3px; }
+  .d-xp-levels { display: flex; justify-content: space-between; margin-top: 4px; }
+  .d-xp-levels span { font-size: 9px; color: #4B5563; }
+
+  .d-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+  .d-stat {
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 10px 4px;
+    text-align: center;
+  }
+  .d-stat .icon { font-size: 14px; margin-bottom: 4px; }
+  .d-stat .num { font-size: 16px; font-weight: 900; color: #fff; display: block; }
+  .d-stat .lbl { font-size: 9px; color: #A3A3B3; }
+
+  .d-week-card {
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .d-week-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .d-week-title { font-size: 11px; font-weight: 600; color: #fff; }
+  .d-week-sub { font-size: 10px; color: #D4FF3A; }
+  .d-week-bars { display: flex; gap: 5px; align-items: flex-end; height: 44px; }
+  .d-wbar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .d-wbar { width: 100%; background: rgba(212,255,58,0.1); border-radius: 3px; }
+  .d-wbar.full { background: #D4FF3A; }
+  .d-wbar.part { background: rgba(212,255,58,0.4); }
+  .d-wbar-lbl { font-size: 8px; color: #4B5563; }
+
+  .d-menu-item {
+    display: flex; align-items: center;
+    padding: 10px 0; gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .d-menu-item .icon { font-size: 13px; color: #A3A3B3; width: 18px; text-align: center; }
+  .d-menu-item .txt { font-size: 12px; color: #fff; font-weight: 500; flex: 1; }
+  .d-menu-item .arr { font-size: 10px; color: #4B5563; }
+
+  /* ──────────────────────────────────────────
+     DESIGN E  — Reputation / Stats-First
+  ────────────────────────────────────────── */
+  .e-header {
+    background: linear-gradient(180deg, #0D0D2A 0%, #050510 100%);
+    padding: 16px 16px 20px;
+    position: relative;
+  }
+  .e-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .e-topbar .title { font-size: 20px; font-weight: 900; color: #fff; }
+  .e-topbar .gear { color: #4B5563; font-size: 16px; }
+  .e-avatar-center { display: flex; flex-direction: column; align-items: center; }
+  .e-avatar-outer {
+    position: relative;
+    width: 76px; height: 76px;
+    margin-bottom: 8px;
+  }
+  .e-avatar-ring-svg {
+    position: absolute; inset: -4px;
+    width: calc(100% + 8px); height: calc(100% + 8px);
+  }
+  .e-avatar {
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    background: rgba(212,255,58,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 900; color: #D4FF3A;
+  }
+  .e-cam {
+    position: absolute;
+    bottom: 0; right: -2px;
+    width: 24px; height: 24px;
+    background: #D4FF3A;
+    border-radius: 50%;
+    border: 2px solid #050510;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #050510; font-weight: 800;
+  }
+  .e-name { font-size: 18px; font-weight: 700; color: #fff; margin: 0 0 2px; text-align: center; }
+  .e-handle { font-size: 11px; color: #A3A3B3; margin-bottom: 8px; text-align: center; }
+  .e-chips-center { display: flex; gap: 6px; justify-content: center; }
+
+  .e-rep-band {
+    background: #0D0D1A;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 14px 16px;
+    display: flex;
+    gap: 0;
+  }
+  .e-rep-item { flex: 1; text-align: center; }
+  .e-rep-item:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.06); }
+  .e-rep-num { font-size: 20px; font-weight: 900; color: #fff; display: block; }
+  .e-rep-num.lime { color: #D4FF3A; }
+  .e-rep-num.amb { color: #FFB547; }
+  .e-rep-lbl { font-size: 9px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .e-body { padding: 14px 16px; }
+  .e-section-label { font-size: 10px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .e-badge-scroll { display: flex; gap: 6px; margin-bottom: 14px; overflow: hidden; }
+  .e-badge {
+    flex: 0 0 58px;
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 16px;
+  }
+  .e-badge .blbl { font-size: 8px; color: #A3A3B3; display: block; margin-top: 3px; line-height: 1.2; }
+
+  .e-menu-item {
+    display: flex; align-items: center;
+    padding: 10px 12px; gap: 10px;
+    background: #0D0D1A;
+    border-radius: 10px;
+    margin-bottom: 5px;
+  }
+  .e-menu-item .icon { font-size: 13px; color: #A3A3B3; }
+  .e-menu-item .txt { font-size: 12px; color: #fff; font-weight: 500; flex: 1; }
+  .e-menu-item .arr { font-size: 10px; color: #4B5563; }
+</style>
+
+<h2>Profile Page — 5 Designs</h2>
+<p class="subtitle">All match the app's dark theme · Each includes a profile photo upload button · Click a design to select it</p>
+
+<div class="design-grid">
+
+  <!-- ═══ DESIGN A: Hero Centered ═══ -->
+  <div class="card design-card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="phone a-phone">
+      <div class="a-topbar">
+        <span class="title">Me</span>
+        <span class="gear">⚙</span>
+      </div>
+
+      <div class="a-avatar-wrap">
+        <div class="a-avatar">
+          H
+          <div class="cam-badge">📷</div>
+        </div>
+        <div class="a-name">Harsha</div>
+        <div class="a-meta">Joined Apr 2024 · India</div>
+        <div class="a-chips">
+          <span class="a-chip chip-lime">Free</span>
+          <span class="a-chip chip-gray">GOLD III</span>
+          <span class="a-chip chip-lime">LV 23</span>
+        </div>
+      </div>
+
+      <div class="a-stats">
+        <div class="a-stat"><span class="num">12D</span><span class="lbl">Streak</span></div>
+        <div class="a-stat"><span class="num">10</span><span class="lbl">Challenges</span></div>
+        <div class="a-stat" style="border-color: rgba(255,181,71,0.3)">
+          <span class="num" style="color:#FFB547">1.2K</span><span class="lbl">Coins</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:700;color:#fff">Recent badges</span>
+          <span style="font-size:10px;color:#D4FF3A">See all</span>
+        </div>
+        <div class="a-badges-row">
+          <div class="a-badge">🔥<span class="blbl">7-day streak</span></div>
+          <div class="a-badge">👟<span class="blbl">First 10k</span></div>
+          <div class="a-badge">🏆<span class="blbl">Winner</span></div>
+          <div class="a-badge">⚡<span class="blbl">Speed run</span></div>
+        </div>
+      </div>
+
+      <div class="a-menu-item"><span class="icon">📊</span><span class="txt">Fitness Reputation</span><span class="arr">›</span></div>
+      <div class="a-menu-item"><span class="icon">⚡</span><span class="txt">XP & Level</span><span class="arr">›</span></div>
+      <div class="a-menu-item"><span class="icon">🔥</span><span class="txt">Streak & Shield</span><span class="arr">›</span></div>
+      <div class="a-menu-item" style="border:none"><span class="icon">📅</span><span class="txt">Daily Missions</span><span class="arr">›</span></div>
+    </div>
+    <div class="design-label">
+      <div class="letter">A</div>
+      <div>
+        <h3>Hero Centered</h3>
+        <p>Large centered avatar · Compact badge row · Same layout, bigger photo presence</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DESIGN B: Cover + Overlap ═══ -->
+  <div class="card design-card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="phone" style="padding:0">
+      <div class="b-cover">
+        <div class="b-cover-dots"></div>
+        <span class="b-cover-title">Me</span>
+        <span class="b-gear">⚙</span>
+        <span class="b-edit-cover">✏ Edit cover</span>
+      </div>
+
+      <div class="b-body">
+        <div class="b-avatar-row">
+          <div class="b-avatar">
+            H
+            <div class="cam-badge">📷</div>
+          </div>
+          <div class="b-name-col">
+            <div class="b-name">Harsha</div>
+            <div class="b-handle">@harsha · India</div>
+          </div>
+        </div>
+
+        <div class="b-chips" style="margin-bottom:10px">
+          <span class="a-chip chip-lime">Free</span>
+          <span class="a-chip chip-gray">GOLD III · LV 23</span>
+        </div>
+
+        <div class="b-week" style="margin-bottom:10px">
+          <div class="b-week-label">This week</div>
+          <div class="b-bars">
+            <div class="b-bar-wrap"><div class="b-bar" style="height:20px"></div><span class="b-bar-lbl">M</span></div>
+            <div class="b-bar-wrap"><div class="b-bar active" style="height:30px"></div><span class="b-bar-lbl">T</span></div>
+            <div class="b-bar-wrap"><div class="b-bar active" style="height:24px"></div><span class="b-bar-lbl">W</span></div>
+            <div class="b-bar-wrap"><div class="b-bar active" style="height:36px"></div><span class="b-bar-lbl">T</span></div>
+            <div class="b-bar-wrap"><div class="b-bar" style="height:10px"></div><span class="b-bar-lbl">F</span></div>
+            <div class="b-bar-wrap"><div class="b-bar active" style="height:28px"></div><span class="b-bar-lbl">S</span></div>
+            <div class="b-bar-wrap"><div class="b-bar" style="height:6px"></div><span class="b-bar-lbl">S</span></div>
+          </div>
+        </div>
+
+        <div class="b-stat-row" style="margin-bottom:12px">
+          <div class="b-stat"><span class="num">847</span><span class="lbl">Reputation</span></div>
+          <div class="b-stat"><span class="num">12D</span><span class="lbl">Streak</span></div>
+          <div class="b-stat"><span class="num" style="color:#FFB547">1.2K</span><span class="lbl">Coins</span></div>
+        </div>
+
+        <div class="b-menu-item"><span class="icon">📊</span><span class="txt">Fitness Reputation</span><span class="arr">›</span></div>
+        <div class="b-menu-item"><span class="icon">⚡</span><span class="txt">XP & Level</span><span class="arr">›</span></div>
+        <div class="b-menu-item"><span class="icon">🔥</span><span class="txt">Streak & Shield</span><span class="arr">›</span></div>
+        <div class="b-menu-item" style="border:none"><span class="icon">📅</span><span class="txt">Daily Missions</span><span class="arr">›</span></div>
+      </div>
+    </div>
+    <div class="design-label">
+      <div class="letter">B</div>
+      <div>
+        <h3>Cover + Overlap</h3>
+        <p>Editable cover photo · Avatar overlaps cover · Weekly activity bar graph</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DESIGN C: Social / Card Menu ═══ -->
+  <div class="card design-card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="phone c-phone">
+      <div class="c-topbar">
+        <span class="title">Me</span>
+        <span class="gear">⚙</span>
+      </div>
+
+      <div class="c-header">
+        <div class="c-avatar">
+          <div class="c-avatar-ring"></div>
+          H
+          <div class="cam-badge">📷</div>
+        </div>
+        <div class="c-info">
+          <div class="c-name">Harsha</div>
+          <div class="c-handle">@harsha_m · India</div>
+          <div class="c-chips-row">
+            <span class="a-chip chip-lime">Free</span>
+            <span class="a-chip chip-gray">GOLD III</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="c-metrics">
+        <div class="c-metric"><div class="num">12D</div><div class="lbl">Streak</div></div>
+        <div class="c-metric"><div class="num">10</div><div class="lbl">Challenges</div></div>
+        <div class="c-metric"><div class="num" style="color:#FFB547">1.2K</div><div class="lbl">Coins</div></div>
+        <div class="c-metric"><div class="num" style="color:#D4FF3A">847</div><div class="lbl">Rep</div></div>
+      </div>
+
+      <div class="c-badge-section">
+        <div class="c-section-row">
+          <span class="c-section-title">Recent badges</span>
+          <span class="c-see-all">See all</span>
+        </div>
+        <div class="c-badges">
+          <div class="c-badge">🔥<span class="blbl">Streak</span></div>
+          <div class="c-badge">👟<span class="blbl">10k</span></div>
+          <div class="c-badge">🏆<span class="blbl">Winner</span></div>
+          <div class="c-badge">⚡<span class="blbl">Speed</span></div>
+          <div class="c-badge">💪<span class="blbl">Grind</span></div>
+        </div>
+      </div>
+
+      <div class="c-divider"></div>
+
+      <div class="c-menu-item"><span class="icon">📊</span><span class="txt">Fitness Reputation</span><span class="arr">›</span></div>
+      <div class="c-menu-item"><span class="icon">⚡</span><span class="txt">XP & Level</span><span class="arr">›</span></div>
+      <div class="c-menu-item"><span class="icon">🔥</span><span class="txt">Streak & Shield</span><span class="arr">›</span></div>
+      <div class="c-menu-item"><span class="icon">📅</span><span class="txt">Daily Missions</span><span class="arr">›</span></div>
+    </div>
+    <div class="design-label">
+      <div class="letter">C</div>
+      <div>
+        <h3>Social Style</h3>
+        <p>Side-by-side header · Gradient avatar ring · 4-stat row · Card-style menu</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DESIGN D: Dashboard / XP Focus ═══ -->
+  <div class="card design-card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="phone d-phone">
+      <div class="d-topbar">
+        <span class="title">Me</span>
+        <span style="color:#4B5563;font-size:16px">⚙</span>
+      </div>
+
+      <div class="d-hero">
+        <div class="d-avatar">
+          H
+          <div class="cam-badge">📷</div>
+        </div>
+        <div class="d-info">
+          <div class="d-name">Harsha</div>
+          <div class="d-sub-row">
+            <span class="a-chip chip-lime chip">Free</span>
+            <span class="a-chip chip-gray chip">GOLD III</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-xp-card">
+        <div class="d-xp-header">
+          <span class="d-xp-label">⚡ Level 23 · XP Progress</span>
+          <span class="d-xp-val">6,800 / 10,000 XP</span>
+        </div>
+        <div class="d-xp-bar-bg"><div class="d-xp-bar-fill"></div></div>
+        <div class="d-xp-levels"><span>LV 23</span><span>LV 24</span></div>
+      </div>
+
+      <div class="d-stats">
+        <div class="d-stat">
+          <div class="icon">🔥</div>
+          <span class="num">12D</span>
+          <span class="lbl">Streak</span>
+        </div>
+        <div class="d-stat">
+          <div class="icon">🏆</div>
+          <span class="num">10</span>
+          <span class="lbl">Challenges</span>
+        </div>
+        <div class="d-stat">
+          <div class="icon" style="color:#FFB547">🪙</div>
+          <span class="num" style="color:#FFB547">1.2K</span>
+          <span class="lbl">Coins</span>
+        </div>
+      </div>
+
+      <div class="d-week-card">
+        <div class="d-week-header">
+          <span class="d-week-title">This week</span>
+          <span class="d-week-sub">↑ 12% vs last</span>
+        </div>
+        <div class="d-week-bars">
+          <div class="d-wbar-wrap"><div class="d-wbar" style="height:22px"></div><span class="d-wbar-lbl">M</span></div>
+          <div class="d-wbar-wrap"><div class="d-wbar full" style="height:40px"></div><span class="d-wbar-lbl">T</span></div>
+          <div class="d-wbar-wrap"><div class="d-wbar full" style="height:32px"></div><span class="d-wbar-lbl">W</span></div>
+          <div class="d-wbar-wrap"><div class="d-wbar full" style="height:44px"></div><span class="d-wbar-lbl">T</span></div>
+          <div class="d-wbar-wrap"><div class="d-wbar part" style="height:16px"></div><span class="d-wbar-lbl">F</span></div>
+          <div class="d-wbar-wrap"><div class="d-wbar full" style="height:36px"></div><span class="d-wbar-lbl">S</span></div>
+          <div class="d-wbar-wrap"><div class="d-wbar" style="height:8px"></div><span class="d-wbar-lbl">S</span></div>
+        </div>
+      </div>
+
+      <div class="d-menu-item"><span class="icon">📊</span><span class="txt">Fitness Reputation</span><span class="arr">›</span></div>
+      <div class="d-menu-item"><span class="icon">🔥</span><span class="txt">Streak & Shield</span><span class="arr">›</span></div>
+      <div class="d-menu-item" style="border:none"><span class="icon">📅</span><span class="txt">Daily Missions</span><span class="arr">›</span></div>
+    </div>
+    <div class="design-label">
+      <div class="letter">D</div>
+      <div>
+        <h3>Dashboard / XP Focus</h3>
+        <p>Compact header · XP progress bar card · Weekly activity chart · Icon stats</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DESIGN E: Reputation / Stats-First ═══ -->
+  <div class="card design-card" data-choice="e" onclick="toggleSelect(this)">
+    <div class="phone" style="padding:0">
+      <div class="e-header">
+        <div class="e-topbar">
+          <span class="title">Me</span>
+          <span class="gear">⚙</span>
+        </div>
+        <div class="e-avatar-center">
+          <div class="e-avatar-outer">
+            <div class="e-avatar">H</div>
+            <div class="e-cam">📷</div>
+          </div>
+          <div class="e-name">Harsha</div>
+          <div class="e-handle">Joined Apr 2024 · India</div>
+          <div class="e-chips-center">
+            <span class="a-chip chip-lime">Free</span>
+            <span class="a-chip chip-gray">GOLD III · LV 23</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="e-rep-band">
+        <div class="e-rep-item">
+          <span class="e-rep-num lime">12D</span>
+          <span class="e-rep-lbl">Streak</span>
+        </div>
+        <div class="e-rep-item">
+          <span class="e-rep-num">847</span>
+          <span class="e-rep-lbl">Reputation</span>
+        </div>
+        <div class="e-rep-item">
+          <span class="e-rep-num amb">1.2K</span>
+          <span class="e-rep-lbl">Coins</span>
+        </div>
+        <div class="e-rep-item">
+          <span class="e-rep-num">10</span>
+          <span class="e-rep-lbl">Challenges</span>
+        </div>
+      </div>
+
+      <div class="e-body">
+        <div class="e-section-label">Recent badges</div>
+        <div class="e-badge-scroll" style="margin-bottom:14px">
+          <div class="e-badge">🔥<span class="blbl">7-day streak</span></div>
+          <div class="e-badge">👟<span class="blbl">First 10k</span></div>
+          <div class="e-badge">🏆<span class="blbl">Winner</span></div>
+          <div class="e-badge">⚡<span class="blbl">Speed run</span></div>
+        </div>
+
+        <div class="e-menu-item"><span class="icon">📊</span><span class="txt">Fitness Reputation</span><span class="arr">›</span></div>
+        <div class="e-menu-item"><span class="icon">⚡</span><span class="txt">XP & Level</span><span class="arr">›</span></div>
+        <div class="e-menu-item"><span class="icon">🔥</span><span class="txt">Streak & Shield</span><span class="arr">›</span></div>
+        <div class="e-menu-item"><span class="icon">📅</span><span class="txt">Daily Missions</span><span class="arr">›</span></div>
+      </div>
+    </div>
+    <div class="design-label">
+      <div class="letter">E</div>
+      <div>
+        <h3>Stats-First / Fullwidth Band</h3>
+        <p>Centered dark header · 4-stat full-width band · Clean list layout</p>
+      </div>
+    </div>
+  </div>
+
+</div>

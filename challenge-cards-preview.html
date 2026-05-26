@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StepUp — Challenge Card Designs</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #050510;
+    font-family: 'Inter', sans-serif;
+    color: white;
+    padding: 40px 24px 80px;
+  }
+
+  h1 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: #D4FF3A;
+    margin-bottom: 6px;
+  }
+  .subtitle { font-size: 13px; color: #A3A3B3; margin-bottom: 40px; }
+
+  .section-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    color: #A3A3B3; text-transform: uppercase;
+    margin-bottom: 14px; margin-top: 40px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 680px;
+  }
+
+  /* ── shared utilities ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.4px;
+  }
+  .badge-lime   { background: #D4FF3A; color: #050510; }
+  .badge-amber  { background: rgba(255,181,71,0.15); color: #FFB547; border: 1px solid rgba(255,181,71,0.35); }
+  .badge-red    { background: rgba(239,68,68,0.15); color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
+  .badge-gray   { background: rgba(255,255,255,0.1); color: #ccc; border: 1px solid rgba(255,255,255,0.12); }
+  .badge-lime-o { background: rgba(212,255,58,0.1); color: #D4FF3A; border: 1px solid rgba(212,255,58,0.3); }
+
+  .title { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; }
+  .italic { font-style: italic; }
+  .label  { font-size: 11px; color: #A3A3B3; }
+  .label-sm { font-size: 10px; color: #A3A3B3; letter-spacing: 0.3px; }
+
+  .chip { padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 800; }
+  .chip-lime  { background: rgba(212,255,58,0.14); color: #D4FF3A; border: 1px solid rgba(212,255,58,0.3); }
+  .chip-amber { background: rgba(255,181,71,0.14); color: #FFB547; border: 1px solid rgba(255,181,71,0.3); }
+
+  .icon-box { border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .icon-lime   { background: rgba(212,255,58,0.1);  border: 1px solid rgba(212,255,58,0.22); }
+  .icon-orange { background: rgba(249,115,22,0.14); border: 1px solid rgba(249,115,22,0.25); }
+  .icon-teal   { background: rgba(20,184,166,0.13); border: 1px solid rgba(20,184,166,0.25); }
+  .icon-blue   { background: rgba(99,102,241,0.13); border: 1px solid rgba(99,102,241,0.25); }
+  .icon-amber  { background: rgba(255,181,71,0.12); border: 1px solid rgba(255,181,71,0.25); }
+
+  .stat-row { display: flex; align-items: center; gap: 14px; }
+  .stat { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #A3A3B3; }
+  .stat span { font-weight: 600; color: rgba(255,255,255,0.9); }
+
+  .play-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; cursor: pointer;
+  }
+  .play-lime  { background: #D4FF3A; }
+  .play-amber { background: #FFB547; }
+
+  .prog-track { height: 4px; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
+  .prog-fill  { height: 100%; border-radius: 10px; }
+
+  .dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .dot-done  { background: #D4FF3A; }
+  .dot-today { background: rgba(212,255,58,0.3); border: 1px solid rgba(212,255,58,0.6); }
+  .dot-empty { background: rgba(255,255,255,0.08); }
+
+  .live-dot {
+    width: 6px; height: 6px; background: #EF4444; border-radius: 50%;
+    display: inline-block; margin-right: 5px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 44px 0 0; }
+
+  /* img helper */
+  .cover-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+</style>
+</head>
+<body>
+
+<h1>StepUp Challenge Cards</h1>
+<p class="subtitle">10 design concepts — reply with your favourite number(s)</p>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESIGN 1 — Horizontal split  (closest to your reference image)
+════════════════════════════════════════════════════════════════════ -->
+<p class="section-label">Design 1 — Horizontal split · image panel + content</p>
+<div class="grid">
+
+  <!-- 1A HIIT -->
+  <div style="height:130px;border-radius:18px;overflow:hidden;display:flex;background:#0D0D1A;border:1px solid rgba(255,255,255,0.08)">
+    <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;z-index:2">
+      <div>
+        <div class="badge badge-gray" style="margin-bottom:8px">Aerobics</div>
+        <div class="title" style="font-size:19px;line-height:1.15">HIIT Intervals</div>
+        <div class="label" style="margin-top:3px">30-day challenge</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat">👁 <span>150K</span></div>
+        <div class="stat">🔥 <span>578 kcal</span></div>
+      </div>
+    </div>
+    <!-- image panel -->
+    <div style="width:140px;flex-shrink:0;position:relative;overflow:hidden">
+      <img class="cover-img" src="https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?auto=format&fit=crop&w=280&h=260&q=80" alt="hiit" style="filter:brightness(0.75) grayscale(15%)">
+      <!-- fade to left -->
+      <div style="position:absolute;inset:0;background:linear-gradient(to right,#0D0D1A 0%,transparent 55%);z-index:1"></div>
+      <!-- play button -->
+      <div class="play-btn play-amber" style="position:absolute;right:11px;bottom:11px;z-index:2">
+        <svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1B Running -->
+  <div style="height:130px;border-radius:18px;overflow:hidden;display:flex;background:#0D0D1A;border:1px solid rgba(255,255,255,0.08)">
+    <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;z-index:2">
+      <div>
+        <div class="badge badge-lime-o" style="margin-bottom:8px">Running</div>
+        <div class="title" style="font-size:19px;line-height:1.15">5K Sprint</div>
+        <div class="label" style="margin-top:3px">7-day challenge</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat">👥 <span>2.4K</span></div>
+        <div class="stat">⚡ <span>+50¢</span></div>
+      </div>
+    </div>
+    <div style="width:140px;flex-shrink:0;position:relative;overflow:hidden">
+      <img class="cover-img" src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=280&h=260&q=80" alt="running" style="filter:brightness(0.75) grayscale(15%)">
+      <div style="position:absolute;inset:0;background:linear-gradient(to right,#0D0D1A 0%,transparent 55%);z-index:1"></div>
+      <div class="play-btn play-lime" style="position:absolute;right:11px;bottom:11px;z-index:2">
+        <svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1C Gym -->
+  <div style="height:130px;border-radius:18px;overflow:hidden;display:flex;background:#0D0D1A;border:1px solid rgba(255,255,255,0.08)">
+    <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;z-index:2">
+      <div>
+        <div class="badge badge-amber" style="margin-bottom:8px">Gym</div>
+        <div class="title" style="font-size:19px;line-height:1.15">Gym Warrior</div>
+        <div class="label" style="margin-top:3px">4-week challenge</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat">👥 <span>620</span></div>
+        <div class="stat">💪 <span>3×/week</span></div>
+      </div>
+    </div>
+    <div style="width:140px;flex-shrink:0;position:relative;overflow:hidden">
+      <img class="cover-img" src="https://images.unsplash.com/photo-1583454110851-a10b4872a14c?auto=format&fit=crop&w=280&h=260&q=80" alt="gym" style="filter:brightness(0.7) grayscale(10%)">
+      <div style="position:absolute;inset:0;background:linear-gradient(to right,#0D0D1A 0%,transparent 55%);z-index:1"></div>
+      <div class="play-btn play-amber" style="position:absolute;right:11px;bottom:11px;z-index:2">
+        <svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1D Yoga -->
+  <div style="height:130px;border-radius:18px;overflow:hidden;display:flex;background:#0D0D1A;border:1px solid rgba(255,255,255,0.08)">
+    <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;z-index:2">
+      <div>
+        <div class="badge" style="background:rgba(139,92,246,0.15);color:#A78BFA;border:1px solid rgba(139,92,246,0.3);margin-bottom:8px">Yoga</div>
+        <div class="title" style="font-size:19px;line-height:1.15">Zen Zone</div>
+        <div class="label" style="margin-top:3px">30-day challenge</div>
+      </div>
+      <div class="stat-row">
+        <div class="stat">👥 <span>1.8K</span></div>
+        <div class="stat">🧘 <span>+45¢</span></div>
+      </div>
+    </div>
+    <div style="width:140px;flex-shrink:0;position:relative;overflow:hidden">
+      <img class="cover-img" src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=280&h=260&q=80" alt="yoga" style="filter:brightness(0.72) grayscale(10%)">
+      <div style="position:absolute;inset:0;background:linear-gradient(to right,#0D0D1A 0%,transparent 55%);z-index:1"></div>
+      <div class="play-btn" style="background:#A78BFA;position:absolute;right:11px;bottom:11px;z-index:2">
+        <svg width="12" height="14" viewBox="0 0 12 14"><path d="M1 1L11 7L1 13V1Z" fill="#050510"/></svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESIGN 2 — Full bleed image with dark bottom gradient
+════════════════════════════════════════════════════════════════════ -->
+<p class="section-label">Design 2 — Full bleed image · dark overlay</p>
+<div class="grid">
+
+  <!-- 2A Running -->
+  <div style="height:190px;border-radius:18px;overflow:hidden;position:relative">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1461897104016-0b3b00cc81ee?auto=format&fit=crop&w=600&h=380&q=80" alt="run" style="filter:brightness(0.5) saturate(0.8)">
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,16,0.97) 0%,transparent 60%)"></div>
+    <!-- top row -->
+    <div style="position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;z-index:2">
+      <div class="badge badge-lime-o">Running</div>
+      <div style="display:flex;align-items:center;font-size:11px;font-weight:700;color:#EF4444"><span class="live-dot"></span>LIVE</div>
+    </div>
+    <!-- bottom -->
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 16px;z-index:2">
+      <div class="title italic" style="font-size:22px;line-height:1.1">10K Challenge</div>
+      <div class="label" style="margin:4px 0 10px">Hit 10K steps every day for 7 days</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="stat-row">
+          <div class="stat">👥 <span>1.2K</span></div>
+          <div class="stat">⏱ <span>7d</span></div>
+          <div class="stat">🔥 <span>420kcal</span></div>
+        </div>
+        <div style="background:#D4FF3A;color:#050510;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:800">Join</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2B Gym -->
+  <div style="height:190px;border-radius:18px;overflow:hidden;position:relative">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&h=380&q=80" alt="gym" style="filter:brightness(0.45) saturate(0.7)">
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,16,0.97) 0%,transparent 55%)"></div>
+    <div style="position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;z-index:2">
+      <div class="badge badge-amber">Seasonal</div>
+      <div class="badge badge-amber" style="font-size:9px">₹500 Prize</div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 16px;z-index:2">
+      <div class="title italic" style="font-size:22px;line-height:1.1">Summer Grind</div>
+      <div class="label" style="margin:4px 0 10px">Gym + Steps combo · May — Jun 2025</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="stat-row">
+          <div class="stat">👥 <span>840</span></div>
+          <div class="stat">🏅 <span>Top 50% wins</span></div>
+        </div>
+        <div style="background:#FFB547;color:#050510;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:800">₹49</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2C Cycling -->
+  <div style="height:190px;border-radius:18px;overflow:hidden;position:relative">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&h=380&q=80" alt="cycling" style="filter:brightness(0.48) saturate(0.8)">
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,16,0.97) 0%,transparent 55%)"></div>
+    <div style="position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;z-index:2">
+      <div class="badge" style="background:rgba(59,130,246,0.2);color:#60A5FA;border:1px solid rgba(59,130,246,0.35)">Cycling</div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 16px;z-index:2">
+      <div class="title italic" style="font-size:22px;line-height:1.1">Pedal Warriors</div>
+      <div class="label" style="margin:4px 0 10px">100km total in 14 days</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="stat-row">
+          <div class="stat">👥 <span>540</span></div>
+          <div class="stat">⏱ <span>14d</span></div>
+        </div>
+        <div style="background:#D4FF3A;color:#050510;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:800">Join</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2D Yoga -->
+  <div style="height:190px;border-radius:18px;overflow:hidden;position:relative">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=600&h=380&q=80" alt="yoga" style="filter:brightness(0.45) saturate(0.7)">
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,16,0.97) 0%,transparent 55%)"></div>
+    <div style="position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;z-index:2">
+      <div class="badge" style="background:rgba(139,92,246,0.18);color:#C4B5FD;border:1px solid rgba(139,92,246,0.3)">Yoga</div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 16px;z-index:2">
+      <div class="title italic" style="font-size:22px;line-height:1.1">Mindful Month</div>
+      <div class="label" style="margin:4px 0 10px">Daily session · 30 days · All levels</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="stat-row">
+          <div class="stat">👥 <span>1.8K</span></div>
+          <div class="stat">FREE</div>
+        </div>
+        <div style="background:#D4FF3A;color:#050510;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:800">Join</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESIGN 3 — Left accent bar + emoji icon
+════════════════════════════════════════════════════════════════════ -->
+<p class="section-label">Design 3 — Accent bar + icon + day dots</p>
+<div class="grid">
+
+  <div style="height:116px;border-radius:16px;overflow:hidden;display:flex;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07)">
+    <div style="width:4px;background:#D4FF3A;border-radius:16px 0 0 16px;flex-shrink:0"></div>
+    <div style="flex:1;padding:13px 14px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:center">
+        <div class="icon-box icon-lime" style="width:44px;height:44px;font-size:20px;margin-right:12px">👟</div>
+        <div>
+          <div style="font-size:9px;font-weight:800;color:#D4FF3A;letter-spacing:0.5px;margin-bottom:3px">DAILY · STEPS</div>
+          <div class="title" style="font-size:16px">10K Steps Daily</div>
+          <div class="label">30 days · 3.2K players</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:3px">
+          <div class="dot dot-done"></div><div class="dot dot-done"></div><div class="dot dot-done"></div>
+          <div class="dot dot-today"></div><div class="dot dot-empty"></div><div class="dot dot-empty"></div><div class="dot dot-empty"></div>
+        </div>
+        <div class="chip chip-lime">+30¢</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:116px;border-radius:16px;overflow:hidden;display:flex;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07)">
+    <div style="width:4px;background:#FFB547;border-radius:16px 0 0 16px;flex-shrink:0"></div>
+    <div style="flex:1;padding:13px 14px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:center">
+        <div class="icon-box icon-orange" style="width:44px;height:44px;font-size:20px;margin-right:12px">🏃</div>
+        <div>
+          <div style="font-size:9px;font-weight:800;color:#FFB547;letter-spacing:0.5px;margin-bottom:3px">WEEKLY · RUNNING</div>
+          <div class="title" style="font-size:16px">5K Sprint Week</div>
+          <div class="label">7 days · 890 players</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:3px">
+          <div class="dot dot-done"></div><div class="dot dot-done"></div><div class="dot dot-today"></div>
+          <div class="dot dot-empty"></div><div class="dot dot-empty"></div><div class="dot dot-empty"></div><div class="dot dot-empty"></div>
+        </div>
+        <div class="chip chip-amber">+80¢</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:116px;border-radius:16px;overflow:hidden;display:flex;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07)">
+    <div style="width:4px;background:#A78BFA;border-radius:16px 0 0 16px;flex-shrink:0"></div>
+    <div style="flex:1;padding:13px 14px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:center">
+        <div class="icon-box" style="width:44px;height:44px;font-size:20px;margin-right:12px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25)">🧘</div>
+        <div>
+          <div style="font-size:9px;font-weight:800;color:#A78BFA;letter-spacing:0.5px;margin-bottom:3px">MONTHLY · YOGA</div>
+          <div class="title" style="font-size:16px">Zen Zone</div>
+          <div class="label">30 days · 1.8K players</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:3px">
+          <div class="dot dot-done"></div><div class="dot dot-done"></div><div class="dot dot-done"></div>
+          <div class="dot dot-done"></div><div class="dot dot-done"></div><div class="dot dot-today"></div><div class="dot dot-empty"></div>
+        </div>
+        <div class="chip" style="background:rgba(139,92,246,0.12);color:#A78BFA;border:1px solid rgba(139,92,246,0.3)">+45¢</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:116px;border-radius:16px;overflow:hidden;display:flex;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07)">
+    <div style="width:4px;background:#34D399;border-radius:16px 0 0 16px;flex-shrink:0"></div>
+    <div style="flex:1;padding:13px 14px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:center">
+        <div class="icon-box" style="width:44px;height:44px;font-size:20px;margin-right:12px;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.22)">🏊</div>
+        <div>
+          <div style="font-size:9px;font-weight:800;color:#34D399;letter-spacing:0.5px;margin-bottom:3px">WEEKLY · SWIM</div>
+          <div class="title" style="font-size:16px">Lap Legends</div>
+          <div class="label">2 weeks · 240 players</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:3px">
+          <div class="dot dot-done"></div><div class="dot dot-today"></div><div class="dot dot-empty"></div>
+          <div class="dot dot-empty"></div><div class="dot dot-empty"></div><div class="dot dot-empty"></div><div class="dot dot-empty"></div>
+        </div>
+        <div class="chip" style="background:rgba(52,211,153,0.1);color:#34D399;border:1px solid rgba(52,211,153,0.28)">+120¢</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESIGN 4 — Lime glow glass (Featured / Tournament hero)
+════════════════════════════════════════════════════════════════════ -->
+<p class="section-label">Design 4 — Featured tournament hero (lime glow)</p>
+<div class="grid" style="grid-template-columns:1fr">
+
+  <div style="height:170px;border-radius:20px;overflow:hidden;position:relative;border:1.5px solid rgba(212,255,58,0.45)">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=900&h=340&q=80" alt="marathon" style="filter:brightness(0.3) saturate(0.6)">
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,255,58,0.18) 0%,rgba(5,5,16,0.85) 100%)"></div>
+    <div style="position:absolute;inset:0;padding:18px;display:flex;flex-direction:column;justify-content:space-between;z-index:2">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="badge badge-lime">⭐ FEATURED TOURNAMENT</div>
+        <div style="font-size:44px;opacity:0.12;font-family:sans-serif">🏆</div>
+      </div>
+      <div>
+        <div class="title italic" style="font-size:28px;line-height:1.1;margin-bottom:6px">Summer Grand Slam</div>
+        <div style="display:flex;gap:24px;align-items:flex-end">
+          <div><div class="label-sm">PRIZE</div><div class="title" style="font-size:20px;color:#D4FF3A">₹5,000</div></div>
+          <div><div class="label-sm">PLAYERS</div><div class="title" style="font-size:20px">1,240</div></div>
+          <div><div class="label-sm">DURATION</div><div class="title" style="font-size:20px">30d</div></div>
+          <div style="margin-left:auto;background:#D4FF3A;color:#050510;padding:11px 24px;border-radius:12px;font-size:14px;font-weight:800;align-self:flex-end;cursor:pointer">Join →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESIGN 5 — Thumbnail image + compact info
+════════════════════════════════════════════════════════════════════ -->
+<p class="section-label">Design 5 — Rounded thumbnail + content</p>
+<div class="grid">
+
+  <div style="height:128px;border-radius:16px;display:flex;align-items:stretch;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07)">
+    <div style="width:100px;flex-shrink:0;overflow:hidden;border-radius:12px;margin:8px 0 8px 8px;position:relative">
+      <img class="cover-img" src="https://images.unsplash.com/photo-1583454110851-a10b4872a14c?auto=format&fit=crop&w=200&h=256&q=80" alt="gym" style="border-radius:10px">
+    </div>
+    <div style="flex:1;padding:14px 14px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div><div style="font-size:9px;color:#A3A3B3;font-weight:700;letter-spacing:0.4px">GYM · DAILY</div><div class="title" style="font-size:16px">Gym Warrior</div></div>
+          <div class="chip chip-lime">FREE</div>
+        </div>
+        <div class="label">3× sessions/week · 4 weeks</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="stat">👥 <span>620</span></div>
+        <div class="chip chip-amber">+60¢</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:128px;border-radius:16px;display:flex;align-items:stretch;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07)">
+    <div style="width:100px;flex-shrink:0;overflow:hidden;border-radius:12px;margin:8px 0 8px 8px;position:relative">
+      <img class="cover-img" src="https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=200&h=256&q=80" alt="swimming" style="border-radius:10px">
+    </div>
+    <div style="flex:1;padding:14px 14px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div><div style="font-size:9px;color:#A3A3B3;font-weight:700;letter-spacing:0.4px">SWIM · WEEKLY</div><div class="title" style="font-size:16px">Lap Legends</div></div>
+          <div class="chip chip-amber">₹49</div>
+        </div>
+        <div class="label">20 laps/week · 2 weeks</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="stat">👥 <span>240</span></div>
+        <div class="chip chip-amber">+120¢</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:128px;border-radius:16px;display:flex;align-items:stretch;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07)">
+    <div style="width:100px;flex-shrink:0;overflow:hidden;border-radius:12px;margin:8px 0 8px 8px;position:relative">
+      <img class="cover-img" src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=200&h=256&q=80" alt="walking" style="border-radius:10px">
+    </div>
+    <div style="flex:1;padding:14px 14px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div><div style="font-size:9px;color:#A3A3B3;font-weight:700;letter-spacing:0.4px">STEPS · DAILY</div><div class="title" style="font-size:16px">10K Steps</div></div>
+          <div class="chip chip-lime">FREE</div>
+        </div>
+        <div class="label">30 days · 3.2K players</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="stat">👥 <span>3.2K</span></div>
+        <div class="chip chip-lime">+30¢</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:128px;border-radius:16px;display:flex;align-items:stretch;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07)">
+    <div style="width:100px;flex-shrink:0;overflow:hidden;border-radius:12px;margin:8px 0 8px 8px;position:relative">
+      <img class="cover-img" src="https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=200&h=256&q=80" alt="cycling" style="border-radius:10px">
+    </div>
+    <div style="flex:1;padding:14px 14px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+          <div><div style="font-size:9px;color:#A3A3B3;font-weight:700;letter-spacing:0.4px">CYCLING · WEEKLY</div><div class="title" style="font-size:16px">Pedal Warriors</div></div>
+          <div class="chip" style="background:rgba(59,130,246,0.12);color:#60A5FA;border:1px solid rgba(59,130,246,0.3)">₹99</div>
+        </div>
+        <div class="label">100km in 14 days</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div class="stat">👥 <span>540</span></div>
+        <div class="chip chip-amber">+200¢</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESIGN 6 — Full image tournament hero (dark amber tint)
+════════════════════════════════════════════════════════════════════ -->
+<p class="section-label">Design 6 — Full image tournament hero (amber premium)</p>
+<div class="grid" style="grid-template-columns:1fr">
+
+  <div style="height:210px;border-radius:20px;overflow:hidden;position:relative;border:1.5px solid rgba(255,181,71,0.4)">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?auto=format&fit=crop&w=1000&h=420&q=80" alt="marathon" style="filter:brightness(0.35) saturate(0.5)">
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,181,71,0.14) 0%,rgba(5,5,16,0.85) 55%)"></div>
+    <div style="position:absolute;inset:0;padding:18px;display:flex;flex-direction:column;justify-content:space-between;z-index:2">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="badge badge-lime">⚡ LIVE NOW</div>
+        <div class="badge badge-amber">Battle Pass</div>
+      </div>
+      <div>
+        <div class="title italic" style="font-size:28px;line-height:1.1;margin-bottom:6px">Ultra Marathon<br>Championship</div>
+        <div class="label" style="margin-bottom:14px">42K steps · 30 days · May 25 — Jun 25</div>
+        <div style="display:flex;gap:20px;align-items:flex-end">
+          <div><div class="label-sm">PRIZE</div><div class="title" style="font-size:18px;color:#FFB547">₹10,000</div></div>
+          <div><div class="label-sm">PLAYERS</div><div class="title" style="font-size:18px">3,441</div></div>
+          <div><div class="label-sm">ENTRY</div><div class="title" style="font-size:18px;color:#FFB547">₹99</div></div>
+          <div style="margin-left:auto;background:#FFB547;color:#050510;padding:11px 22px;border-radius:12px;font-size:14px;font-weight:800;align-self:flex-end;cursor:pointer">Unlock →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESIGN 7 — Minimal list rows (dense)
+════════════════════════════════════════════════════════════════════ -->
+<p class="section-label">Design 7 — Minimal list rows</p>
+<div style="display:flex;flex-direction:column;gap:8px;max-width:680px">
+
+  <div style="height:72px;border-radius:14px;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;padding:0 14px;gap:12px">
+    <div class="icon-box icon-lime" style="width:42px;height:42px;font-size:18px">👟</div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+        <div class="title" style="font-size:15px">10K Steps</div>
+        <div class="chip chip-lime" style="font-size:9px;padding:2px 7px">DAILY</div>
+      </div>
+      <div class="label">30 days · 3.2K players</div>
+    </div>
+    <div style="text-align:right">
+      <div class="title" style="font-size:14px;color:#FFB547">+30¢</div>
+      <div class="label-sm" style="margin-top:2px">FREE</div>
+    </div>
+    <div style="color:#A3A3B3;font-size:20px;margin-left:4px">›</div>
+  </div>
+
+  <div style="height:72px;border-radius:14px;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;padding:0 14px;gap:12px">
+    <div class="icon-box icon-orange" style="width:42px;height:42px;font-size:18px">🏃</div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+        <div class="title" style="font-size:15px">5K Sprint</div>
+        <div style="display:flex;align-items:center;font-size:10px;font-weight:700;color:#EF4444"><span class="live-dot"></span>LIVE</div>
+      </div>
+      <div class="label">7 days · 890 players</div>
+    </div>
+    <div style="text-align:right">
+      <div class="title" style="font-size:14px;color:#FFB547">+80¢</div>
+      <div class="label-sm" style="margin-top:2px">₹49</div>
+    </div>
+    <div style="color:#A3A3B3;font-size:20px;margin-left:4px">›</div>
+  </div>
+
+  <div style="height:72px;border-radius:14px;background:#0D0D1A;border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;padding:0 14px;gap:12px">
+    <div class="icon-box icon-teal" style="width:42px;height:42px;font-size:18px">🧘</div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+        <div class="title" style="font-size:15px">Mindful Month</div>
+        <div class="chip chip-amber" style="font-size:9px;padding:2px 7px">MONTHLY</div>
+      </div>
+      <div class="label">30 days · 1.8K players</div>
+    </div>
+    <div style="text-align:right">
+      <div class="title" style="font-size:14px;color:#FFB547">+100¢</div>
+      <div class="label-sm" style="margin-top:2px">FREE</div>
+    </div>
+    <div style="color:#A3A3B3;font-size:20px;margin-left:4px">›</div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESIGN 8 — My Challenges progress card
+════════════════════════════════════════════════════════════════════ -->
+<p class="section-label">Design 8 — My Challenges · progress + day grid</p>
+<div class="grid">
+
+  <div style="border-radius:18px;background:rgba(212,255,58,0.04);border:1.5px solid rgba(212,255,58,0.38);padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="icon-box icon-orange" style="width:38px;height:38px;font-size:17px">🏃</div>
+        <div>
+          <div class="title" style="font-size:16px">5K Sprint Week</div>
+          <div class="label">Day 3 / 7 · Running</div>
+        </div>
+      </div>
+      <div class="title" style="font-size:22px;color:#D4FF3A">43%</div>
+    </div>
+    <div>
+      <div style="display:flex;gap:3px;margin-bottom:8px">
+        <div class="dot dot-done"></div><div class="dot dot-done"></div><div class="dot dot-done"></div>
+        <div class="dot dot-today"></div><div class="dot dot-empty"></div><div class="dot dot-empty"></div><div class="dot dot-empty"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="prog-track" style="flex:1;margin-right:12px"><div class="prog-fill" style="width:43%;background:#D4FF3A"></div></div>
+        <div style="font-size:11px;font-weight:700;color:#FFB547">+80¢ on finish</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="border-radius:18px;background:rgba(255,181,71,0.04);border:1.5px solid rgba(255,181,71,0.32);padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="icon-box icon-lime" style="width:38px;height:38px;font-size:17px">👟</div>
+        <div>
+          <div class="title" style="font-size:16px">10K Steps Daily</div>
+          <div class="label">Day 12 / 30 · Steps</div>
+        </div>
+      </div>
+      <div class="title" style="font-size:22px;color:#FFB547">40%</div>
+    </div>
+    <div>
+      <div style="display:flex;gap:3px;margin-bottom:8px">
+        <div class="dot dot-done"></div><div class="dot dot-done"></div><div class="dot dot-done"></div>
+        <div class="dot dot-done"></div><div class="dot dot-done"></div><div class="dot dot-done"></div>
+        <div class="dot dot-done"></div><div class="dot dot-done"></div><div class="dot dot-done"></div>
+        <div class="dot dot-done"></div><div class="dot dot-done"></div><div class="dot dot-done"></div>
+        <div class="dot dot-today"></div><div class="dot dot-empty"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="prog-track" style="flex:1;margin-right:12px"><div class="prog-fill" style="width:40%;background:#FFB547"></div></div>
+        <div style="font-size:11px;font-weight:700;color:#FFB547">+30¢ on finish</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESIGN 9 — Seasonal premium card (tall, amber or lime)
+════════════════════════════════════════════════════════════════════ -->
+<p class="section-label">Design 9 — Seasonal premium · image background</p>
+<div class="grid">
+
+  <div style="height:190px;border-radius:20px;overflow:hidden;position:relative;border:1.5px solid rgba(255,181,71,0.42)">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=600&h=380&q=80" alt="fitness" style="filter:brightness(0.3) saturate(0.5)">
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,181,71,0.18) 0%,rgba(5,5,16,0.9) 100%)"></div>
+    <div style="position:absolute;right:-8px;bottom:-16px;font-size:110px;opacity:0.07;z-index:1">🏆</div>
+    <div style="position:absolute;inset:0;padding:18px;display:flex;flex-direction:column;justify-content:space-between;z-index:2">
+      <div style="display:flex;justify-content:space-between">
+        <div class="badge badge-amber">🍂 SEASONAL</div>
+        <div class="badge" style="background:#FFB547;color:#050510">PRO</div>
+      </div>
+      <div>
+        <div class="title italic" style="font-size:22px;line-height:1.1;margin-bottom:6px">Summer Grand Slam</div>
+        <div class="label" style="margin-bottom:12px">May – Jun 2025 · All activities</div>
+        <div style="display:flex;gap:20px">
+          <div><div class="label-sm">PRIZE</div><div class="title" style="font-size:16px;color:#FFB547">₹5,000</div></div>
+          <div><div class="label-sm">PLAYERS</div><div class="title" style="font-size:16px">1,240</div></div>
+          <div><div class="label-sm">ENTRY</div><div class="title" style="font-size:16px;color:#FFB547">₹99</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:190px;border-radius:20px;overflow:hidden;position:relative;border:1.5px solid rgba(212,255,58,0.38)">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&w=600&h=380&q=80" alt="sports" style="filter:brightness(0.3) saturate(0.5)">
+    <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,255,58,0.16) 0%,rgba(5,5,16,0.9) 100%)"></div>
+    <div style="position:absolute;right:-8px;bottom:-16px;font-size:110px;opacity:0.06;z-index:1">⚡</div>
+    <div style="position:absolute;inset:0;padding:18px;display:flex;flex-direction:column;justify-content:space-between;z-index:2">
+      <div style="display:flex;justify-content:space-between">
+        <div class="badge badge-lime-o">☀️ SEASONAL</div>
+        <div class="badge badge-lime">FREE</div>
+      </div>
+      <div>
+        <div class="title italic" style="font-size:22px;line-height:1.1;margin-bottom:6px">Monsoon Miles</div>
+        <div class="label" style="margin-bottom:12px">Jun – Jul 2025 · Walk + Run</div>
+        <div style="display:flex;gap:20px">
+          <div><div class="label-sm">PRIZE</div><div class="title" style="font-size:16px;color:#D4FF3A">₹500</div></div>
+          <div><div class="label-sm">PLAYERS</div><div class="title" style="font-size:16px">4,890</div></div>
+          <div><div class="label-sm">DURATION</div><div class="title" style="font-size:16px">45d</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     DESIGN 10 — 2-column compact tile grid
+════════════════════════════════════════════════════════════════════ -->
+<p class="section-label">Design 10 — 2-column compact tiles</p>
+<div class="two-col">
+
+  <div style="height:160px;border-radius:18px;overflow:hidden;position:relative;border:1px solid rgba(212,255,58,0.25)">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?auto=format&fit=crop&w=300&h=320&q=80" alt="steps" style="filter:brightness(0.35) saturate(0.7)">
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,16,0.95) 0%,transparent 70%)"></div>
+    <div style="position:absolute;top:12px;left:12px;z-index:2"><div class="chip chip-lime" style="font-size:9px">DAILY</div></div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:12px;z-index:2">
+      <div class="title" style="font-size:16px;margin-bottom:3px">10K Steps</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="label">30d · Free</div>
+        <div style="font-size:12px;color:#FFB547;font-weight:700">+30¢</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:160px;border-radius:18px;overflow:hidden;position:relative;border:1px solid rgba(249,115,22,0.28)">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=300&h=320&q=80" alt="run" style="filter:brightness(0.35) saturate(0.7)">
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,16,0.95) 0%,transparent 70%)"></div>
+    <div style="position:absolute;top:12px;left:12px;z-index:2">
+      <div style="display:flex;align-items:center;font-size:10px;font-weight:700;color:#EF4444;background:rgba(239,68,68,0.14);padding:3px 8px;border-radius:20px;border:1px solid rgba(239,68,68,0.3)"><span class="live-dot"></span>LIVE</div>
+    </div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:12px;z-index:2">
+      <div class="title" style="font-size:16px;margin-bottom:3px">5K Sprint</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="label">7d · ₹49</div>
+        <div style="font-size:12px;color:#FFB547;font-weight:700">+80¢</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:160px;border-radius:18px;overflow:hidden;position:relative;border:1px solid rgba(139,92,246,0.28)">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=300&h=320&q=80" alt="yoga" style="filter:brightness(0.35) saturate(0.7)">
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,16,0.95) 0%,transparent 70%)"></div>
+    <div style="position:absolute;top:12px;left:12px;z-index:2"><div class="chip" style="font-size:9px;background:rgba(139,92,246,0.14);color:#A78BFA;border:1px solid rgba(139,92,246,0.3)">MONTHLY</div></div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:12px;z-index:2">
+      <div class="title" style="font-size:16px;margin-bottom:3px">Zen Zone</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="label">30d · Free</div>
+        <div style="font-size:12px;color:#FFB547;font-weight:700">+45¢</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:160px;border-radius:18px;overflow:hidden;position:relative;border:1px solid rgba(255,181,71,0.3)">
+    <img class="cover-img" src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=300&h=320&q=80" alt="gym" style="filter:brightness(0.35) saturate(0.7)">
+    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,16,0.95) 0%,transparent 70%)"></div>
+    <div style="position:absolute;top:12px;left:12px;z-index:2"><div class="chip chip-amber" style="font-size:9px">WEEKLY</div></div>
+    <div style="position:absolute;bottom:0;left:0;right:0;padding:12px;z-index:2">
+      <div class="title" style="font-size:16px;margin-bottom:3px">Gym Warrior</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="label">4w · Free</div>
+        <div style="font-size:12px;color:#FFB547;font-weight:700">+60¢</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+<div style="margin-top:28px;display:flex;align-items:center;gap:10px">
+  <div class="badge badge-lime">StepUp</div>
+  <p style="font-size:12px;color:#A3A3B3">Reply with design number(s) you like — I'll implement it in the app</p>
+</div>
+
+</body>
+</html>

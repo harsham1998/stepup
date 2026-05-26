@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StepUp — 5 Leaderboard Designs</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #050510;
+  --surf:     #0D0D1A;
+  --surf2:    #13131F;
+  --lime:     #D4FF3A;
+  --amber:    #FFB547;
+  --ink2:     #A3A3B3;
+  --ink3:     #4B5563;
+  --border:   rgba(255,255,255,0.08);
+  --green:    #34D399;
+  --pink:     #F472B6;
+  --red:      #EF4444;
+}
+
+body {
+  background: #02020c;
+  font-family: 'Inter', sans-serif;
+  color: #fff;
+  padding: 48px 32px 80px;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 36px; font-weight: 900; color: var(--lime);
+  margin-bottom: 4px;
+}
+.page-sub { font-size: 13px; color: var(--ink3); margin-bottom: 48px; }
+
+/* PHONE GRID */
+.phones-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  max-width: 1300px;
+}
+
+@media (max-width: 1100px) {
+  .phones-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 700px) {
+  .phones-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.phone-wrap:hover .phone-shell {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(212,255,58,0.12);
+}
+
+.design-label {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 14px; font-weight: 900;
+  color: var(--ink2);
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+.design-name {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 18px; font-weight: 900;
+  color: #fff;
+  text-align: center;
+  margin-top: -8px;
+}
+.design-desc {
+  font-size: 11px; color: var(--ink3);
+  text-align: center;
+  max-width: 160px;
+  line-height: 1.5;
+}
+
+.phone-shell {
+  width: 200px;
+  height: 430px;
+  border-radius: 36px;
+  border: 2px solid rgba(255,255,255,0.12);
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+
+/* ─── STATUS BAR ─── */
+.sbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 18px 0;
+  font-size: 9px; font-weight: 700;
+  color: #fff;
+}
+.sbar-icons { display: flex; gap: 4px; align-items: center; }
+
+/* ─── NAV TABS ─── */
+.nav-tabs {
+  display: flex; gap: 6px;
+  padding: 8px 14px;
+}
+.tab {
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 9px; font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--ink2);
+  display: flex; align-items: center; gap: 3px;
+}
+.tab.active { background: rgba(212,255,58,0.15); color: var(--lime); border-color: rgba(212,255,58,0.4); }
+
+/* ─── FILTER PILLS ─── */
+.filter-pills {
+  display: flex; gap: 5px;
+  padding: 0 14px 8px;
+}
+.pill {
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 8px; font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--ink3);
+}
+.pill.active {
+  background: var(--lime); color: #050510;
+  border-color: transparent;
+}
+
+/* ─── BOTTOM NAV ─── */
+.bot-nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 44px;
+  background: rgba(13,13,26,0.95);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 10px;
+}
+.bot-icon {
+  font-size: 8px; color: var(--ink3);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.bot-icon.active { color: var(--lime); }
+.bot-dot { width: 18px; height: 2px; border-radius: 2px; background: currentColor; }
+.bot-bar { width: 18px; height: 14px; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; }
+.bot-bar span { background: currentColor; height: 2px; border-radius: 1px; }
+.bot-bar span:nth-child(1) { width: 40%; }
+.bot-bar span:nth-child(2) { width: 70%; }
+.bot-bar span:nth-child(3) { width: 100%; }
+
+.scroll-area {
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+
+/* ════════════════════════════
+   DESIGN 1 — PODIUM CROWN
+   ════════════════════════════ */
+.d1 .phone-shell { background: #070714; }
+
+.d1-hero {
+  margin: 6px 14px 8px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #0e1a0a 0%, #0d0d1a 60%, #1a0e0a 100%);
+  border: 1px solid rgba(212,255,58,0.15);
+  padding: 10px 12px 8px;
+}
+.d1-you-rank { font-size: 9px; color: var(--ink3); margin-bottom: 2px; }
+.d1-you-rank b { color: var(--lime); }
+.d1-you-big {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 22px; font-weight: 900; line-height: 1;
+  margin-bottom: 4px;
+}
+.d1-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; border-radius: 20px;
+  background: rgba(255,181,71,0.15); color: var(--amber);
+  border: 1px solid rgba(255,181,71,0.35);
+  font-size: 8px; font-weight: 800;
+}
+
+.d1-podium {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 4px; padding: 0 10px 8px;
+  height: 100px;
+}
+.d1-platform {
+  display: flex; flex-direction: column; align-items: center;
+  flex: 1;
+}
+.d1-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 12px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 3px;
+  position: relative;
+}
+.d1-pname { font-size: 7px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 52px; text-align: center;}
+.d1-pct { font-size: 7px; color: var(--lime); font-weight: 800; margin-bottom: 3px; }
+.d1-block {
+  width: 100%; border-radius: 6px 6px 0 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 4px 0;
+}
+.d1-pos { font-family: 'Big Shoulders Display', sans-serif; font-size: 13px; font-weight: 900; }
+
+.d1-p1 .d1-avatar { background: rgba(212,255,58,0.2); color: var(--lime); box-shadow: 0 0 10px rgba(212,255,58,0.3); }
+.d1-p1 .d1-block { background: linear-gradient(180deg, #D4FF3A22 0%, #D4FF3A10 100%); border: 1px solid rgba(212,255,58,0.25); height: 54px; }
+.d1-p1 .d1-pos { color: var(--lime); }
+
+.d1-p2 .d1-avatar { background: rgba(200,200,200,0.15); color: #c0c0c0; }
+.d1-p2 .d1-block { background: rgba(200,200,200,0.07); border: 1px solid rgba(255,255,255,0.1); height: 40px; }
+.d1-p2 .d1-pos { color: #c0c0c0; }
+
+.d1-p3 .d1-avatar { background: rgba(205,127,50,0.15); color: #cd7f32; }
+.d1-p3 .d1-block { background: rgba(205,127,50,0.07); border: 1px solid rgba(205,127,50,0.18); height: 30px; }
+.d1-p3 .d1-pos { color: #cd7f32; }
+
+.d1-crown {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  font-size: 10px;
+}
+
+.d1-list { padding: 0 14px; }
+.d1-row {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.d1-row.you-row {
+  background: rgba(212,255,58,0.06);
+  border-radius: 8px;
+  padding: 6px 6px;
+  margin: 0 -6px;
+  border-bottom: none;
+  border: 1px solid rgba(212,255,58,0.2);
+}
+.d1-rnum { font-family: 'Big Shoulders Display', sans-serif; font-size: 12px; font-weight: 900; color: var(--lime); width: 22px; }
+.d1-rnum.grey { color: var(--ink3); }
+.d1-rav { width: 20px; height: 20px; border-radius: 50%; background: var(--surf2); font-size: 8px; font-weight: 800; display: flex; align-items: center; justify-content: center; color: var(--ink2); flex-shrink: 0; }
+.d1-rname { font-size: 10px; font-weight: 600; flex: 1; }
+.d1-rpct { font-size: 10px; font-weight: 800; color: var(--lime); }
+.d1-rpct.grey { color: var(--ink3); }
+
+.d1-cutoff {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 0;
+  font-size: 7px; color: var(--red);
+  font-weight: 700;
+}
+.d1-cutoff::before, .d1-cutoff::after {
+  content: ''; flex: 1; height: 1px; background: rgba(239,68,68,0.3);
+}
+
+/* ════════════════════════════
+   DESIGN 2 — HEAT LANES
+   ════════════════════════════ */
+.d2 .phone-shell { background: #06060f; }
+
+.d2-header { padding: 4px 14px 6px; }
+.d2-title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 20px; font-weight: 900;
+}
+.d2-sub { font-size: 8px; color: var(--ink3); }
+
+.d2-you-card {
+  margin: 0 14px 8px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(212,255,58,0.12) 0%, rgba(212,255,58,0.04) 100%);
+  border: 1px solid rgba(212,255,58,0.25);
+  padding: 8px 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.d2-you-left { flex: 1; }
+.d2-you-rank { font-size: 8px; color: var(--ink3); }
+.d2-you-num {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 24px; font-weight: 900; color: var(--lime); line-height: 1;
+}
+.d2-you-label { font-size: 7px; color: var(--ink2); }
+.d2-coin-badge {
+  padding: 4px 8px; border-radius: 20px;
+  background: rgba(255,181,71,0.15); color: var(--amber);
+  border: 1px solid rgba(255,181,71,0.35);
+  font-size: 8px; font-weight: 800;
+}
+
+.d2-lanes { padding: 0 14px; display: flex; flex-direction: column; gap: 4px; }
+
+.d2-lane {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 8px; border-radius: 10px;
+  position: relative; overflow: hidden;
+}
+.d2-lane::before {
+  content: '';
+  position: absolute; inset: 0;
+  opacity: 0.07;
+  border-radius: 10px;
+}
+.d2-lane.hot::before { background: linear-gradient(90deg, #ff6b35, #ff3535); opacity: 0.18; }
+.d2-lane.warm::before { background: linear-gradient(90deg, #FFB547, #ff6b35); opacity: 0.1; }
+.d2-lane.you-lane {
+  border: 1px solid rgba(212,255,58,0.35);
+  background: rgba(212,255,58,0.05);
+}
+.d2-lane.you-lane::before { background: var(--lime); opacity: 0.05; }
+.d2-lane.cool::before { background: rgba(255,255,255,0.04); }
+
+.d2-lnum {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 13px; font-weight: 900;
+  width: 20px; flex-shrink: 0;
+}
+.d2-lnum.top1 { color: var(--lime); }
+.d2-lnum.top23 { color: var(--amber); }
+.d2-lnum.me { color: var(--lime); }
+.d2-lnum.grey { color: var(--ink3); }
+
+.d2-lav {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--surf2);
+  font-size: 8px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink2); flex-shrink: 0;
+}
+.d2-lav.hot-av { background: rgba(255,107,53,0.2); color: #ff9060; }
+.d2-lav.me-av { background: rgba(212,255,58,0.2); color: var(--lime); }
+
+.d2-linfo { flex: 1; min-width: 0; }
+.d2-lname { font-size: 9px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d2-lsub { font-size: 7px; color: var(--ink3); margin-top: 1px; }
+
+.d2-lbar-wrap { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: rgba(255,255,255,0.05); border-radius: 0 0 10px 10px; }
+.d2-lbar { height: 100%; border-radius: 0 0 10px 10px; }
+.d2-lbar.b-hot { background: linear-gradient(90deg, #ff6b35, #ff3535); }
+.d2-lbar.b-warm { background: linear-gradient(90deg, #FFB547, #ff6b35); }
+.d2-lbar.b-lime { background: var(--lime); }
+.d2-lbar.b-cool { background: rgba(255,255,255,0.12); }
+
+.d2-lpct {
+  font-size: 10px; font-weight: 800;
+  flex-shrink: 0;
+}
+.d2-lpct.hot { color: #ff6b35; }
+.d2-lpct.warm { color: var(--amber); }
+.d2-lpct.me { color: var(--lime); }
+.d2-lpct.cool { color: var(--ink3); }
+
+.d2-cutoff-line {
+  display: flex; align-items: center; gap: 5px;
+  margin: 3px 0; font-size: 7px; color: var(--red); font-weight: 700;
+}
+.d2-cutoff-line::before, .d2-cutoff-line::after {
+  content:''; flex:1; height:1px; background: rgba(239,68,68,0.3);
+}
+
+
+/* ════════════════════════════
+   DESIGN 3 — GLASS TIER
+   ════════════════════════════ */
+.d3 .phone-shell {
+  background: radial-gradient(ellipse at 50% 0%, #0d1520 0%, #06060f 60%);
+}
+
+.d3-top { padding: 4px 14px 4px; }
+.d3-title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 20px; font-weight: 900;
+}
+.d3-sub { font-size: 8px; color: var(--ink3); }
+
+.d3-tabs {
+  display: flex; gap: 4px;
+  padding: 6px 14px;
+}
+.d3-tab {
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 8px; font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--ink3);
+}
+.d3-tab.active {
+  background: var(--lime); color: #050510;
+  border-color: transparent;
+}
+
+.d3-you-glass {
+  margin: 0 12px 8px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(212,255,58,0.2);
+  padding: 8px 10px;
+  position: relative;
+  overflow: hidden;
+}
+.d3-you-glass::before {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  background: radial-gradient(circle, rgba(212,255,58,0.15) 0%, transparent 70%);
+}
+.d3-yg-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.d3-yg-rank { font-size: 8px; color: var(--ink2); }
+.d3-yg-big {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 20px; font-weight: 900; color: var(--lime); line-height: 1;
+}
+.d3-yg-label { font-size: 7px; color: var(--ink3); }
+.d3-yg-badge {
+  padding: 3px 7px; border-radius: 20px;
+  background: rgba(255,181,71,0.15); color: var(--amber);
+  border: 1px solid rgba(255,181,71,0.3);
+  font-size: 7px; font-weight: 800;
+  align-self: flex-start;
+}
+.d3-yg-bar { height: 3px; background: rgba(255,255,255,0.08); border-radius: 3px; }
+.d3-yg-bar-fill { height: 100%; width: 84%; background: linear-gradient(90deg, var(--lime), #8fff00); border-radius: 3px; }
+.d3-yg-barlabel { display: flex; justify-content: space-between; margin-top: 2px; font-size: 6px; color: var(--ink3); }
+
+.d3-list { padding: 0 12px; display: flex; flex-direction: column; gap: 3px; }
+
+.d3-card {
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 7px 9px;
+  display: flex; align-items: center; gap: 7px;
+  position: relative; overflow: hidden;
+}
+.d3-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.d3-card.r1::before { background: var(--lime); }
+.d3-card.r2::before { background: #c0c0c0; }
+.d3-card.r3::before { background: #cd7f32; }
+.d3-card.me-card {
+  background: rgba(212,255,58,0.05);
+  border-color: rgba(212,255,58,0.2);
+}
+.d3-card.me-card::before { background: var(--lime); }
+.d3-card.faded { opacity: 0.6; }
+
+.d3-rnum {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 14px; font-weight: 900;
+  color: var(--ink3); width: 20px; flex-shrink: 0; text-align: center;
+}
+.d3-rnum.lime { color: var(--lime); }
+.d3-rnum.silver { color: #c0c0c0; }
+.d3-rnum.bronze { color: #cd7f32; }
+
+.d3-av {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--surf2);
+  font-size: 8px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink2); flex-shrink: 0;
+}
+.d3-av.r1 { background: rgba(212,255,58,0.15); color: var(--lime); }
+.d3-av.me { background: rgba(212,255,58,0.12); color: var(--lime); }
+
+.d3-name { font-size: 9px; font-weight: 700; flex: 1; }
+.d3-pct { font-size: 10px; font-weight: 800; color: var(--ink2); }
+.d3-pct.lime { color: var(--lime); }
+
+.d3-cutoff {
+  display: flex; align-items: center; gap: 4px;
+  margin: 2px 0; font-size: 6px; color: var(--red); font-weight: 700;
+}
+.d3-cutoff::before, .d3-cutoff::after {
+  content: ''; flex: 1; height: 1px; background: rgba(239,68,68,0.25);
+}
+
+
+/* ════════════════════════════
+   DESIGN 4 — SCORE ARCADE
+   ════════════════════════════ */
+.d4 .phone-shell {
+  background: #04040e;
+}
+
+.d4-scanlines {
+  position: absolute; inset: 0; z-index: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.15) 3px,
+    rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+}
+
+.d4-content { position: relative; z-index: 1; }
+
+.d4-header { padding: 4px 14px 4px; }
+.d4-title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 20px; font-weight: 900; letter-spacing: 1px;
+  color: var(--lime);
+  text-shadow: 0 0 12px rgba(212,255,58,0.5);
+}
+.d4-sub { font-size: 8px; color: var(--ink3); }
+
+.d4-score-card {
+  margin: 4px 14px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(212,255,58,0.3);
+  background: rgba(212,255,58,0.05);
+  padding: 8px 10px;
+  display: flex; align-items: center;
+}
+.d4-sc-left { flex: 1; }
+.d4-sc-label { font-size: 7px; color: var(--lime); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.d4-sc-num {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 28px; font-weight: 900;
+  color: var(--lime);
+  text-shadow: 0 0 14px rgba(212,255,58,0.4);
+  line-height: 1;
+}
+.d4-sc-sub { font-size: 7px; color: var(--ink3); }
+.d4-sc-badge {
+  padding: 4px 8px; border-radius: 6px;
+  background: rgba(255,181,71,0.15); color: var(--amber);
+  border: 1px solid rgba(255,181,71,0.35);
+  font-size: 7px; font-weight: 800;
+  text-align: center;
+}
+
+.d4-rows { padding: 0 14px; display: flex; flex-direction: column; gap: 3px; }
+
+.d4-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 7px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  position: relative;
+}
+.d4-row.me-row {
+  border-color: rgba(212,255,58,0.35);
+  background: rgba(212,255,58,0.04);
+}
+.d4-row.top-row {
+  border-color: rgba(212,255,58,0.15);
+  background: rgba(212,255,58,0.02);
+}
+
+.d4-rank-badge {
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 11px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.d4-rank-badge.gold { background: rgba(212,255,58,0.2); color: var(--lime); }
+.d4-rank-badge.silver { background: rgba(192,192,192,0.15); color: #c0c0c0; }
+.d4-rank-badge.bronze { background: rgba(205,127,50,0.15); color: #cd7f32; }
+.d4-rank-badge.me { background: rgba(212,255,58,0.15); color: var(--lime); }
+.d4-rank-badge.plain { background: rgba(255,255,255,0.06); color: var(--ink3); }
+
+.d4-av {
+  width: 20px; height: 20px; border-radius: 5px;
+  background: var(--surf2);
+  font-size: 7px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink2); flex-shrink: 0;
+}
+.d4-av.glow { box-shadow: 0 0 6px rgba(212,255,58,0.25); }
+
+.d4-name { font-size: 9px; font-weight: 700; flex: 1; }
+
+.d4-score-bar {
+  display: flex; align-items: center; gap: 4px;
+}
+.d4-score {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 13px; font-weight: 900;
+}
+.d4-score.lime { color: var(--lime); text-shadow: 0 0 8px rgba(212,255,58,0.3); }
+.d4-score.silver { color: #c0c0c0; }
+.d4-score.bronze { color: #cd7f32; }
+.d4-score.me { color: var(--lime); }
+.d4-score.dim { color: var(--ink3); }
+
+.d4-cutoff {
+  display: flex; align-items: center; gap: 4px;
+  margin: 1px 0; font-size: 6px; color: var(--red); font-weight: 700; letter-spacing: 0.5px;
+}
+.d4-cutoff::before, .d4-cutoff::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(239,68,68,0.4);
+  box-shadow: 0 0 4px rgba(239,68,68,0.2);
+}
+
+
+/* ════════════════════════════
+   DESIGN 5 — RING / RADAR
+   ════════════════════════════ */
+.d5 .phone-shell {
+  background: #050510;
+}
+
+.d5-header { padding: 4px 14px 2px; }
+.d5-title {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 20px; font-weight: 900;
+}
+.d5-sub { font-size: 8px; color: var(--ink3); }
+
+.d5-radar {
+  position: relative;
+  height: 110px;
+  margin: 4px 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.d5-rings {
+  position: absolute;
+  display: flex; align-items: center; justify-content: center;
+}
+.d5-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(212,255,58,0.1);
+}
+.d5-ring:nth-child(1) { width: 100px; height: 100px; }
+.d5-ring:nth-child(2) { width: 70px; height: 70px; border-color: rgba(212,255,58,0.14); }
+.d5-ring:nth-child(3) { width: 44px; height: 44px; border-color: rgba(212,255,58,0.2); }
+
+.d5-center {
+  position: relative; z-index: 2;
+  text-align: center;
+}
+.d5-center-rank {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 28px; font-weight: 900; color: var(--lime); line-height: 1;
+  text-shadow: 0 0 16px rgba(212,255,58,0.5);
+}
+.d5-center-label { font-size: 7px; color: var(--ink2); }
+.d5-center-sub { font-size: 7px; color: var(--ink3); }
+
+/* orbit dots */
+.d5-dot {
+  position: absolute;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--surf2);
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 6px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink2);
+}
+.d5-dot.top1 {
+  background: rgba(212,255,58,0.2);
+  color: var(--lime);
+  border-color: rgba(212,255,58,0.4);
+  box-shadow: 0 0 8px rgba(212,255,58,0.3);
+}
+.d5-dot.top2 { background: rgba(200,200,200,0.12); color: #c0c0c0; }
+.d5-dot.top3 { background: rgba(205,127,50,0.12); color: #cd7f32; }
+
+.d5-badge {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 0 14px 6px;
+  padding: 5px 10px; border-radius: 10px;
+  background: rgba(212,255,58,0.06);
+  border: 1px solid rgba(212,255,58,0.18);
+}
+.d5-badge-l { font-size: 8px; color: var(--ink2); }
+.d5-badge-l b { color: var(--lime); }
+.d5-badge-r {
+  padding: 2px 8px; border-radius: 20px;
+  background: rgba(255,181,71,0.15); color: var(--amber);
+  border: 1px solid rgba(255,181,71,0.3);
+  font-size: 7px; font-weight: 800;
+}
+
+.d5-list { padding: 0 14px; display: flex; flex-direction: column; gap: 3px; }
+
+.d5-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.d5-item:last-child { border-bottom: none; }
+.d5-item.me-item {
+  background: rgba(212,255,58,0.04);
+  border-radius: 8px;
+  padding: 5px 6px;
+  margin: 0 -6px;
+  border-bottom: none;
+  border: 1px solid rgba(212,255,58,0.18);
+}
+
+.d5-irank {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-size: 11px; font-weight: 900; color: var(--ink3);
+  width: 18px; flex-shrink: 0;
+}
+.d5-irank.lime { color: var(--lime); }
+
+.d5-iav {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--surf2);
+  font-size: 7px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink2); flex-shrink: 0;
+}
+.d5-iav.me { background: rgba(212,255,58,0.15); color: var(--lime); }
+
+.d5-iname { font-size: 9px; font-weight: 600; flex: 1; }
+
+.d5-ipct-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.d5-ipct { font-size: 9px; font-weight: 800; color: var(--lime); }
+.d5-ipct.dim { color: var(--ink3); }
+.d5-imini { height: 3px; width: 30px; border-radius: 3px; background: rgba(255,255,255,0.06); }
+.d5-imini-fill { height: 100%; border-radius: 3px; background: var(--lime); }
+
+.d5-cutoff {
+  display: flex; align-items: center; gap: 4px;
+  margin: 2px 0; font-size: 6px; color: var(--red); font-weight: 700;
+}
+.d5-cutoff::before, .d5-cutoff::after {
+  content:''; flex:1; height:1px; background: rgba(239,68,68,0.3);
+}
+
+/* ─────── SVG ICONS ─────── */
+svg { display: block; }
+</style>
+</head>
+<body>
+
+<div class="page-title">Leaderboard — 5 Designs</div>
+<div class="page-sub">StepUp · volt lime · Big Shoulders Display · Inter — click any design to explore</div>
+
+<div class="phones-grid">
+
+  <!-- ══ DESIGN 1 — PODIUM CROWN ══ -->
+  <div class="phone-wrap d1">
+    <div class="phone-shell">
+      <!-- status bar -->
+      <div class="sbar">
+        <span>10:08</span>
+        <div class="sbar-icons">
+          <svg width="12" height="8" viewBox="0 0 12 8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+          <svg width="10" height="8" viewBox="0 0 10 8"><path d="M5 2 C2.5 2 0.5 3.5 0 5.5 L1.5 5.5 C2 4.3 3.4 3.5 5 3.5 C6.6 3.5 8 4.3 8.5 5.5 L10 5.5 C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+          <svg width="20" height="9" viewBox="0 0 20 9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".5"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".5"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+        </div>
+      </div>
+
+      <!-- nav tabs -->
+      <div class="nav-tabs">
+        <div class="tab active">🏆 League</div>
+        <div class="tab">📊 Standings</div>
+      </div>
+
+      <!-- filter pills -->
+      <div class="filter-pills">
+        <div class="pill active">This challenge</div>
+        <div class="pill">Friends</div>
+        <div class="pill">Global</div>
+      </div>
+
+      <!-- you card -->
+      <div class="d1-hero">
+        <div class="d1-you-rank">You · <b>#14 of 92</b></div>
+        <div class="d1-you-big">Top 16% ★</div>
+        <div class="d1-badge">On track for +200¢</div>
+      </div>
+
+      <!-- podium -->
+      <div class="d1-podium">
+        <!-- 2nd -->
+        <div class="d1-platform d1-p2">
+          <div class="d1-avatar" style="font-size:8px;">S</div>
+          <div class="d1-pname" style="font-size:7px;">Sneha R</div>
+          <div class="d1-pct">100%</div>
+          <div class="d1-block"><div class="d1-pos">#2</div></div>
+        </div>
+        <!-- 1st -->
+        <div class="d1-platform d1-p1">
+          <div class="d1-avatar" style="position:relative;">
+            <span class="d1-crown">👑</span>A
+          </div>
+          <div class="d1-pname" style="font-size:7px;">Aarav M</div>
+          <div class="d1-pct">100%</div>
+          <div class="d1-block"><div class="d1-pos">#1</div></div>
+        </div>
+        <!-- 3rd -->
+        <div class="d1-platform d1-p3">
+          <div class="d1-avatar" style="font-size:8px;">V</div>
+          <div class="d1-pname" style="font-size:7px;">Vikram K</div>
+          <div class="d1-pct">100%</div>
+          <div class="d1-block"><div class="d1-pos">#3</div></div>
+        </div>
+      </div>
+
+      <!-- list -->
+      <div class="d1-list">
+        <div class="d1-row you-row">
+          <div class="d1-rnum">#14</div>
+          <div class="d1-rav" style="background:rgba(212,255,58,0.15);color:var(--lime);">Y</div>
+          <div class="d1-rname">You</div>
+          <div class="d1-rpct">100%</div>
+        </div>
+        <div class="d1-row">
+          <div class="d1-rnum grey">#46</div>
+          <div class="d1-rav">L</div>
+          <div class="d1-rname" style="color:var(--ink2);">Last top 50%</div>
+          <div class="d1-rpct grey">75%</div>
+        </div>
+        <div class="d1-cutoff">Top 50% cutoff</div>
+        <div class="d1-row" style="opacity:0.5;">
+          <div class="d1-rnum grey">#47</div>
+          <div class="d1-rav">R</div>
+          <div class="d1-rname" style="color:var(--ink3);">Rohit S</div>
+          <div class="d1-rpct grey">71%</div>
+        </div>
+        <div class="d1-row" style="opacity:0.4;">
+          <div class="d1-rnum grey">#48</div>
+          <div class="d1-rav">K</div>
+          <div class="d1-rname" style="color:var(--ink3);">Kavya P</div>
+          <div class="d1-rpct grey">71%</div>
+        </div>
+      </div>
+
+      <!-- bottom nav -->
+      <div class="bot-nav">
+        <div class="bot-icon"><div class="bot-dot"></div><span>Home</span></div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Chat</span></div>
+        <div class="bot-icon active">
+          <div class="bot-bar"><span></span><span></span><span></span></div>
+          <span>Lead</span>
+        </div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Coins</span></div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Me</span></div>
+      </div>
+    </div>
+    <div class="design-label">DESIGN 1</div>
+    <div class="design-name">Podium Crown</div>
+    <div class="design-desc">Visual trophy podium for top 3 with ranked list below</div>
+  </div>
+
+
+  <!-- ══ DESIGN 2 — HEAT LANES ══ -->
+  <div class="phone-wrap d2">
+    <div class="phone-shell">
+      <div class="d4-scanlines"></div>
+      <div class="d4-content" style="height:100%;">
+      <div class="sbar">
+        <span>10:08</span>
+        <div class="sbar-icons">
+          <svg width="12" height="8" viewBox="0 0 12 8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+          <svg width="10" height="8" viewBox="0 0 10 8"><path d="M5 2 C2.5 2 0.5 3.5 0 5.5 L1.5 5.5 C2 4.3 3.4 3.5 5 3.5 C6.6 3.5 8 4.3 8.5 5.5 L10 5.5 C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+          <svg width="20" height="9" viewBox="0 0 20 9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".5"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".5"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+        </div>
+      </div>
+      <div class="nav-tabs">
+        <div class="tab active">🏆 League</div>
+        <div class="tab">📊 Standings</div>
+      </div>
+      <div class="filter-pills">
+        <div class="pill active">This challenge</div>
+        <div class="pill">Friends</div>
+        <div class="pill">Global</div>
+      </div>
+
+      <div class="d2-you-card">
+        <div class="d2-you-left">
+          <div class="d2-you-rank">You · 7-Day Gym · Day 4 of 7</div>
+          <div class="d2-you-num">#14</div>
+          <div class="d2-you-label">Top 16% · 92 participants</div>
+        </div>
+        <div class="d2-coin-badge">+200¢ on track</div>
+      </div>
+
+      <div class="d2-lanes">
+        <div class="d2-lane hot">
+          <div class="d2-lbar-wrap"><div class="d2-lbar b-hot" style="width:100%"></div></div>
+          <div class="d2-lnum top1">#1</div>
+          <div class="d2-lav hot-av">A</div>
+          <div class="d2-linfo">
+            <div class="d2-lname">Aarav M</div>
+          </div>
+          <div class="d2-lpct hot">100%</div>
+        </div>
+        <div class="d2-lane warm">
+          <div class="d2-lbar-wrap"><div class="d2-lbar b-warm" style="width:100%"></div></div>
+          <div class="d2-lnum top23">#2</div>
+          <div class="d2-lav">S</div>
+          <div class="d2-linfo">
+            <div class="d2-lname">Sneha R</div>
+          </div>
+          <div class="d2-lpct warm">100%</div>
+        </div>
+        <div class="d2-lane warm">
+          <div class="d2-lbar-wrap"><div class="d2-lbar b-warm" style="width:100%"></div></div>
+          <div class="d2-lnum top23">#3</div>
+          <div class="d2-lav">V</div>
+          <div class="d2-linfo">
+            <div class="d2-lname">Vikram K</div>
+          </div>
+          <div class="d2-lpct warm">100%</div>
+        </div>
+        <div class="d2-lane you-lane">
+          <div class="d2-lbar-wrap"><div class="d2-lbar b-lime" style="width:100%"></div></div>
+          <div class="d2-lnum me">#14</div>
+          <div class="d2-lav me-av">Y</div>
+          <div class="d2-linfo">
+            <div class="d2-lname" style="color:var(--lime);">You</div>
+          </div>
+          <div class="d2-lpct me">100%</div>
+        </div>
+        <div class="d2-lane cool">
+          <div class="d2-lbar-wrap"><div class="d2-lbar b-cool" style="width:75%"></div></div>
+          <div class="d2-lnum grey">#46</div>
+          <div class="d2-lav">L</div>
+          <div class="d2-linfo">
+            <div class="d2-lname" style="color:var(--ink2);">Last top 50%</div>
+          </div>
+          <div class="d2-lpct cool">75%</div>
+        </div>
+        <div class="d2-cutoff-line">Top 50% cutoff</div>
+        <div class="d2-lane cool" style="opacity:0.5;">
+          <div class="d2-lbar-wrap"><div class="d2-lbar b-cool" style="width:71%"></div></div>
+          <div class="d2-lnum grey">#47</div>
+          <div class="d2-lav">R</div>
+          <div class="d2-linfo">
+            <div class="d2-lname" style="color:var(--ink3);">Rohit S</div>
+          </div>
+          <div class="d2-lpct cool">71%</div>
+        </div>
+        <div class="d2-lane cool" style="opacity:0.4;">
+          <div class="d2-lbar-wrap"><div class="d2-lbar b-cool" style="width:71%"></div></div>
+          <div class="d2-lnum grey">#48</div>
+          <div class="d2-lav">K</div>
+          <div class="d2-linfo">
+            <div class="d2-lname" style="color:var(--ink3);">Kavya P</div>
+          </div>
+          <div class="d2-lpct cool">71%</div>
+        </div>
+      </div>
+
+      <div class="bot-nav">
+        <div class="bot-icon"><div class="bot-dot"></div><span>Home</span></div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Chat</span></div>
+        <div class="bot-icon active">
+          <div class="bot-bar"><span></span><span></span><span></span></div>
+          <span>Lead</span>
+        </div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Coins</span></div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Me</span></div>
+      </div>
+      </div>
+    </div>
+    <div class="design-label">DESIGN 2</div>
+    <div class="design-name">Heat Lanes</div>
+    <div class="design-desc">Color-coded intensity bars — red hot for leaders, lime for you</div>
+  </div>
+
+
+  <!-- ══ DESIGN 3 — GLASS TIER ══ -->
+  <div class="phone-wrap d3">
+    <div class="phone-shell">
+      <div class="sbar">
+        <span>10:08</span>
+        <div class="sbar-icons">
+          <svg width="12" height="8" viewBox="0 0 12 8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+          <svg width="10" height="8" viewBox="0 0 10 8"><path d="M5 2 C2.5 2 0.5 3.5 0 5.5 L1.5 5.5 C2 4.3 3.4 3.5 5 3.5 C6.6 3.5 8 4.3 8.5 5.5 L10 5.5 C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+          <svg width="20" height="9" viewBox="0 0 20 9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".5"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".5"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+        </div>
+      </div>
+
+      <div class="d3-top">
+        <div class="d3-title">Leaderboard</div>
+        <div class="d3-sub">7-Day Gym · Day 4 of 7</div>
+      </div>
+
+      <div class="d3-tabs">
+        <div class="d3-tab active">This challenge</div>
+        <div class="d3-tab">Friends</div>
+        <div class="d3-tab">Global</div>
+      </div>
+
+      <!-- you glass card -->
+      <div class="d3-you-glass">
+        <div class="d3-yg-top">
+          <div>
+            <div class="d3-yg-rank">You · #14 of 92</div>
+            <div class="d3-yg-big">Top 16%</div>
+            <div class="d3-yg-label">84% ahead of challenge</div>
+          </div>
+          <div class="d3-yg-badge">+200¢ on track</div>
+        </div>
+        <div class="d3-yg-bar"><div class="d3-yg-bar-fill"></div></div>
+        <div class="d3-yg-barlabel">
+          <span>Top 50% cutoff at #46</span>
+          <span style="color:var(--lime);">Well inside ✓</span>
+        </div>
+      </div>
+
+      <!-- list -->
+      <div class="d3-list">
+        <div class="d3-card r1">
+          <div class="d3-rnum lime">#1</div>
+          <div class="d3-av r1">A</div>
+          <div class="d3-name">Aarav M</div>
+          <div class="d3-pct lime">100%</div>
+        </div>
+        <div class="d3-card r2">
+          <div class="d3-rnum silver">#2</div>
+          <div class="d3-av">S</div>
+          <div class="d3-name">Sneha R</div>
+          <div class="d3-pct">100%</div>
+        </div>
+        <div class="d3-card r3">
+          <div class="d3-rnum bronze">#3</div>
+          <div class="d3-av">V</div>
+          <div class="d3-name">Vikram K</div>
+          <div class="d3-pct">100%</div>
+        </div>
+        <div class="d3-card me-card">
+          <div class="d3-rnum lime">#14</div>
+          <div class="d3-av me">Y</div>
+          <div class="d3-name" style="color:var(--lime);">You</div>
+          <div class="d3-pct lime">100%</div>
+        </div>
+        <div class="d3-card">
+          <div class="d3-rnum">#46</div>
+          <div class="d3-av">L</div>
+          <div class="d3-name" style="color:var(--ink2);">Last top 50%</div>
+          <div class="d3-pct">75%</div>
+        </div>
+        <div class="d3-cutoff">Top 50% cutoff</div>
+        <div class="d3-card faded">
+          <div class="d3-rnum">#47</div>
+          <div class="d3-av">R</div>
+          <div class="d3-name" style="color:var(--ink3);">Rohit S</div>
+          <div class="d3-pct" style="color:var(--ink3);">71%</div>
+        </div>
+        <div class="d3-card faded" style="opacity:0.35;">
+          <div class="d3-rnum">#48</div>
+          <div class="d3-av">K</div>
+          <div class="d3-name" style="color:var(--ink3);">Kavya P</div>
+          <div class="d3-pct" style="color:var(--ink3);">71%</div>
+        </div>
+      </div>
+
+      <div class="bot-nav">
+        <div class="bot-icon"><div class="bot-dot"></div><span>Home</span></div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Chat</span></div>
+        <div class="bot-icon active">
+          <div class="bot-bar"><span></span><span></span><span></span></div>
+          <span>Lead</span>
+        </div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Coins</span></div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Me</span></div>
+      </div>
+    </div>
+    <div class="design-label">DESIGN 3</div>
+    <div class="design-name">Glass Tier</div>
+    <div class="design-desc">Frosted glass cards with progress bar and color-coded rank accents</div>
+  </div>
+
+
+  <!-- ══ DESIGN 4 — SCORE ARCADE ══ -->
+  <div class="phone-wrap d4">
+    <div class="phone-shell">
+      <div class="d4-scanlines"></div>
+      <div class="d4-content" style="height:100%;">
+
+      <div class="sbar">
+        <span>10:08</span>
+        <div class="sbar-icons">
+          <svg width="12" height="8" viewBox="0 0 12 8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+          <svg width="10" height="8" viewBox="0 0 10 8"><path d="M5 2 C2.5 2 0.5 3.5 0 5.5 L1.5 5.5 C2 4.3 3.4 3.5 5 3.5 C6.6 3.5 8 4.3 8.5 5.5 L10 5.5 C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+          <svg width="20" height="9" viewBox="0 0 20 9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".5"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".5"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+        </div>
+      </div>
+
+      <div class="d4-header">
+        <div class="d4-title">LEADERBOARD</div>
+        <div class="d4-sub">7-Day Gym · Day 4 of 7 · 92 players</div>
+      </div>
+
+      <div class="nav-tabs" style="padding: 4px 14px;">
+        <div class="tab active">🏆 League</div>
+        <div class="tab">📊 Standings</div>
+      </div>
+      <div class="filter-pills" style="padding: 0 14px 6px;">
+        <div class="pill active">This challenge</div>
+        <div class="pill">Friends</div>
+        <div class="pill">Global</div>
+      </div>
+
+      <div class="d4-score-card">
+        <div class="d4-sc-left">
+          <div class="d4-sc-label">YOUR RANK</div>
+          <div class="d4-sc-num">#14</div>
+          <div class="d4-sc-sub">Top 16% · of 92 players</div>
+        </div>
+        <div class="d4-sc-badge">ON TRACK<br>+200¢</div>
+      </div>
+
+      <div class="d4-rows">
+        <div class="d4-row top-row">
+          <div class="d4-rank-badge gold">1</div>
+          <div class="d4-av glow">A</div>
+          <div class="d4-name">Aarav M</div>
+          <div class="d4-score lime">100%</div>
+        </div>
+        <div class="d4-row">
+          <div class="d4-rank-badge silver">2</div>
+          <div class="d4-av">S</div>
+          <div class="d4-name">Sneha R</div>
+          <div class="d4-score silver">100%</div>
+        </div>
+        <div class="d4-row">
+          <div class="d4-rank-badge bronze">3</div>
+          <div class="d4-av">V</div>
+          <div class="d4-name">Vikram K</div>
+          <div class="d4-score bronze">100%</div>
+        </div>
+        <div class="d4-row me-row">
+          <div class="d4-rank-badge me">14</div>
+          <div class="d4-av glow" style="background:rgba(212,255,58,0.15);color:var(--lime);">Y</div>
+          <div class="d4-name" style="color:var(--lime);">You</div>
+          <div class="d4-score me">100%</div>
+        </div>
+        <div class="d4-row">
+          <div class="d4-rank-badge plain">46</div>
+          <div class="d4-av">L</div>
+          <div class="d4-name" style="color:var(--ink2);">Last top 50%</div>
+          <div class="d4-score dim">75%</div>
+        </div>
+        <div class="d4-cutoff">— TOP 50% CUTOFF —</div>
+        <div class="d4-row" style="opacity:0.5;">
+          <div class="d4-rank-badge plain">47</div>
+          <div class="d4-av">R</div>
+          <div class="d4-name" style="color:var(--ink3);">Rohit S</div>
+          <div class="d4-score dim">71%</div>
+        </div>
+        <div class="d4-row" style="opacity:0.35;">
+          <div class="d4-rank-badge plain">48</div>
+          <div class="d4-av">K</div>
+          <div class="d4-name" style="color:var(--ink3);">Kavya P</div>
+          <div class="d4-score dim">71%</div>
+        </div>
+      </div>
+
+      <div class="bot-nav">
+        <div class="bot-icon"><div class="bot-dot"></div><span>Home</span></div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Chat</span></div>
+        <div class="bot-icon active">
+          <div class="bot-bar"><span></span><span></span><span></span></div>
+          <span>Lead</span>
+        </div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Coins</span></div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Me</span></div>
+      </div>
+
+      </div>
+    </div>
+    <div class="design-label">DESIGN 4</div>
+    <div class="design-name">Score Arcade</div>
+    <div class="design-desc">Retro scanline texture, neon glow rank badges, bold typography</div>
+  </div>
+
+
+  <!-- ══ DESIGN 5 — RADAR ORBIT ══ -->
+  <div class="phone-wrap d5">
+    <div class="phone-shell">
+      <!-- subtle radial glow -->
+      <div style="position:absolute;top:100px;left:50%;transform:translateX(-50%);width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(212,255,58,0.08) 0%,transparent 70%);pointer-events:none;z-index:0;"></div>
+
+      <div style="position:relative;z-index:1;height:100%;">
+      <div class="sbar">
+        <span>10:08</span>
+        <div class="sbar-icons">
+          <svg width="12" height="8" viewBox="0 0 12 8"><rect x="0" y="4" width="2" height="4" fill="white" opacity=".5"/><rect x="3" y="2.5" width="2" height="5.5" fill="white" opacity=".7"/><rect x="6" y="1" width="2" height="7" fill="white" opacity=".85"/><rect x="9" y="0" width="2" height="8" fill="white"/></svg>
+          <svg width="10" height="8" viewBox="0 0 10 8"><path d="M5 2 C2.5 2 0.5 3.5 0 5.5 L1.5 5.5 C2 4.3 3.4 3.5 5 3.5 C6.6 3.5 8 4.3 8.5 5.5 L10 5.5 C9.5 3.5 7.5 2 5 2Z" fill="white" opacity=".6"/><circle cx="5" cy="6.5" r="1" fill="white"/></svg>
+          <svg width="20" height="9" viewBox="0 0 20 9"><rect x="0" y="1" width="17" height="7" rx="2" fill="none" stroke="white" stroke-width="1" opacity=".5"/><rect x="17.5" y="3" width="1.5" height="3" rx=".75" fill="white" opacity=".5"/><rect x="1" y="2" width="14" height="5" rx="1" fill="#D4FF3A"/></svg>
+        </div>
+      </div>
+
+      <div class="d5-header">
+        <div class="d5-title">Leaderboard</div>
+        <div class="d5-sub">7-Day Gym · Day 4 of 7</div>
+      </div>
+
+      <div class="nav-tabs" style="padding: 4px 14px;">
+        <div class="tab active">🏆 League</div>
+        <div class="tab">📊 Standings</div>
+      </div>
+      <div class="filter-pills" style="padding: 0 14px 4px;">
+        <div class="pill active">This challenge</div>
+        <div class="pill">Friends</div>
+        <div class="pill">Global</div>
+      </div>
+
+      <!-- radar -->
+      <div class="d5-radar">
+        <div class="d5-rings">
+          <div class="d5-ring"></div>
+          <div class="d5-ring"></div>
+          <div class="d5-ring"></div>
+        </div>
+        <!-- orbit dots: top, right, bottom-left -->
+        <div class="d5-dot top1" style="top:0px;left:50%;transform:translateX(-50%);">A</div>
+        <div class="d5-dot top2" style="top:16px;right:16px;">S</div>
+        <div class="d5-dot top3" style="top:16px;left:16px;">V</div>
+        <!-- center = you -->
+        <div class="d5-center">
+          <div class="d5-center-rank">#14</div>
+          <div class="d5-center-label">You</div>
+          <div class="d5-center-sub">Top 16%</div>
+        </div>
+      </div>
+
+      <!-- your badge -->
+      <div class="d5-badge">
+        <div class="d5-badge-l">You · <b>#14 of 92</b> · Top 16% ★</div>
+        <div class="d5-badge-r">+200¢</div>
+      </div>
+
+      <!-- list -->
+      <div class="d5-list">
+        <div class="d5-item">
+          <div class="d5-irank lime">#1</div>
+          <div class="d5-iav" style="background:rgba(212,255,58,0.15);color:var(--lime);">A</div>
+          <div class="d5-iname">Aarav M</div>
+          <div class="d5-ipct-wrap">
+            <div class="d5-ipct">100%</div>
+            <div class="d5-imini"><div class="d5-imini-fill" style="width:100%"></div></div>
+          </div>
+        </div>
+        <div class="d5-item">
+          <div class="d5-irank" style="color:#c0c0c0;">#2</div>
+          <div class="d5-iav">S</div>
+          <div class="d5-iname">Sneha R</div>
+          <div class="d5-ipct-wrap">
+            <div class="d5-ipct">100%</div>
+            <div class="d5-imini"><div class="d5-imini-fill" style="width:100%"></div></div>
+          </div>
+        </div>
+        <div class="d5-item">
+          <div class="d5-irank" style="color:#cd7f32;">#3</div>
+          <div class="d5-iav">V</div>
+          <div class="d5-iname">Vikram K</div>
+          <div class="d5-ipct-wrap">
+            <div class="d5-ipct">100%</div>
+            <div class="d5-imini"><div class="d5-imini-fill" style="width:100%"></div></div>
+          </div>
+        </div>
+        <div class="d5-item me-item">
+          <div class="d5-irank lime">#14</div>
+          <div class="d5-iav me">Y</div>
+          <div class="d5-iname" style="color:var(--lime);">You</div>
+          <div class="d5-ipct-wrap">
+            <div class="d5-ipct">100%</div>
+            <div class="d5-imini"><div class="d5-imini-fill" style="width:100%"></div></div>
+          </div>
+        </div>
+        <div class="d5-item">
+          <div class="d5-irank">#46</div>
+          <div class="d5-iav">L</div>
+          <div class="d5-iname" style="color:var(--ink2);">Last top 50%</div>
+          <div class="d5-ipct-wrap">
+            <div class="d5-ipct dim">75%</div>
+            <div class="d5-imini"><div class="d5-imini-fill" style="width:75%;background:var(--ink3);"></div></div>
+          </div>
+        </div>
+        <div class="d5-cutoff">Top 50% cutoff</div>
+        <div class="d5-item" style="opacity:0.5;">
+          <div class="d5-irank">#47</div>
+          <div class="d5-iav">R</div>
+          <div class="d5-iname" style="color:var(--ink3);">Rohit S</div>
+          <div class="d5-ipct-wrap">
+            <div class="d5-ipct dim">71%</div>
+            <div class="d5-imini"><div class="d5-imini-fill" style="width:71%;background:var(--ink3);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bot-nav">
+        <div class="bot-icon"><div class="bot-dot"></div><span>Home</span></div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Chat</span></div>
+        <div class="bot-icon active">
+          <div class="bot-bar"><span></span><span></span><span></span></div>
+          <span>Lead</span>
+        </div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Coins</span></div>
+        <div class="bot-icon"><div class="bot-dot"></div><span>Me</span></div>
+      </div>
+      </div>
+    </div>
+    <div class="design-label">DESIGN 5</div>
+    <div class="design-name">Radar Orbit</div>
+    <div class="design-desc">Concentric ring radar showing your position among top competitors</div>
+  </div>
+
+</div>
+
+</body>
+</html>

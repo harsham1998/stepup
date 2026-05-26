@@ -78,7 +78,7 @@ class BattleDetailScreen extends StatelessWidget {
                   ),
                   Column(children: [
                     const Icon(Icons.sports_mma_rounded,
-                        color: Color(0xFFEF4444), size: 28),
+                        color: Color(0xFFC97B4E), size: 28),
                     const SizedBox(height: 4),
                     Text('VS',
                         style: AppTheme.bigNum(14, color: AppTheme.ink3)),
@@ -131,7 +131,7 @@ class BattleDetailScreen extends StatelessWidget {
                   Text('52%',
                       style: AppTheme.label(11, color: AppTheme.ink2)),
                   Text('2d 14h left',
-                      style: AppTheme.label(11, color: AppTheme.ink3)),
+                      style: AppTheme.label(11, color: AppTheme.ink2)),
                   Text('48%',
                       style: AppTheme.label(11, color: AppTheme.ink2)),
                 ],
@@ -139,7 +139,7 @@ class BattleDetailScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               Text('BREAKDOWN',
-                  style: AppTheme.label(10, color: AppTheme.ink3).copyWith(
+                  style: AppTheme.label(10, color: AppTheme.ink2).copyWith(
                       letterSpacing: 1.2, fontWeight: FontWeight.w800)),
               const SizedBox(height: 10),
 
@@ -168,7 +168,7 @@ class BattleDetailScreen extends StatelessWidget {
                         style: AppTheme.label(13, color: AppTheme.voltLime)
                             .copyWith(fontWeight: FontWeight.w700)),
                     Text('vs',
-                        style: AppTheme.label(11, color: AppTheme.ink3)),
+                        style: AppTheme.label(11, color: AppTheme.ink2)),
                     Text(row[2],
                         style: AppTheme.label(13, color: Colors.white)),
                   ],
