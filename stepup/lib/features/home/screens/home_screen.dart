@@ -21,6 +21,10 @@ import '../../../shared/models/challenge.dart';
 import '../../../shared/models/league_status.dart';
 import '../../../shared/models/rival.dart';
 import '../../../core/theme.dart';
+import '../widgets/friends_pulse_section.dart';
+import '../widgets/home_shortcuts.dart';
+import '../widgets/home_coins_banner.dart';
+import '../../social/providers/social_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -58,7 +62,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final missionsAsync  = ref.watch(healthMissionsProvider);
     final challengesAsync = ref.watch(myChallengesProvider);
     final leagueAsync    = ref.watch(leagueStatusProvider);
-    final standingsAsync = ref.watch(leagueStandingsProvider);
     final battlesAsync   = ref.watch(battlesProvider);
     final walletAsync    = ref.watch(walletBalanceProvider);
     final communityAsync = ref.watch(communityFeedProvider);
@@ -86,7 +89,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ) ?? [];
 
     final league = leagueAsync.whenOrNull(data: (l) => l);
-    final standings = standingsAsync.whenOrNull(data: (s) => s);
 
     final activeBattle = battlesAsync.whenOrNull(
       data: (list) => list.where((b) => b.status == 'active').isNotEmpty
@@ -115,8 +117,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ref.invalidate(healthMissionsProvider);
             ref.invalidate(myChallengesProvider);
             ref.invalidate(leagueStatusProvider);
-            ref.invalidate(leagueStandingsProvider);
             ref.invalidate(battlesProvider);
+            ref.invalidate(socialActivityFeedProvider);
+            ref.invalidate(friendsLeagueStandingsProvider);
             ref.invalidate(walletBalanceProvider);
             ref.invalidate(communityFeedProvider);
             ref.invalidate(streakStatusProvider);
@@ -270,21 +273,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(height: 24),
 
-            // ── League ────────────────────────────────────────────────
-            _SectionRow(
-              title: 'League',
-              badge: league != null ? 'SEASON ${league.season}' : null,
-              onSeeAll: () => context.push('/leaderboard/league'),
-            ),
-            const SizedBox(height: 12),
-            leagueAsync.when(
-              loading: () => const SizedBox(height: 100,
-                  child: Center(child: CircularProgressIndicator(
-                      color: AppTheme.voltLime, strokeWidth: 2))),
-              error: (_, err) => const SizedBox(),
-              data: (league) => _LeagueCard(
-                  league: league, standings: standings, userName: name),
-            ),
+            // ── Friends Pulse ─────────────────────────────────────────
+            const FriendsPulseSection(),
             const SizedBox(height: 24),
 
             // ── Live Battle ───────────────────────────────────────────
@@ -303,75 +293,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Text('Shortcuts', style: GoogleFonts.bigShouldersDisplay(
               fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
             const SizedBox(height: 12),
-            Row(children: [
-              _Shortcut(icon: Icons.add_rounded, label: 'Log',
-                  onTap: () => context.push('/activities/log')),
-              const SizedBox(width: 12),
-              _Shortcut(icon: Icons.emoji_events_outlined, label: 'Join',
-                  onTap: () => context.push('/challenges')),
-              const SizedBox(width: 12),
-              _Shortcut(icon: Icons.sports_kabaddi_rounded, label: 'Rival',
-                  onTap: () => context.push('/rivals')),
-              const SizedBox(width: 12),
-              _Shortcut(icon: Icons.monetization_on_outlined, label: 'Redeem',
-                  onTap: () => context.push('/coins/rewards')),
-            ]),
+            const HomeShortcuts(),
             const SizedBox(height: 16),
 
-            // ── Coins / Battle Pass Banner ────────────────────────────
-            GestureDetector(
-              onTap: () => context.push('/coins/battlepass'),
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                decoration: BoxDecoration(
-                  color: AppTheme.surface,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppTheme.border),
-                ),
-                child: Row(children: [
-                  Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppTheme.amber.withValues(alpha: 0.15),
-                    ),
-                    child: const Center(
-                      child: Icon(Icons.monetization_on_rounded,
-                          color: AppTheme.amber, size: 20),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(_fmtCoins(coins),
-                      style: GoogleFonts.bigShouldersDisplay(
-                        fontSize: 22, fontWeight: FontWeight.w900,
-                        color: AppTheme.amber)),
-                    Text('≈ ₹${(coins / 100).toStringAsFixed(0)} in rewards',
-                      style: AppTheme.label(11, color: AppTheme.ink2)),
-                  ]),
-                  const Spacer(),
-                  if (league != null)
-                    Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                      Text('S${league.season} · T${league.rankInTier} / ${league.totalInTier}',
-                        style: AppTheme.label(11, color: AppTheme.voltLime)
-                          .copyWith(fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 6),
-                      SizedBox(
-                        width: 80,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(2),
-                          child: LinearProgressIndicator(
-                            value: league.xpProgress.clamp(0.0, 1.0),
-                            minHeight: 3,
-                            backgroundColor: Colors.white.withValues(alpha: 0.07),
-                            valueColor: const AlwaysStoppedAnimation(AppTheme.voltLime),
-                          ),
-                        ),
-                      ),
-                    ]),
-                ]),
-              ),
-            ),
+            // ── Coins Banner ──────────────────────────────────────────
+            const HomeCoinsBanner(),
             const SizedBox(height: 24),
 
             // ── Community ─────────────────────────────────────────────
@@ -464,11 +390,6 @@ String _fmtNum(int n) {
     return '${s.substring(0, s.length - 3)},${s.substring(s.length - 3)}';
   }
   return n.toString();
-}
-
-String _fmtCoins(int c) {
-  if (c >= 1000) return '${(c / 1000).toStringAsFixed(c % 1000 == 0 ? 0 : 1)}K ¢';
-  return '$c ¢';
 }
 
 // ── Shared section header ────────────────────────────────────────────────────
@@ -1394,158 +1315,6 @@ class _ChallengeCard extends StatelessWidget {
   }
 }
 
-// ── League card ──────────────────────────────────────────────────────────────
-
-class _LeagueCard extends StatelessWidget {
-  final LeagueStatus league;
-  final Map<String, dynamic>? standings;
-  final String userName;
-  const _LeagueCard({required this.league, this.standings, required this.userName});
-
-  @override
-  Widget build(BuildContext context) {
-    final leagueColor = _hexColor(league.colorHex);
-    final nearby = standings?['nearby'] as List? ?? [];
-
-    // Find promote zone threshold
-    final promoteAt = (standings?['promote_at'] as num?)?.toInt() ?? 0;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.border),
-      ),
-      child: Column(children: [
-        // Header row
-        Padding(
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-          child: Row(children: [
-            // League badge
-            Container(
-              width: 48, height: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: leagueColor.withValues(alpha: 0.15),
-                border: Border.all(color: leagueColor.withValues(alpha: 0.5), width: 2),
-              ),
-              child: Center(
-                child: Text(league.label[0].toUpperCase(),
-                  style: GoogleFonts.bigShouldersDisplay(
-                    fontSize: 22, fontWeight: FontWeight.w900,
-                    color: leagueColor)),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(league.label.toUpperCase(),
-                style: GoogleFonts.bigShouldersDisplay(
-                  fontSize: 20, fontWeight: FontWeight.w900,
-                  color: leagueColor)),
-              Text('Rank ${league.rankInTier} of ${_fmtNum(league.totalInTier)}  ·  ${league.xp} XP',
-                style: AppTheme.label(11, color: AppTheme.ink2)),
-            ]),
-            const Spacer(),
-            GestureDetector(
-              onTap: () => context.push('/leaderboard/standings'),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text('NEXT', style: AppTheme.label(9, color: AppTheme.ink2)
-                  .copyWith(letterSpacing: 0.4)),
-                const SizedBox(height: 2),
-                Text(
-                  _nextTier(league),
-                  style: GoogleFonts.bigShouldersDisplay(
-                    fontSize: 13, fontWeight: FontWeight.w900,
-                    color: AppTheme.voltLime)),
-              ]),
-            ),
-          ]),
-        ),
-
-        // Standings rows
-        if (nearby.isNotEmpty) ...[
-          Divider(color: AppTheme.border, height: 1),
-          ...nearby.take(5).map((row) {
-            final rank = (row['rank'] as num).toInt();
-            final isYou = row['is_me'] as bool? ?? false;
-            final uname = row['name'] as String? ?? 'Unknown';
-            final xp = (row['xp'] as num? ?? 0).toInt();
-            final showZone = promoteAt > 0 && rank == promoteAt + 1;
-
-            return Column(children: [
-              if (showZone)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Row(children: [
-                    Expanded(child: Container(height: 1,
-                        color: AppTheme.voltLime.withValues(alpha: 0.3))),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text('PROMOTE ZONE',
-                        style: AppTheme.label(9, color: AppTheme.voltLime)
-                          .copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.8)),
-                    ),
-                    Expanded(child: Container(height: 1,
-                        color: AppTheme.voltLime.withValues(alpha: 0.3))),
-                  ]),
-                ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
-                color: isYou
-                    ? AppTheme.voltLime.withValues(alpha: 0.05)
-                    : Colors.transparent,
-                child: Row(children: [
-                  SizedBox(
-                    width: 36,
-                    child: Text('#$rank',
-                      style: GoogleFonts.bigShouldersDisplay(
-                        fontSize: 14, fontWeight: FontWeight.w900,
-                        color: isYou ? AppTheme.voltLime : AppTheme.ink2)),
-                  ),
-                  Container(
-                    width: 26, height: 26,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isYou
-                          ? AppTheme.voltLime.withValues(alpha: 0.2)
-                          : Colors.white.withValues(alpha: 0.07),
-                    ),
-                    child: Center(
-                      child: Text(
-                        uname.isNotEmpty ? uname[0].toUpperCase() : '?',
-                        style: GoogleFonts.bigShouldersDisplay(
-                          fontSize: 13, fontWeight: FontWeight.w900,
-                          color: isYou ? AppTheme.voltLime : Colors.white)),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(isYou ? 'You' : uname,
-                      style: AppTheme.label(13,
-                        color: isYou ? Colors.white : AppTheme.ink2)
-                          .copyWith(fontWeight: isYou ? FontWeight.w700 : FontWeight.w400)),
-                  ),
-                  Text('${_fmtNum(xp)} XP',
-                    style: AppTheme.label(12, color: AppTheme.ink2)
-                      .copyWith(fontWeight: FontWeight.w600)),
-                ]),
-              ),
-            ]);
-          }),
-        ],
-        const SizedBox(height: 4),
-      ]),
-    );
-  }
-
-  String _nextTier(LeagueStatus l) {
-    final ladder = l.tierLadder;
-    final idx = ladder.indexWhere((t) => t.isCurrent);
-    if (idx >= 0 && idx < ladder.length - 1) return ladder[idx + 1].label.toUpperCase();
-    return 'MAX';
-  }
-}
-
 Color _hexColor(String hex) {
   final h = hex.replaceAll('#', '');
   if (h.length == 6) return Color(int.parse('FF$h', radix: 16));
@@ -1659,36 +1428,6 @@ class _BattleCard extends StatelessWidget {
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}K';
     return n.toString();
   }
-}
-
-// ── Shortcut button ──────────────────────────────────────────────────────────
-
-class _Shortcut extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  const _Shortcut({required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) => Expanded(
-        child: GestureDetector(
-          onTap: onTap,
-          child: Column(children: [
-            Container(
-              width: 52, height: 52,
-              decoration: BoxDecoration(
-                color: AppTheme.surface,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppTheme.border),
-              ),
-              child: Icon(icon, color: Colors.white, size: 22),
-            ),
-            const SizedBox(height: 5),
-            Text(label, style: AppTheme.label(11, color: AppTheme.ink2)
-              .copyWith(fontWeight: FontWeight.w600)),
-          ]),
-        ),
-      );
 }
 
 // ── Community ────────────────────────────────────────────────────────────────
