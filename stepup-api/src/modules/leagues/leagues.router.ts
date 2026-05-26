@@ -1,12 +1,21 @@
 // stepup-api/src/modules/leagues/leagues.router.ts
 import { Router, Request, Response } from 'express';
-import { getMyLeague, getStandings } from './leagues.service';
+import { getMyLeague, getStandings, getFriendsStandings } from './leagues.service';
 
 export const leaguesRouter = Router();
 
 leaguesRouter.get('/me', async (req: Request, res: Response) => {
   try {
     const data = await getMyLeague(req.user!.id);
+    res.json(data);
+  } catch (err: unknown) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
+  }
+});
+
+leaguesRouter.get('/friends-standings', async (req: Request, res: Response) => {
+  try {
+    const data = await getFriendsStandings(req.user!.id);
     res.json(data);
   } catch (err: unknown) {
     res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });

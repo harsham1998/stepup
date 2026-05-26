@@ -26,6 +26,7 @@ import { achievementsRouter } from './modules/achievements/achievements.router';
 import { levelsRouter } from './modules/steps/levels.router';
 import { reputationRouter } from './modules/reputation/reputation.router';
 import { seasonsRouter } from './modules/seasons/seasons.router';
+import { socialRouter } from './modules/social/social.router';
 
 export function createApp() {
   const app = express();
@@ -63,6 +64,7 @@ export function createApp() {
   app.use('/xp', levelsRouter);
   app.use('/reputation', reputationRouter);
   app.use('/seasons', seasonsRouter);
+  app.use('/social', socialRouter);
 
   app.use(errorHandler);
   return app;

@@ -89,6 +89,55 @@ function xpToLeagueSlug(xp: number): string {
   return 'bronze';
 }
 
+export async function getFriendsStandings(userId: string) {
+  const db = getSupabase();
+
+  // Get friend IDs
+  const { data: friendships } = await db
+    .from('friendships')
+    .select('friend_id')
+    .eq('user_id', userId);
+
+  const friendIds = (friendships ?? []).map(f => f.friend_id);
+  const allIds = [userId, ...friendIds];
+
+  // Get league entries for user + friends
+  const { data: rows } = await db
+    .from('user_leagues')
+    .select('user_id, xp, league_slug')
+    .in('user_id', allIds);
+
+  if (!rows || rows.length === 0) return { entries: [], my_rank: 1 };
+
+  // Sort by XP descending
+  rows.sort((a, b) => b.xp - a.xp);
+
+  const userIds = rows.map(r => r.user_id);
+  const { data: users } = await db
+    .from('users')
+    .select('id, name, avatar_url, streak_days')
+    .in('id', userIds);
+
+  const userMap = Object.fromEntries((users ?? []).map(u => [u.id, u]));
+  const myXp = rows.find(r => r.user_id === userId)?.xp ?? 0;
+
+  const entries = rows.map((r, i) => ({
+    rank: i + 1,
+    user_id: r.user_id,
+    name: userMap[r.user_id]?.name ?? 'Unknown',
+    avatar_url: userMap[r.user_id]?.avatar_url ?? null,
+    streak_days: userMap[r.user_id]?.streak_days ?? 0,
+    xp: r.xp,
+    league_slug: r.league_slug,
+    is_me: r.user_id === userId,
+    xp_gap: r.user_id === userId ? 0 : r.xp - myXp,
+  }));
+
+  const myRank = entries.find(e => e.is_me)?.rank ?? 1;
+
+  return { entries, my_rank: myRank };
+}
+
 export async function getStandings(userId: string, page = 1) {
   const db = getSupabase();
   const pageSize = 50;
