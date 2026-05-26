@@ -681,19 +681,40 @@ class _MyChallengesViewState extends State<_MyChallengesView> {
   }
 }
 
-class _MyChallengeTile extends StatelessWidget {
+class _MyChallengeTile extends ConsumerWidget {
   final Challenge challenge;
   final bool highlight;
   const _MyChallengeTile({required this.challenge, required this.highlight});
 
   @override
-  Widget build(BuildContext context) {
-    final days =
-        challenge.endTime.difference(challenge.startTime).inDays.clamp(1, 9999);
-    final daysPassed =
-        DateTime.now().difference(challenge.startTime).inDays.clamp(0, days);
-    final pct = (daysPassed / days).clamp(0.0, 1.0);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progressAsync = ref.watch(challengeProgressProvider(challenge.id));
     final cfg = challenge.activity;
+
+    final days = challenge.endTime.difference(challenge.startTime).inDays.clamp(1, 9999);
+    final daysPassed = DateTime.now().difference(challenge.startTime).inDays.clamp(0, days);
+
+    final double pct = progressAsync.whenOrNull(
+          data: (p) => p?.percent,
+        ) ??
+        (daysPassed / days).clamp(0.0, 1.0);
+
+    final String progressLabel = progressAsync.whenOrNull(
+          data: (p) {
+            if (p == null) return 'Day $daysPassed/$days';
+            if (['gym', 'cycling', 'outdoor'].contains(p.activityType)) {
+              return '${p.current}/${p.goal} sessions · Day $daysPassed/$days';
+            }
+            final cur = p.current >= 1000
+                ? '${(p.current / 1000).toStringAsFixed(1)}k'
+                : '${p.current}';
+            final goal = p.goal >= 1000
+                ? '${(p.goal / 1000).toStringAsFixed(0)}k'
+                : '${p.goal}';
+            return '$cur/$goal steps · Day $daysPassed/$days';
+          },
+        ) ??
+        'Day $daysPassed/$days';
 
     return GestureDetector(
       onTap: () => context.push('/challenges/${challenge.id}'),
@@ -744,15 +765,13 @@ class _MyChallengeTile extends StatelessWidget {
                           bgColor: pct >= 1.0
                               ? AppTheme.voltLime
                               : Colors.white.withValues(alpha: 0.2),
-                          textColor:
-                              pct >= 1.0 ? AppTheme.bg : Colors.white,
+                          textColor: pct >= 1.0 ? AppTheme.bg : Colors.white,
                         ),
                       ]),
                       const Spacer(),
                       Text(
                         challenge.title,
-                        style: AppTheme.bigNum(17)
-                            .copyWith(fontStyle: FontStyle.italic),
+                        style: AppTheme.bigNum(17).copyWith(fontStyle: FontStyle.italic),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -764,15 +783,13 @@ class _MyChallengeTile extends StatelessWidget {
                             child: LinearProgressIndicator(
                               value: pct,
                               minHeight: 4,
-                              backgroundColor:
-                                  Colors.white.withValues(alpha: 0.15),
-                              valueColor: const AlwaysStoppedAnimation(
-                                  AppTheme.voltLime),
+                              backgroundColor: Colors.white.withValues(alpha: 0.15),
+                              valueColor: const AlwaysStoppedAnimation(AppTheme.voltLime),
                             ),
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Text('Day $daysPassed/$days',
+                        Text(progressLabel,
                             style: AppTheme.label(10,
                                 color: Colors.white.withValues(alpha: 0.7))),
                         const SizedBox(width: 8),
