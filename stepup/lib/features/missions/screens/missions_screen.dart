@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/health_missions_provider.dart';
+import '../../../core/api_client.dart';
 import '../../../core/theme.dart';
+
+// Tracks which health missions have been reported to the API this session.
+// Server-side Redis prevents double-awarding across sessions.
+final _reportedMissionsProvider = StateProvider<Set<String>>((ref) => <String>{});
 
 class MissionsScreen extends ConsumerWidget {
   const MissionsScreen({super.key});
@@ -115,7 +121,7 @@ class _Badge extends StatelessWidget {
       );
 }
 
-class _MissionCard extends StatelessWidget {
+class _MissionCard extends ConsumerWidget {
   final HealthMission mission;
   const _MissionCard({required this.mission});
 
@@ -129,9 +135,21 @@ class _MissionCard extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final icon = _icons[mission.activity] ?? Icons.directions_walk_rounded;
     final done = mission.completed;
+
+    if (done) {
+      final reported = ref.read(_reportedMissionsProvider);
+      if (!reported.contains(mission.id)) {
+        ref.read(_reportedMissionsProvider.notifier).state = {...reported, mission.id};
+        Future.microtask(() async {
+          try {
+            await ApiClient.instance.post('/missions/health/complete', {'missionId': mission.id});
+          } catch (_) {}
+        });
+      }
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),

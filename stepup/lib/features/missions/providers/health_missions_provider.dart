@@ -4,7 +4,7 @@ import '../../steps/step_sync_service.dart';
 class HealthMission {
   final String id, title, activity, unit;
   final double current, target;
-  final int coinReward;
+  final int coinReward, xpReward;
 
   const HealthMission({
     required this.id,
@@ -14,6 +14,7 @@ class HealthMission {
     required this.current,
     required this.target,
     required this.coinReward,
+    required this.xpReward,
   });
 
   bool get completed => current >= target;
@@ -63,6 +64,7 @@ final healthMissionsProvider = FutureProvider<List<HealthMission>>((ref) async {
       current: summary.steps.toDouble(),
       target: 8000,
       coinReward: 15,
+      xpReward: 30,
     ),
     HealthMission(
       id: 'water',
@@ -72,6 +74,7 @@ final healthMissionsProvider = FutureProvider<List<HealthMission>>((ref) async {
       current: waterL,
       target: 2.5,
       coinReward: 10,
+      xpReward: 25,
     ),
     HealthMission(
       id: 'sleep',
@@ -81,6 +84,7 @@ final healthMissionsProvider = FutureProvider<List<HealthMission>>((ref) async {
       current: sleepHrs,
       target: 7.0,
       coinReward: 15,
+      xpReward: 25,
     ),
     HealthMission(
       id: 'active',
@@ -90,6 +94,7 @@ final healthMissionsProvider = FutureProvider<List<HealthMission>>((ref) async {
       current: summary.activeMins.toDouble(),
       target: 30,
       coinReward: 10,
+      xpReward: 20,
     ),
     HealthMission(
       id: 'workout',
@@ -99,6 +104,7 @@ final healthMissionsProvider = FutureProvider<List<HealthMission>>((ref) async {
       current: workouts.isNotEmpty ? 1 : 0,
       target: 1,
       coinReward: 20,
+      xpReward: 30,
     ),
   ];
 });

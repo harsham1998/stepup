@@ -1,5 +1,6 @@
 // stepup-api/src/modules/missions/missions.service.ts
 import { getSupabase } from '../../lib/supabase';
+import { getRedis } from '../../lib/redis';
 import { awardXp } from '../steps/xp.service';
 
 export async function getMissions(userId: string, type: 'daily' | 'weekly' | 'seasonal') {
@@ -114,4 +115,45 @@ async function awardMissionReward(
   if (xp > 0) {
     await awardXp(userId, xp);
   }
+}
+
+const HEALTH_MISSION_XP: Record<string, number> = {
+  steps: 30,
+  water: 25,
+  sleep: 25,
+  active: 20,
+  workout: 30,
+};
+
+const HEALTH_MISSION_COINS: Record<string, number> = {
+  steps: 15,
+  water: 10,
+  sleep: 15,
+  active: 10,
+  workout: 20,
+};
+
+export async function completeHealthMission(userId: string, missionId: string) {
+  if (!HEALTH_MISSION_XP[missionId]) throw new Error('Unknown mission');
+
+  const today = new Date().toISOString().slice(0, 10);
+  const redis = getRedis();
+  const key = `health_mission_done:${userId}:${missionId}:${today}`;
+
+  const already = await redis.get(key);
+  if (already) return { rewarded: false };
+
+  // Mark claimed for 48 hours (covers timezone edge cases)
+  await redis.setex(key, 172800, '1');
+
+  const db = getSupabase();
+  const coins = HEALTH_MISSION_COINS[missionId]!;
+  const xp = HEALTH_MISSION_XP[missionId]!;
+
+  if (coins > 0) {
+    await db.rpc('increment_coins', { uid: userId, amount: coins });
+  }
+  await awardXp(userId, xp);
+
+  return { rewarded: true, xp, coins };
 }
