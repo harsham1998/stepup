@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -72,8 +73,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final activeMins = summary?.activeMins ?? 0;
     final bpm = heartRateAsync.whenOrNull(data: (h) => h) ?? 0;
     final streakDays = streakAsync.whenOrNull(data: (s) => s.streakDays) ?? 0;
-    const stepGoal = 10000;
-    final stepPct = (steps / stepGoal).clamp(0.0, 1.0);
 
     final activeChallenges = challengesAsync.whenOrNull(
       data: (list) => list.where((c) => c.isLive).toList(),
@@ -182,76 +181,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ]),
             const SizedBox(height: 16),
 
-            // ── Steps Hero Card ───────────────────────────────────────
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-              decoration: BoxDecoration(
-                color: AppTheme.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.border),
+            // ── XP Hero Card ──────────────────────────────────────────
+            if (league != null)
+              _XpHeroCard(
+                league: league,
+                streakDays: streakDays,
+                steps: steps,
+                distKm: distKm,
+                kcal: kcal,
+                activeMins: activeMins,
+                bpm: bpm,
+              )
+            else
+              Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: AppTheme.voltLime, strokeWidth: 2),
+                ),
               ),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                // Streak + goal %
-                Row(children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppTheme.voltLime,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(Icons.star_rounded, size: 12, color: AppTheme.bg),
-                      const SizedBox(width: 4),
-                      Text('${streakDays}D STREAK',
-                        style: GoogleFonts.bigShouldersDisplay(
-                          fontSize: 12, fontWeight: FontWeight.w900, color: AppTheme.bg)),
-                    ]),
-                  ),
-                  const Spacer(),
-                  Text('${(stepPct * 100).round()}% of goal',
-                    style: AppTheme.label(12, color: AppTheme.ink2)),
-                ]),
-                const SizedBox(height: 8),
-                // Big steps number
-                GestureDetector(
-                  onTap: () => context.push('/activities'),
-                  child: Text(
-                    _fmtNum(steps),
-                    style: GoogleFonts.bigShouldersDisplay(
-                      fontSize: 64, fontWeight: FontWeight.w900,
-                      color: AppTheme.voltLime, height: 0.95,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Progress bar
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(2),
-                  child: LinearProgressIndicator(
-                    value: stepPct,
-                    minHeight: 4,
-                    backgroundColor: Colors.white.withValues(alpha: 0.07),
-                    valueColor: const AlwaysStoppedAnimation(AppTheme.voltLime),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                // 4 stats
-                Row(children: [
-                  _StatCell(icon: Icons.bolt_rounded, value: distKm.toStringAsFixed(1), label: 'KM'),
-                  _StatDivider(),
-                  _StatCell(icon: Icons.favorite_border_rounded, value: '$kcal', label: 'KCAL', emoji: '🔥'),
-                  _StatDivider(),
-                  _StatCell(icon: Icons.access_time_rounded, value: '$activeMins', label: 'MIN'),
-                  _StatDivider(),
-                  _StatCell(
-                    icon: Icons.monitor_heart_outlined,
-                    value: bpm > 0 ? '$bpm' : '--',
-                    label: 'BPM',
-                    emoji: '❤️',
-                  ),
-                ]),
-              ]),
-            ),
             const SizedBox(height: 24),
 
             // ── Daily Missions ────────────────────────────────────────
@@ -551,39 +504,486 @@ class _SectionRow extends StatelessWidget {
       ]);
 }
 
-// ── Stat cell ────────────────────────────────────────────────────────────────
+// ── XP Hero Card ─────────────────────────────────────────────────────────────
 
-class _StatCell extends StatelessWidget {
-  final IconData icon;
-  final String value, label;
-  final String? emoji;
-  const _StatCell({required this.icon, required this.value, required this.label, this.emoji});
+class _XpHeroCard extends StatefulWidget {
+  final LeagueStatus league;
+  final int streakDays, steps, kcal, activeMins, bpm;
+  final double distKm;
+
+  const _XpHeroCard({
+    required this.league,
+    required this.streakDays,
+    required this.steps,
+    required this.distKm,
+    required this.kcal,
+    required this.activeMins,
+    required this.bpm,
+  });
+
+  @override
+  State<_XpHeroCard> createState() => _XpHeroCardState();
+}
+
+class _XpHeroCardState extends State<_XpHeroCard> {
+  bool _tooltipVisible = false;
+  Timer? _tooltipTimer;
+
+  @override
+  void dispose() {
+    _tooltipTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onBarTap() {
+    setState(() => _tooltipVisible = true);
+    _tooltipTimer?.cancel();
+    _tooltipTimer = Timer(const Duration(milliseconds: 2200), () {
+      if (mounted) setState(() => _tooltipVisible = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = widget.league;
+    final currentIdx = l.tierLadder.indexWhere((t) => t.isCurrent);
+    final nextTier = (currentIdx >= 0 && currentIdx < l.tierLadder.length - 1)
+        ? l.tierLadder[currentIdx + 1]
+        : null;
+    final xpToNext = l.xpForNext - l.xp;
+    final tierColor = _hexColor(l.colorHex);
+    final progress = l.xpProgress.clamp(0.0, 1.0);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+          // ── Two panels ───────────────────────────────────
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+
+                // LEFT — XP
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _Eyebrow(dotColor: AppTheme.voltLime,
+                            label: 'SEASON ${l.season} XP'),
+                        const SizedBox(height: 10),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(_fmtNum(l.xp),
+                              style: GoogleFonts.bigShouldersDisplay(
+                                fontSize: 52, fontWeight: FontWeight.w900,
+                                color: AppTheme.voltLime,
+                                letterSpacing: -1.5, height: 0.85,
+                              )),
+                            const SizedBox(width: 6),
+                            Text('XP',
+                              style: GoogleFonts.bigShouldersDisplay(
+                                fontSize: 18, fontWeight: FontWeight.w900,
+                                color: AppTheme.voltLime.withValues(alpha: 0.45),
+                              )),
+                          ],
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 11, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: AppTheme.voltLime.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(99),
+                            border: Border.all(
+                              color: AppTheme.voltLime.withValues(alpha: 0.22)),
+                          ),
+                          child: Row(mainAxisSize: MainAxisSize.min, children: [
+                            const Text('🔥',
+                              style: TextStyle(fontSize: 13, height: 1)),
+                            const SizedBox(width: 6),
+                            Text('${widget.streakDays} Day Streak',
+                              style: GoogleFonts.bigShouldersDisplay(
+                                fontSize: 11, fontWeight: FontWeight.w900,
+                                color: AppTheme.voltLime,
+                              )),
+                          ]),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Glowing divider
+                Container(
+                  width: 1,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        AppTheme.voltLime.withValues(alpha: 0.22),
+                        AppTheme.voltLime.withValues(alpha: 0.22),
+                        Colors.transparent,
+                      ],
+                      stops: const [0.0, 0.18, 0.82, 1.0],
+                    ),
+                  ),
+                ),
+
+                // RIGHT — Tier
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _Eyebrow(dotColor: tierColor, label: 'CURRENT TIER'),
+                        const SizedBox(height: 10),
+                        ShaderMask(
+                          shaderCallback: (bounds) => LinearGradient(
+                            colors: [
+                              const Color(0xFFFFE082),
+                              tierColor,
+                              const Color(0xFFCC7700),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ).createShader(bounds),
+                          child: Text(l.label.toUpperCase(),
+                            style: GoogleFonts.bigShouldersDisplay(
+                              fontSize: 34, fontWeight: FontWeight.w900,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.white, height: 0.9,
+                            )),
+                        ),
+                        const SizedBox(height: 7),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: tierColor.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: tierColor.withValues(alpha: 0.28)),
+                          ),
+                          child: Text('SEASON ${l.season}',
+                            style: GoogleFonts.inter(
+                              fontSize: 9, fontWeight: FontWeight.w700,
+                              color: tierColor, letterSpacing: 0.5,
+                            )),
+                        ),
+                        const Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: Text('#${l.rankInTier}',
+                            style: GoogleFonts.bigShouldersDisplay(
+                              fontSize: 22, fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            )),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Progress bar + milestones ─────────────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              children: [
+                // Bar with tap-to-reveal tooltip
+                GestureDetector(
+                  onTap: _onBarTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final trackW = constraints.maxWidth;
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          // Track background
+                          Container(
+                            height: 7,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                          ),
+                          // Animated gradient fill
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.0, end: progress),
+                            duration: const Duration(milliseconds: 1400),
+                            curve: Curves.easeOutBack,
+                            builder: (context2, fillValue, child) {
+                              final value = fillValue;
+                              final fillW = (trackW * value).clamp(0.0, trackW);
+                              return Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(99),
+                                    child: Container(
+                                      height: 7, width: fillW,
+                                      decoration: const BoxDecoration(
+                                        gradient: LinearGradient(colors: [
+                                          AppTheme.amber,
+                                          AppTheme.voltLime,
+                                        ]),
+                                      ),
+                                    ),
+                                  ),
+                                  // Glowing head dot
+                                  if (fillW > 6)
+                                    Positioned(
+                                      left: fillW - 5.5, top: -2,
+                                      child: Container(
+                                        width: 11, height: 11,
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.voltLime,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: AppTheme.voltLime
+                                                  .withValues(alpha: 0.5),
+                                              blurRadius: 8, spreadRadius: 2,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                          // Tooltip — floats above bar head, anchored near fill end
+                          if (nextTier != null)
+                            Positioned(
+                              bottom: 13,
+                              right: 0,
+                              child: AnimatedOpacity(
+                                opacity: _tooltipVisible ? 1.0 : 0.0,
+                                duration: const Duration(milliseconds: 200),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.surface,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: AppTheme.voltLime
+                                          .withValues(alpha: 0.22)),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppTheme.voltLime
+                                            .withValues(alpha: 0.12),
+                                        blurRadius: 16,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('${_fmtNum(xpToNext)} XP',
+                                        style: GoogleFonts.bigShouldersDisplay(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w900,
+                                          color: AppTheme.voltLime,
+                                        )),
+                                      const SizedBox(width: 5),
+                                      Text('to reach ',
+                                        style: AppTheme.label(10)),
+                                      Text(nextTier.label.toUpperCase(),
+                                        style: GoogleFonts.inter(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                          color: const Color(0xFF94A3B8),
+                                        )),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Milestone ticks from tier ladder
+                if (l.tierLadder.isNotEmpty)
+                  Row(
+                    children: List.generate(l.tierLadder.length, (i) {
+                      final tier = l.tierLadder[i];
+                      final isReached = currentIdx >= 0 && i < currentIdx;
+                      final isCurr = tier.isCurrent;
+                      final isNext = i == currentIdx + 1;
+                      final tickColor = isCurr
+                          ? AppTheme.amber
+                          : isReached
+                              ? AppTheme.voltLime
+                              : AppTheme.ink3;
+                      final labelColor = isCurr
+                          ? AppTheme.amber
+                          : isReached
+                              ? AppTheme.voltLime.withValues(alpha: 0.6)
+                              : isNext
+                                  ? const Color(0xFF94A3B8)
+                                  : AppTheme.ink3;
+                      final abbrev = tier.label.length > 4
+                          ? tier.label.substring(0, 4).toUpperCase()
+                          : tier.label.toUpperCase();
+
+                      return Expanded(
+                        child: Column(children: [
+                          Container(
+                            width: 1.5, height: 6,
+                            decoration: BoxDecoration(
+                              color: tickColor,
+                              borderRadius: BorderRadius.circular(1),
+                              boxShadow: isCurr
+                                  ? [BoxShadow(
+                                      color: AppTheme.amber.withValues(alpha: 0.6),
+                                      blurRadius: 6)]
+                                  : isReached
+                                      ? [BoxShadow(
+                                          color: AppTheme.voltLime
+                                              .withValues(alpha: 0.5),
+                                          blurRadius: 4)]
+                                      : null,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(abbrev,
+                            style: GoogleFonts.inter(
+                              fontSize: 8, fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4, color: labelColor,
+                            )),
+                        ]),
+                      );
+                    }),
+                  ),
+              ],
+            ),
+          ),
+
+          // ── Colour-coded stat tiles ───────────────────────
+          Container(
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: AppTheme.border)),
+            ),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
+            child: Row(children: [
+              _HeroStatTile(emoji: '👟', value: _fmtNum(widget.steps),
+                label: 'STEPS', valueColor: AppTheme.voltLime,
+                bgColor: AppTheme.voltLime.withValues(alpha: 0.07)),
+              const SizedBox(width: 6),
+              _HeroStatTile(emoji: '⚡', value: widget.distKm.toStringAsFixed(1),
+                label: 'KM', valueColor: const Color(0xFF67E8F9),
+                bgColor: const Color(0xFF67E8F9).withValues(alpha: 0.07)),
+              const SizedBox(width: 6),
+              _HeroStatTile(emoji: '🔥', value: '${widget.kcal}',
+                label: 'KCAL', valueColor: const Color(0xFFFB923C),
+                bgColor: const Color(0xFFFB923C).withValues(alpha: 0.07)),
+              const SizedBox(width: 6),
+              _HeroStatTile(emoji: '⏱', value: '${widget.activeMins}',
+                label: 'MIN', valueColor: Colors.white,
+                bgColor: Colors.white.withValues(alpha: 0.04)),
+              const SizedBox(width: 6),
+              _HeroStatTile(
+                emoji: '❤️',
+                value: widget.bpm > 0 ? '${widget.bpm}' : '--',
+                label: 'BPM', valueColor: const Color(0xFFF87171),
+                bgColor: const Color(0xFFF87171).withValues(alpha: 0.07)),
+            ]),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Eyebrow label ────────────────────────────────────────────────────────────
+
+class _Eyebrow extends StatelessWidget {
+  final Color dotColor;
+  final String label;
+  const _Eyebrow({required this.dotColor, required this.label});
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Container(
+        width: 4, height: 4,
+        decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+      ),
+      const SizedBox(width: 5),
+      Text(label,
+        style: GoogleFonts.inter(
+          fontSize: 9, fontWeight: FontWeight.w700,
+          letterSpacing: 1.2, color: AppTheme.ink3,
+        )),
+    ],
+  );
+}
+
+// ── Hero stat tile ────────────────────────────────────────────────────────────
+
+class _HeroStatTile extends StatelessWidget {
+  final String emoji, value, label;
+  final Color valueColor, bgColor;
+  const _HeroStatTile({
+    required this.emoji,
+    required this.value,
+    required this.label,
+    required this.valueColor,
+    required this.bgColor,
+  });
 
   @override
   Widget build(BuildContext context) => Expanded(
-        child: Column(children: [
-          emoji != null
-              ? Text(emoji!, style: const TextStyle(fontSize: 14, height: 1.1))
-              : Icon(icon, color: AppTheme.ink2, size: 16),
-          const SizedBox(height: 4),
-          Text(value,
-            style: GoogleFonts.bigShouldersDisplay(
-              fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white)),
-          Text(label,
-            style: AppTheme.label(9, color: AppTheme.ink2)
-              .copyWith(letterSpacing: 0.4, fontWeight: FontWeight.w600)),
-        ]),
-      );
-}
-
-class _StatDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 1, height: 36,
-    margin: const EdgeInsets.symmetric(horizontal: 4),
-    color: Colors.white.withValues(alpha: 0.06),
+    child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 9),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(children: [
+        Text(emoji, style: const TextStyle(fontSize: 15, height: 1)),
+        const SizedBox(height: 4),
+        Text(value,
+          style: GoogleFonts.bigShouldersDisplay(
+            fontSize: 17, fontWeight: FontWeight.w900,
+            color: valueColor, height: 1,
+          )),
+        const SizedBox(height: 3),
+        Text(label,
+          style: GoogleFonts.inter(
+            fontSize: 7.5, fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+            color: valueColor.withValues(alpha: 0.5),
+          )),
+      ]),
+    ),
   );
 }
+
 
 // ── Mission card (horizontal scroll square) ──────────────────────────────────
 

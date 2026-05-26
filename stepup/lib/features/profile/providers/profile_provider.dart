@@ -14,10 +14,16 @@ final profileSummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async 
   }
 });
 
-// Full editable profile for the edit screen (includes phone + email from auth)
+// Full editable profile for the edit screen (includes phone + email from auth).
+// Falls back to summary data when the edit endpoint is unavailable so the form
+// loads immediately from cache instead of spinning until timeout.
 final editProfileProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  final data = await ApiClient.instance.get('/auth/profile/edit');
-  return (data as Map<String, dynamic>?) ?? {};
+  try {
+    final data = await ApiClient.instance.get('/auth/profile/edit');
+    return (data as Map<String, dynamic>?) ?? {};
+  } catch (_) {
+    return await ref.read(profileSummaryProvider.future);
+  }
 });
 
 // Keep for screens that still call /auth/profile directly

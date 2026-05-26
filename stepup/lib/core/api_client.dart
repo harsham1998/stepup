@@ -69,7 +69,14 @@ class ApiClient {
   }
 
   Future<dynamic> patch(String path, Map<String, dynamic> body) async {
-    final r = await _dio.patch(path, data: body);
-    return r.data;
+    try {
+      final r = await _dio.patch(path, data: body);
+      return r.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      final serverMsg = data is Map ? (data['error'] as String?) : null;
+      final statusCode = e.response?.statusCode;
+      throw _ApiError(serverMsg ?? e.message ?? 'Request failed', statusCode);
+    }
   }
 }

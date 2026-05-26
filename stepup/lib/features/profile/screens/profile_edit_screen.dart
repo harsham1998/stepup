@@ -11,19 +11,28 @@ class ProfileEditScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(editProfileProvider);
-    return async.when(
-      loading: () => const Scaffold(
-        backgroundColor: AppTheme.bg,
-        body: Center(child: CircularProgressIndicator(color: AppTheme.voltLime)),
-      ),
-      error: (e, _) => Scaffold(
+    final editAsync = ref.watch(editProfileProvider);
+    final summaryAsync = ref.watch(profileSummaryProvider);
+
+    // Prefer richer edit data (has phone/email). Fall back to summary
+    // (already cached from profile screen) so the form loads instantly.
+    if (editAsync.hasValue) {
+      return _ProfileEditForm(initial: editAsync.value!);
+    }
+    if (summaryAsync.hasValue && (summaryAsync.value?.isNotEmpty ?? false)) {
+      return _ProfileEditForm(initial: summaryAsync.value!);
+    }
+    if (editAsync.hasError && summaryAsync.hasError) {
+      return Scaffold(
         backgroundColor: AppTheme.bg,
         body: Center(
           child: Text('Failed to load profile', style: AppTheme.label(14, color: AppTheme.ink2)),
         ),
-      ),
-      data: (profile) => _ProfileEditForm(initial: profile),
+      );
+    }
+    return const Scaffold(
+      backgroundColor: AppTheme.bg,
+      body: Center(child: CircularProgressIndicator(color: AppTheme.voltLime)),
     );
   }
 }
