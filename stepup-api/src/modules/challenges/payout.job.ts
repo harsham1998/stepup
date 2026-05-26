@@ -4,6 +4,7 @@ import { getRedis } from '../../lib/redis';
 import { logger } from '../../lib/logger';
 import { PrizeDistribution, WalletTransaction } from '../../types';
 import { notifyChallengePayout } from '../notifications/notifications.service';
+import { awardXp } from '../steps/xp.service';
 
 const PAYOUT_QUEUE = 'challenge-payout';
 
@@ -18,6 +19,23 @@ export function startPayoutWorker() {
 export async function schedulePayoutJob(challengeId: string, runAt: Date) {
   const delay = runAt.getTime() - Date.now();
   await payoutQueue.add('payout', { challengeId }, { delay: Math.max(delay, 0) });
+}
+
+function getChallengeXp(
+  challenge: { entry_fee: number; start_time: string; end_time: string },
+  rankFromTop: number,
+  totalParticipants: number,
+): number {
+  const isFree = challenge.entry_fee === 0;
+  const durationDays = Math.round(
+    (new Date(challenge.end_time).getTime() - new Date(challenge.start_time).getTime()) / 86_400_000,
+  );
+  if (isFree) return durationDays <= 1 ? 50 : 150;
+  // Paid: top 10% gets 400, top 50% gets 200, rest get 50 participation XP
+  const topPercent = rankFromTop / Math.max(totalParticipants, 1);
+  if (topPercent <= 0.10) return 400;
+  if (topPercent <= 0.50) return 200;
+  return 50;
 }
 
 export async function processPayout(challengeId: string) {
@@ -85,6 +103,18 @@ export async function processPayout(challengeId: string) {
 
       // Fire-and-forget notification (non-blocking)
       notifyChallengePayout(winner.userId, perWinner, prevCutoff + rank + 1).catch(() => {});
+
+      // Award XP based on challenge type and rank
+      const xpAmount = getChallengeXp(challenge, prevCutoff - tierWinners.length + rank + 1, ranked.length);
+      awardXp(winner.userId, xpAmount).catch(() => {});
+    }
+  }
+
+  // Award 50 XP participation to everyone not already in a prize tier
+  const winnersSet = new Set(walletInserts.map(w => w.user_id));
+  for (const participant of ranked) {
+    if (!winnersSet.has(participant.userId)) {
+      awardXp(participant.userId, 50).catch(() => {});
     }
   }
 
