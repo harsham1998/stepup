@@ -66,7 +66,7 @@ class StepSyncService {
 
   Future<bool> requestPermissions() async {
     try {
-      return await _health.requestAuthorization([
+      final types = [
         HealthDataType.STEPS,
         HealthDataType.DISTANCE_WALKING_RUNNING,
         HealthDataType.ACTIVE_ENERGY_BURNED,
@@ -82,7 +82,25 @@ class StepSyncService {
         HealthDataType.SLEEP_LIGHT,
         HealthDataType.SLEEP_REM,
         HealthDataType.WATER,
-      ]);
+      ];
+      final permissions = [
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ,
+        HealthDataAccess.READ_WRITE,
+      ];
+      return await _health.requestAuthorization(types, permissions: permissions);
     } catch (_) {
       return _health.requestAuthorization([HealthDataType.STEPS]);
     }
@@ -289,6 +307,45 @@ class StepSyncService {
       'deviceModel': 'unknown',
       'osVersion': 'unknown',
     });
+  }
+
+  Future<List<HealthDataPoint>> getWaterSamplesForDate(DateTime date) async {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+    try {
+      final data = await _health.getHealthDataFromTypes(
+        types: [HealthDataType.WATER],
+        startTime: start,
+        endTime: end,
+      );
+      data.sort((a, b) => a.dateFrom.compareTo(b.dateFrom));
+      return data;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<bool> logWater(double liters) async {
+    final now = DateTime.now();
+    try {
+      return await _health.writeHealthData(
+        value: liters,
+        type: HealthDataType.WATER,
+        startTime: now,
+        endTime: now,
+        unit: HealthDataUnit.LITER,
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<List<double>> getWaterHistoryForDays(int days) async {
+    final futures = List.generate(days, (i) {
+      final date = DateTime.now().subtract(Duration(days: days - 1 - i));
+      return getWaterLitersForDate(date);
+    });
+    return Future.wait(futures);
   }
 
   static Future<void> initialiseBackgroundService() async {

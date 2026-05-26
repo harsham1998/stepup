@@ -151,7 +151,8 @@ class _MissionCard extends ConsumerWidget {
       }
     }
 
-    return Container(
+    final isWater = mission.id == 'water';
+    final card = Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       decoration: BoxDecoration(
@@ -215,5 +216,12 @@ class _MissionCard extends ConsumerWidget {
         ),
       ]),
     );
+    if (isWater) {
+      return GestureDetector(
+        onTap: () => context.push('/water'),
+        child: card,
+      );
+    }
+    return card;
   }
 }
