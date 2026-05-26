@@ -1,5 +1,6 @@
 // stepup-api/src/modules/missions/missions.service.ts
 import { getSupabase } from '../../lib/supabase';
+import { awardXp } from '../steps/xp.service';
 
 export async function getMissions(userId: string, type: 'daily' | 'weekly' | 'seasonal') {
   const db = getSupabase();
@@ -111,8 +112,6 @@ async function awardMissionReward(
     await db.rpc('increment_coins', { uid: userId, amount: coins });
   }
   if (xp > 0) {
-    await db.from('users')
-      .update({ xp: db.rpc('increment', { row_id: userId, field: 'xp', amount: xp }) as any })
-      .eq('id', userId);
+    await awardXp(userId, xp);
   }
 }
