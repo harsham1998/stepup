@@ -6,12 +6,8 @@ import '../../../core/api_client.dart';
 // ── Profile summary (all data the profile screen needs in one call) ───────────
 
 final profileSummaryProvider = FutureProvider<Map<String, dynamic>>((ref) async {
-  try {
-    final data = await ApiClient.instance.get('/auth/profile/summary');
-    return (data as Map<String, dynamic>?) ?? {};
-  } catch (_) {
-    return {};
-  }
+  final data = await ApiClient.instance.get('/auth/profile/summary');
+  return (data as Map<String, dynamic>?) ?? {};
 });
 
 // Full editable profile for the edit screen (includes phone + email from auth).

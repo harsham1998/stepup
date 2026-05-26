@@ -137,40 +137,58 @@ export async function getProfileSummary(userId: string) {
   monday.setDate(now.getDate() + diffToMonday);
   const mondayStr = monday.toISOString().slice(0, 10);
 
-  const [userRes, missionsRes, progressRes, rivalsRes, weekStepsRes, challengesRes, achievementsRes] = await Promise.all([
-    db.from('users').select('id,name,phone,city,avatar_url,streak_days,xp,league,coin_balance,goal_tier,created_at').eq('id', userId).maybeSingle(),
+  // User row is critical — fail fast if it errors
+  const userRes = await db
+    .from('users')
+    .select('id,name,phone,city,avatar_url,streak_days,xp,league,coin_balance,goal_tier,created_at')
+    .eq('id', userId)
+    .maybeSingle();
+  if (userRes.error) throw new Error(userRes.error.message);
+
+  // Secondary counts — use Promise.allSettled so one failure doesn't wipe the whole response
+  const [missionsRes, progressRes, rivalsRes, weekStepsRes, activeChallengeIdsRes, challengesRes, achievementsRes] = await Promise.allSettled([
     db.from('missions').select('id').eq('type', 'daily').eq('active', true),
     db.from('user_missions').select('completed').eq('user_id', userId).eq('assigned_date', today),
     db.from('rivals').select('rival_id', { count: 'exact', head: true }).eq('user_id', userId),
     db.from('user_daily_steps').select('date,total_steps').eq('user_id', userId).gte('date', mondayStr).order('date'),
-    db.from('challenge_participants')
-      .select('challenge_id', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .in('challenge_id',
-        db.from('challenges').select('id').eq('status', 'active') as any
-      ),
+    // Fetch active challenge IDs first to avoid a subquery
+    db.from('challenges').select('id').eq('status', 'active'),
+    db.from('challenge_participants').select('challenge_id', { count: 'exact', head: true }).eq('user_id', userId),
     db.from('user_achievements').select('id', { count: 'exact', head: true }).eq('user_id', userId),
   ]);
 
-  if (userRes.error) throw new Error(userRes.error.message);
+  const missions    = missionsRes.status === 'fulfilled' ? missionsRes.value.data : [];
+  const progress    = progressRes.status === 'fulfilled' ? progressRes.value.data : [];
+  const rivalsCount = rivalsRes.status === 'fulfilled' ? (rivalsRes.value.count ?? 0) : 0;
+  const weekStepsRaw = weekStepsRes.status === 'fulfilled' ? weekStepsRes.value.data : [];
+  const activeChallengeIds = new Set(
+    activeChallengeIdsRes.status === 'fulfilled'
+      ? (activeChallengeIdsRes.value.data ?? []).map((c: { id: string }) => c.id)
+      : []
+  );
+  const allParticipations = challengesRes.status === 'fulfilled' ? challengesRes.value.data : [];
+  const challengesActive = (allParticipations ?? []).filter(
+    (p: { challenge_id: string }) => activeChallengeIds.has(p.challenge_id)
+  ).length;
+  const achievementsEarned = achievementsRes.status === 'fulfilled' ? (achievementsRes.value.count ?? 0) : 0;
 
-  const totalMissions = missionsRes.data?.length ?? 0;
-  const completedMissions = (progressRes.data ?? []).filter(m => m.completed).length;
+  const totalMissions = missions?.length ?? 0;
+  const completedMissions = (progress ?? []).filter((m: { completed: boolean }) => m.completed).length;
 
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
     return d.toISOString().slice(0, 10);
   });
-  const stepMap = Object.fromEntries((weekStepsRes.data ?? []).map(r => [r.date, r.total_steps]));
+  const stepMap = Object.fromEntries((weekStepsRaw ?? []).map((r: { date: string; total_steps: number }) => [r.date, r.total_steps]));
   const weekSteps = weekDays.map(date => ({ date, steps: stepMap[date] ?? 0 }));
 
   return {
     ...userRes.data,
     missions_today: { completed: completedMissions, total: totalMissions },
-    rivals_count: rivalsRes.count ?? 0,
-    challenges_active: challengesRes.count ?? 0,
-    achievements_earned: achievementsRes.count ?? 0,
+    rivals_count: rivalsCount,
+    challenges_active: challengesActive,
+    achievements_earned: achievementsEarned,
     week_steps: weekSteps,
   };
 }

@@ -22,7 +22,11 @@ class ProfileScreen extends ConsumerWidget {
       body: SafeArea(
         child: summaryAsync.when(
           loading: () => const _ProfileSkeleton(),
-          error: (_, _) => const _ProfileSkeleton(),
+          error: (e, _) => _ProfileBody(
+            summary: const {},
+            leagueAsync: leagueAsync,
+            subAsync: subAsync,
+          ),
           data: (summary) => _ProfileBody(
             summary: summary,
             leagueAsync: leagueAsync,
@@ -75,13 +79,12 @@ class _ProfileBody extends ConsumerWidget {
     // Mission ring
     final missionProgress = missionsTotal > 0 ? missionsCompleted / missionsTotal : 0.0;
 
-    // Seed the avatar URL once from the profile summary.
-    // Use addPostFrameCallback so we don't mutate provider state mid-build.
-    final avatarUrl = summary['avatar_url'] as String?;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(avatarUploadProvider.notifier).seedUrl(avatarUrl);
-    });
+    final summaryAvatarUrl = summary['avatar_url'] as String?;
     final avatarState = ref.watch(avatarUploadProvider);
+    // Keep avatarUploadProvider in sync for upload interactions
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(avatarUploadProvider.notifier).seedUrl(summaryAvatarUrl);
+    });
 
     // Show error snackbar once if upload failed
     if (avatarState.error != null) {
@@ -107,6 +110,7 @@ class _ProfileBody extends ConsumerWidget {
                 city: city,
                 joinedLabel: joinedLabel,
                 avatarState: avatarState,
+                summaryAvatarUrl: summaryAvatarUrl,
                 streakProgress: streakProgress,
                 missionProgress: missionProgress,
                 league: league,
@@ -301,6 +305,7 @@ class _AvatarHeader extends ConsumerWidget {
   final String city;
   final String joinedLabel;
   final AvatarState avatarState;
+  final String? summaryAvatarUrl;
   final double streakProgress;
   final double missionProgress;
   final String league;
@@ -313,6 +318,7 @@ class _AvatarHeader extends ConsumerWidget {
     required this.city,
     required this.joinedLabel,
     required this.avatarState,
+    this.summaryAvatarUrl,
     required this.streakProgress,
     required this.missionProgress,
     required this.league,
@@ -324,7 +330,9 @@ class _AvatarHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isUploading = avatarState.isUploading;
-    final avatarUrl = avatarState.url;
+    // avatarUploadProvider tracks uploads in-session; fall back to DB value so
+    // the photo shows immediately without waiting for seedUrl to propagate.
+    final avatarUrl = avatarState.url ?? summaryAvatarUrl;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

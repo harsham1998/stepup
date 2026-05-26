@@ -225,7 +225,12 @@ class _ProfileEditFormState extends ConsumerState<_ProfileEditForm> {
   @override
   Widget build(BuildContext context) {
     final avatarState = ref.watch(avatarUploadProvider);
-    final avatarUrl = avatarState.url ?? (widget.initial['avatar_url'] as String?);
+    final initialAvatarUrl = widget.initial['avatar_url'] as String?;
+    // Sync provider so other screens see the avatar even before an upload
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(avatarUploadProvider.notifier).seedUrl(initialAvatarUrl);
+    });
+    final avatarUrl = avatarState.url ?? initialAvatarUrl;
     final name = _nameCtrl.text.trim();
     final phone = widget.initial['phone'] as String?;
     final email = widget.initial['email'] as String?;

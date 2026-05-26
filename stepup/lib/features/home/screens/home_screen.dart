@@ -49,7 +49,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final now = DateTime.now();
     // Normalize to midnight — stable FutureProvider.family cache key across rebuilds
     final today = DateTime(now.year, now.month, now.day);
-    final profileAsync   = ref.watch(profileProvider);
+    final profileAsync   = ref.watch(profileSummaryProvider);
     final summaryAsync   = ref.watch(healthDaySummaryProvider(today));
     final heartRateAsync = ref.watch(heartRateProvider(today));
     final streakAsync    = ref.watch(streakStatusProvider);
@@ -62,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final communityAsync = ref.watch(communityFeedProvider);
 
     final name = profileAsync.whenOrNull(
-      data: (p) { final n = p['name'] as String? ?? ''; return n.isNotEmpty ? n.split(' ').first : 'You'; },
+      data: (p) { final n = (p as Map<String, dynamic>)['name'] as String? ?? ''; return n.isNotEmpty ? n.split(' ').first : 'You'; },
     ) ?? 'You';
     final initial = name.isNotEmpty ? name[0].toUpperCase() : 'Y';
 
