@@ -12,17 +12,11 @@ class ProfileEditScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final editAsync = ref.watch(editProfileProvider);
-    final summaryAsync = ref.watch(profileSummaryProvider);
 
-    // Prefer richer edit data (has phone/email). Fall back to summary
-    // (already cached from profile screen) so the form loads instantly.
     if (editAsync.hasValue) {
       return _ProfileEditForm(initial: editAsync.value!);
     }
-    if (summaryAsync.hasValue && (summaryAsync.value?.isNotEmpty ?? false)) {
-      return _ProfileEditForm(initial: summaryAsync.value!);
-    }
-    if (editAsync.hasError && summaryAsync.hasError) {
+    if (editAsync.hasError) {
       return Scaffold(
         backgroundColor: AppTheme.bg,
         body: Center(
