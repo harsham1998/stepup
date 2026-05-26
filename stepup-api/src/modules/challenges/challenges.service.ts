@@ -92,6 +92,22 @@ export async function joinChallenge(userId: string, challengeId: string) {
     if ((count ?? 0) >= challenge.max_participants) throw new Error('Challenge is full');
   }
 
+  // Guard: ensure user row exists (auth user may not have a users profile row yet)
+  await db.from('users').upsert(
+    { id: userId },
+    { onConflict: 'id', ignoreDuplicates: true },
+  );
+
+  // Check for existing participation before billing
+  const { data: existing } = await db
+    .from('challenge_participants')
+    .select('id')
+    .eq('challenge_id', challengeId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (existing) throw new Error('Already joined this challenge');
+
   const idempotencyKey = `challenge_join:${userId}:${challengeId}`;
 
   if (challenge.entry_fee > 0) {
@@ -100,16 +116,16 @@ export async function joinChallenge(userId: string, challengeId: string) {
 
   const { error: joinErr } = await db
     .from('challenge_participants')
-    .insert({ challenge_id: challengeId, user_id: userId });
-  if (joinErr) {
-    if (joinErr.code === '23505') throw new Error('Already joined this challenge');
-    throw new Error(joinErr.message);
-  }
+    .upsert(
+      { challenge_id: challengeId, user_id: userId },
+      { onConflict: 'challenge_id,user_id', ignoreDuplicates: true },
+    );
+  if (joinErr) throw new Error(joinErr.message);
 
   try {
     const redis = getRedis();
     await redis.zadd(`leaderboard:challenge:${challengeId}`, 0, userId);
-  } catch { /* Redis optional — leaderboard seeded asynchronously */ }
+  } catch { /* Redis optional */ }
 
   return { joined: true, challenge_id: challengeId };
 }
