@@ -1,23 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { getSupabase } from '../../lib/supabase';
+import { xpForNextLevel, getLevelTitle } from './xp.service';
 
 export const levelsRouter = Router();
-
-const LEVEL_TITLES: Record<number, string> = {
-  1: 'Walker', 10: 'Mover', 20: 'Challenger', 35: 'Athlete', 50: 'Elite', 75: 'Legend', 100: 'Immortal'
-};
-
-function getLevelTitle(level: number): string {
-  const breakpoints = [100, 75, 50, 35, 20, 10, 1];
-  for (const bp of breakpoints) {
-    if (level >= bp) return LEVEL_TITLES[bp];
-  }
-  return 'Walker';
-}
-
-function xpForNextLevel(level: number): number {
-  return Math.floor(1000 * Math.pow(1.15, level - 1));
-}
 
 levelsRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {

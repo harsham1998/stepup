@@ -8,7 +8,7 @@ const LEVEL_TITLES: Record<number, string> = {
   1: 'Walker', 10: 'Mover', 20: 'Challenger', 35: 'Athlete', 50: 'Elite', 75: 'Legend', 100: 'Immortal',
 };
 
-function getLevelTitle(level: number): string {
+export function getLevelTitle(level: number): string {
   for (const bp of [100, 75, 50, 35, 20, 10, 1]) {
     if (level >= bp) return LEVEL_TITLES[bp];
   }
@@ -19,18 +19,30 @@ export function xpForNextLevel(level: number): number {
   return Math.floor(1000 * Math.pow(1.15, level - 1));
 }
 
+// Note: concurrent calls for the same user may cause a read-write race.
+// An atomic Supabase RPC (increment_xp) would eliminate this but requires
+// a DB migration. For a fitness app, simultaneous XP awards per user are rare.
 export async function awardXp(userId: string, amount: number) {
   if (amount <= 0) return;
   const db = getSupabase();
 
-  // Upsert user_levels row
+  // Fetch current user_levels row
   const { data: row } = await db
     .from('user_levels')
     .select('xp, level')
     .eq('user_id', userId)
     .maybeSingle();
 
-  let { xp = 0, level = 1 } = row ?? {};
+  let xp = 0;
+  let level = 1;
+  if (row) {
+    xp = row.xp;
+    level = row.level;
+  } else {
+    // No user_levels row yet — seed from users.xp to avoid resetting existing users
+    const { data: userRow } = await db.from('users').select('xp').eq('id', userId).maybeSingle();
+    xp = userRow?.xp ?? 0;
+  }
   const newXp = xp + amount;
 
   // Process level-ups
@@ -44,13 +56,17 @@ export async function awardXp(userId: string, amount: number) {
   }
 
   // Update user_levels
-  await db.from('user_levels').upsert(
+  const { error: upsertError } = await db.from('user_levels').upsert(
     { user_id: userId, xp: newXp, level: currentLevel, title: getLevelTitle(currentLevel) },
     { onConflict: 'user_id' },
   );
+  if (upsertError) throw new Error(`Failed to update user_levels: ${upsertError.message}`);
 
   // Keep users.xp in sync for league calculations
-  await db.from('users').update({ xp: newXp }).eq('id', userId);
+  const { error: updateError } = await db.from('users').update({ xp: newXp }).eq('id', userId);
+  if (updateError) throw new Error(`Failed to sync users.xp: ${updateError.message}`);
+
+  // Badges are awarded by streak evaluation (streaks.service.ts), not by XP awards
 }
 
 // Thin wrapper — keeps steps.service.ts working without changes
