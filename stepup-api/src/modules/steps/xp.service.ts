@@ -1,5 +1,6 @@
 // stepup-api/src/modules/steps/xp.service.ts
 import { getSupabase } from '../../lib/supabase';
+import { logger } from '../../lib/logger';
 
 const DAILY_STEP_GOAL = 10_000;
 export { DAILY_STEP_GOAL };
@@ -60,11 +61,19 @@ export async function awardXp(userId: string, amount: number) {
     { user_id: userId, xp: newXp, level: currentLevel, title: getLevelTitle(currentLevel) },
     { onConflict: 'user_id' },
   );
-  if (upsertError) throw new Error(`Failed to update user_levels: ${upsertError.message}`);
+  if (upsertError) {
+    logger.error({ userId, newXp, currentLevel, err: upsertError }, 'user_levels upsert failed');
+    throw new Error(`Failed to update user_levels: ${upsertError.message}`);
+  }
 
   // Keep users.xp in sync for league calculations
   const { error: updateError } = await db.from('users').update({ xp: newXp }).eq('id', userId);
-  if (updateError) throw new Error(`Failed to sync users.xp: ${updateError.message}`);
+  if (updateError) {
+    logger.error({ userId, newXp, err: updateError }, 'users.xp sync failed');
+    throw new Error(`Failed to sync users.xp: ${updateError.message}`);
+  }
+
+  logger.info({ userId, xp: newXp, level: currentLevel }, 'XP awarded');
 
   // Badges are awarded by streak evaluation (streaks.service.ts), not by XP awards
 }

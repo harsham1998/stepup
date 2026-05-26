@@ -2,6 +2,7 @@
 import { getSupabase } from '../../lib/supabase';
 import { getRedis } from '../../lib/redis';
 import { awardXp } from '../steps/xp.service';
+import { logger } from '../../lib/logger';
 
 export async function getMissions(userId: string, type: 'daily' | 'weekly' | 'seasonal') {
   const db = getSupabase();
@@ -137,14 +138,17 @@ export async function completeHealthMission(userId: string, missionId: string) {
   if (!HEALTH_MISSION_XP[missionId]) throw new Error('Unknown mission');
 
   const today = new Date().toISOString().slice(0, 10);
-  const redis = getRedis();
   const key = `health_mission_done:${userId}:${missionId}:${today}`;
 
-  const already = await redis.get(key);
-  if (already) return { rewarded: false };
-
-  // Mark claimed for 48 hours (covers timezone edge cases)
-  await redis.setex(key, 172800, '1');
+  // Redis idempotency — if Redis is down, skip the check (accept double-award risk)
+  try {
+    const redis = getRedis();
+    const already = await redis.get(key);
+    if (already) return { rewarded: false };
+    await redis.setex(key, 172800, '1');
+  } catch (redisErr) {
+    logger.warn({ missionId, userId, err: redisErr }, 'Redis unavailable for health mission idempotency check, proceeding anyway');
+  }
 
   const db = getSupabase();
   const coins = HEALTH_MISSION_COINS[missionId]!;
@@ -153,7 +157,14 @@ export async function completeHealthMission(userId: string, missionId: string) {
   if (coins > 0) {
     await db.rpc('increment_coins', { uid: userId, amount: coins });
   }
-  await awardXp(userId, xp);
+
+  try {
+    await awardXp(userId, xp);
+    logger.info({ userId, missionId, xp, coins }, 'Health mission reward granted');
+  } catch (xpErr) {
+    logger.error({ userId, missionId, xp, err: xpErr }, 'awardXp failed for health mission');
+    throw xpErr;
+  }
 
   return { rewarded: true, xp, coins };
 }
