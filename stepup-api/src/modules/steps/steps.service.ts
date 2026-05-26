@@ -2,6 +2,7 @@ import { getSupabase } from '../../lib/supabase';
 import { getRedis } from '../../lib/redis';
 import { StepSyncPayload } from '../../types';
 import { runAnticheatChecks } from './anticheat.service';
+import { evaluateStreak } from '../streaks/streaks.service';
 
 const SYNC_INTERVAL_MINUTES = 15;
 
@@ -42,6 +43,8 @@ export async function syncSteps(userId: string, payload: StepSyncPayload) {
   });
 
   await updateLeaderboardsForUser(userId, payload.steps);
+
+  evaluateStreak(userId).catch(() => {});
 
   // Award XP (fire-and-forget)
   import('./xp.service').then(({ awardStepXp }) => awardStepXp(userId, payload.steps)).catch(() => {});

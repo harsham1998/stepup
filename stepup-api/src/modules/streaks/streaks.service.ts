@@ -1,14 +1,144 @@
 // stepup-api/src/modules/streaks/streaks.service.ts
 import { getSupabase } from '../../lib/supabase';
+import { DAILY_STEP_GOAL } from '../steps/xp.service';
 
 const REVIVE_COST_COINS = 100;
+
+type DayStatus = 'full' | 'partial' | 'none';
+
+function classifyDay(steps: number): DayStatus {
+  if (steps >= DAILY_STEP_GOAL) return 'full';
+  if (steps >= DAILY_STEP_GOAL * 0.5) return 'partial';
+  return 'none';
+}
+
+export async function evaluateStreak(userId: string) {
+  const db = getSupabase();
+
+  const today = new Date().toISOString().slice(0, 10);
+  const threeDaysAgo = new Date();
+  threeDaysAgo.setDate(threeDaysAgo.getDate() - 2);
+  const fromDate = threeDaysAgo.toISOString().slice(0, 10);
+
+  const { data: stepRows } = await db
+    .from('user_daily_steps')
+    .select('date, total_steps')
+    .eq('user_id', userId)
+    .gte('date', fromDate)
+    .lte('date', today)
+    .order('date', { ascending: true });
+
+  const stepMap: Record<string, number> = {};
+  for (const row of stepRows ?? []) stepMap[row.date] = row.total_steps;
+
+  const { data: user } = await db
+    .from('users')
+    .select('streak_days, best_streak_days, partial_day_count')
+    .eq('id', userId)
+    .single();
+
+  if (!user) return;
+
+  const todaySteps = stepMap[today] ?? 0;
+  const todayStatus = classifyDay(todaySteps);
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yStr = yesterday.toISOString().slice(0, 10);
+
+  const yStatus = classifyDay(stepMap[yStr] ?? 0);
+
+  let newStreakDays = user.streak_days;
+  let newPartialCount = user.partial_day_count ?? 0;
+  let breakDate: string | null = null;
+
+  if (todayStatus === 'full') {
+    newStreakDays = user.streak_days + 1;
+    newPartialCount = 0;
+  } else if (todayStatus === 'partial') {
+    newPartialCount = (user.partial_day_count ?? 0) + 1;
+    if (newPartialCount >= 3) {
+      newStreakDays = 0;
+      newPartialCount = 0;
+      breakDate = today;
+    }
+  } else {
+    newPartialCount = 0;
+    if (yStatus === 'none') {
+      newStreakDays = 0;
+      breakDate = today;
+    }
+  }
+
+  const newBest = Math.max(user.best_streak_days ?? 0, newStreakDays);
+
+  const update: Record<string, unknown> = {
+    streak_days: newStreakDays,
+    best_streak_days: newBest,
+    partial_day_count: newPartialCount,
+  };
+  if (breakDate) update.streak_break_date = breakDate;
+
+  await db.from('users').update(update).eq('id', userId);
+}
+
+export async function getStreakCalendar(userId: string, days = 60) {
+  const db = getSupabase();
+
+  const endDate = new Date().toISOString().slice(0, 10);
+  const startDt = new Date();
+  startDt.setDate(startDt.getDate() - (days - 1));
+  const startDate = startDt.toISOString().slice(0, 10);
+
+  const { data: stepRows } = await db
+    .from('user_daily_steps')
+    .select('date, total_steps')
+    .eq('user_id', userId)
+    .gte('date', startDate)
+    .lte('date', endDate)
+    .order('date', { ascending: true });
+
+  const stepMap: Record<string, number> = {};
+  for (const row of stepRows ?? []) stepMap[row.date] = row.total_steps;
+
+  const result: Array<{ date: string; steps: number; status: string; streak_count: number }> = [];
+  let rollingStreak = 0;
+  let partialCount = 0;
+
+  const cursor = new Date(startDt);
+  cursor.setHours(0, 0, 0, 0);
+
+  while (cursor.toISOString().slice(0, 10) <= endDate) {
+    const d = cursor.toISOString().slice(0, 10);
+    const steps = stepMap[d] ?? 0;
+    const status = classifyDay(steps);
+
+    if (status === 'full') {
+      rollingStreak++;
+      partialCount = 0;
+    } else if (status === 'partial') {
+      partialCount++;
+      if (partialCount >= 3) { rollingStreak = 0; partialCount = 0; }
+    } else {
+      partialCount = 0;
+      if (result.length > 0 && result[result.length - 1].status === 'none') {
+        rollingStreak = 0;
+      }
+    }
+
+    result.push({ date: d, steps, status, streak_count: rollingStreak });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return result;
+}
 
 export async function getStreakStatus(userId: string) {
   const db = getSupabase();
 
   const { data: user } = await db
     .from('users')
-    .select('streak_days, coin_balance')
+    .select('streak_days, coin_balance, best_streak_days, streak_break_date')
     .eq('id', userId)
     .single();
 
@@ -46,6 +176,8 @@ export async function getStreakStatus(userId: string) {
     revive_cost_coins: REVIVE_COST_COINS,
     coin_balance: user?.coin_balance ?? 0,
     month_key: monthKey,
+    best_streak_days: user?.best_streak_days ?? 0,
+    streak_break_date: user?.streak_break_date ?? null,
   };
 }
 
@@ -85,12 +217,18 @@ export async function reviveStreak(userId: string) {
 
   const { data: user } = await db
     .from('users')
-    .select('coin_balance, streak_days')
+    .select('coin_balance, streak_days, streak_break_date')
     .eq('id', userId)
     .single();
 
   if (!user || user.coin_balance < REVIVE_COST_COINS) {
     throw new Error(`Need ${REVIVE_COST_COINS} coins to revive streak`);
+  }
+
+  if (user.streak_break_date) {
+    const breakDate = new Date(user.streak_break_date);
+    const diffDays = Math.floor((Date.now() - breakDate.getTime()) / 86_400_000);
+    if (diffDays > 2) throw new Error('Revive window expired (2 days after break)');
   }
 
   const { error: shieldErr } = await db.from('streak_shields').insert({
