@@ -33,6 +33,12 @@ class _StepUpAppState extends ConsumerState<StepUpApp> {
       theme: AppTheme.dark,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaler: const TextScaler.linear(1.15),
+        ),
+        child: child!,
+      ),
     );
   }
 }
