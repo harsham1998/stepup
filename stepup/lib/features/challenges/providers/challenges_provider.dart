@@ -16,3 +16,9 @@ final challengeDetailProvider = FutureProvider.family<Challenge, String>((ref, i
   final data = await ApiClient.instance.get('/challenges/$id') as Map<String, dynamic>;
   return Challenge.fromJson(data);
 });
+
+final challengeProgressProvider = FutureProvider.family<ChallengeProgress?, String>((ref, id) async {
+  final data = await ApiClient.instance.get('/challenges/$id/progress') as Map<String, dynamic>;
+  if (data['joined'] == false) return null;
+  return ChallengeProgress.fromJson(data);
+});
