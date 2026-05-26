@@ -38,6 +38,7 @@ import '../features/activities/screens/activity_feed_screen.dart';
 import '../features/activities/screens/workout_detail_screen.dart';
 import '../features/notifications/screens/notifications_screen.dart';
 import '../features/devices/screens/devices_screen.dart';
+import '../features/seasons/screens/season_rewards_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -111,6 +112,7 @@ final router = GoRouter(
         GoRoute(path: '/activities/workout', builder: (_, __) => const WorkoutDetailScreen()),
         GoRoute(path: '/activities/log', builder: (_, s) => LogSessionScreen(initialType: s.uri.queryParameters['type'])),
         GoRoute(path: '/notifications',  builder: (_, __) => const NotificationsScreen()),
+        GoRoute(path: '/season-rewards', builder: (_, __) => const SeasonRewardsScreen()),
       ],
     ),
   ],
