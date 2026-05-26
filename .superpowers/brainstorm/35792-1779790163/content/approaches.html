@@ -1,0 +1,57 @@
+<h2>Implementation Approach</h2>
+<p class="subtitle">How should we structure the gamification overhaul?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Layered (Recommended)</h3>
+      <p>4 focused layers, each independently testable:</p>
+      <ol style="margin:8px 0 0 16px;font-size:13px;line-height:1.8;color:#aaa">
+        <li><strong style="color:#d4ff3a">XP Engine</strong> — fix mission XP bug, add challenge-win XP, level-up coin rewards</li>
+        <li><strong style="color:#d4ff3a">Streak v2</strong> — calendar view, partial-activity break logic, proper 2-day grace</li>
+        <li><strong style="color:#d4ff3a">Fitness Reputation</strong> — real calculation across 5 sub-scores, 0–900 scale</li>
+        <li><strong style="color:#d4ff3a">Seasons</strong> — admin table, XP reset, tier soft-decay, rewards page</li>
+      </ol>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Each layer ships independently</li><li>Easy to test in isolation</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>4 PRs instead of 1</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Big Bang</h3>
+      <p>All subsystems in one large PR.</p>
+      <ol style="margin:8px 0 0 16px;font-size:13px;line-height:1.8;color:#aaa">
+        <li>All API fixes and new endpoints</li>
+        <li>All Flutter screen wiring</li>
+        <li>All streak, reputation, season logic</li>
+      </ol>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Single coherent release</li><li>No half-baked states in prod</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Very large, hard to review</li><li>One bug blocks everything</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>UI-First</h3>
+      <p>Wire all Flutter screens to APIs first, fix backend as needed.</p>
+      <ol style="margin:8px 0 0 16px;font-size:13px;line-height:1.8;color:#aaa">
+        <li>XP level screen → real API</li>
+        <li>Reputation screen → real API</li>
+        <li>Streak calendar → real data</li>
+        <li>Then fill in missing backend logic</li>
+      </ol>
+      <div class="pros-cons" style="margin-top:10px">
+        <div class="pros"><h4>Pros</h4><ul><li>Immediately visible in app</li><li>Designer-friendly workflow</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Surfaces broken APIs quickly — needs fixing anyway</li><li>Can't test UI without backend</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

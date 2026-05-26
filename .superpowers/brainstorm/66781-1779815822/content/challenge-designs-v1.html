@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Challenge Detail — 5 Design Concepts</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #09091a;
+    color: #fff;
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 80px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #D4FF3A;
+    text-align: center;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #A3A3B3;
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+  .toggle-hint {
+    text-align: center;
+    color: #A3A3B3;
+    font-size: 12px;
+    margin-bottom: 20px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 8px 14px;
+    display: inline-block;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* State toggle buttons */
+  .state-toggle {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  .toggle-btn {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: #A3A3B3;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toggle-btn.active {
+    background: #D4FF3A;
+    border-color: #D4FF3A;
+    color: #050510;
+  }
+
+  /* Design grid */
+  .designs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Phone frame */
+  .design-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .design-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #A3A3B3;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .design-name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+    margin-top: 2px;
+  }
+  .design-tagline {
+    font-size: 11px;
+    color: #A3A3B3;
+    text-align: center;
+    margin-top: 2px;
+    max-width: 240px;
+  }
+  .phone {
+    width: 280px;
+    min-height: 560px;
+    background: #050510;
+    border-radius: 32px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .phone:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 28px 72px rgba(0,0,0,0.7), 0 0 0 2px #D4FF3A40;
+  }
+  .phone.selected {
+    border-color: #D4FF3A;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 3px #D4FF3A;
+  }
+  .phone-screen {
+    width: 100%;
+    min-height: 560px;
+  }
+  .screen-before { display: none; }
+  .screen-after { display: none; }
+  .screen-before.active { display: block; }
+  .screen-after.active { display: block; }
+
+  /* ─── COMMON PHONE UI ELEMENTS ─── */
+  .ph-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px 6px;
+  }
+  .ph-back { font-size: 16px; color: #fff; }
+  .ph-share { font-size: 11px; color: #A3A3B3; }
+
+  /* ─── DESIGN 1: MISSION CONTROL ─── */
+  .d1-cover {
+    margin: 8px 14px 0;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    height: 120px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.25) 0%, rgba(139,92,246,0.1) 100%);
+    border: 1px solid rgba(99,102,241,0.25);
+  }
+  .d1-cover-emoji {
+    position: absolute;
+    right: 12px;
+    bottom: 4px;
+    font-size: 72px;
+    opacity: 0.12;
+  }
+  .d1-cover-inner {
+    padding: 12px 14px;
+  }
+  .badge-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    background: #D4FF3A;
+    color: #050510;
+    text-transform: uppercase;
+  }
+  .badge-pill.gold { background: #FFB547; }
+  .d1-cover-title {
+    font-size: 20px;
+    font-weight: 900;
+    font-style: italic;
+    margin-top: 20px;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .d1-cover-date { font-size: 10px; color: #A3A3B3; margin-top: 2px; }
+
+  .ring-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 14px 10px;
+  }
+  .ring-wrap {
+    position: relative;
+    width: 130px;
+    height: 130px;
+  }
+  .ring-wrap svg {
+    transform: rotate(-90deg);
+    width: 130px;
+    height: 130px;
+  }
+  .ring-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 10; }
+  .ring-fill { fill: none; stroke: #D4FF3A; stroke-width: 10; stroke-linecap: round;
+    stroke-dasharray: 339.29; transition: stroke-dashoffset 0.5s; }
+  .ring-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .ring-pct { font-size: 24px; font-weight: 900; color: #D4FF3A; }
+  .ring-sub { font-size: 9px; color: #A3A3B3; }
+
+  .d1-stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 6px;
+    padding: 0 14px 10px;
+  }
+  .stat-mini {
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 7px 4px;
+    text-align: center;
+  }
+  .stat-mini-val {
+    font-size: 12px;
+    font-weight: 900;
+    color: #fff;
+    display: block;
+  }
+  .stat-mini-val.lime { color: #D4FF3A; }
+  .stat-mini-val.gold { color: #FFB547; }
+  .stat-mini-lbl {
+    font-size: 8px;
+    color: #A3A3B3;
+    display: block;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .checkin-strip {
+    padding: 0 14px 10px;
+  }
+  .strip-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #A3A3B3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .strip-dots {
+    display: flex;
+    gap: 4px;
+  }
+  .dot-day {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .dot-lbl { font-size: 8px; color: #A3A3B3; }
+  .dot-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: transparent;
+    color: #A3A3B3;
+  }
+  .dot-circle.done { background: #D4FF3A; border-color: #D4FF3A; color: #050510; }
+  .dot-circle.today { background: rgba(212,255,58,0.15); border-color: #D4FF3A; color: #D4FF3A; }
+
+  /* Before state ring (empty / locked) */
+  .ring-fill-empty { stroke: rgba(255,255,255,0.1); stroke-dashoffset: 0; }
+  .ring-join-overlay {
+    position: absolute; top:50%; left:50%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+  }
+  .ring-join-text { font-size: 11px; font-weight: 700; color: #A3A3B3; }
+
+  /* Stats 4-box (before joining) */
+  .stats-4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 6px;
+    padding: 0 14px 10px;
+  }
+  .stat-box {
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .stat-box.gold-box { border-color: rgba(255,181,71,0.3); background: rgba(255,181,71,0.06); }
+  .stat-box-lbl { font-size: 7.5px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.3px; }
+  .stat-box-val { font-size: 12px; font-weight: 900; color: #fff; margin-top: 2px; }
+  .stat-box-val.gold { color: #FFB547; }
+
+  .goal-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 0 14px 6px;
+    font-size: 11px;
+    color: #fff;
+  }
+  .goal-row-icon { font-size: 14px; }
+
+  .paid-banner {
+    margin: 6px 14px;
+    background: rgba(255,181,71,0.07);
+    border: 1px solid rgba(255,181,71,0.25);
+    border-radius: 8px;
+    padding: 9px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .paid-banner-icon { font-size: 13px; }
+  .paid-title { font-size: 11px; font-weight: 700; color: #fff; }
+  .paid-sub { font-size: 10px; color: #A3A3B3; margin-top: 1px; }
+
+  .cta-area {
+    padding: 10px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .cta-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .cta-primary { background: #D4FF3A; color: #050510; }
+  .cta-primary.gold { background: #FFB547; }
+  .cta-secondary {
+    background: rgba(212,255,58,0.08);
+    border: 1px solid rgba(212,255,58,0.35);
+    color: #D4FF3A;
+  }
+  .cta-ghost {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #A3A3B3;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* Section header */
+  .sec-hdr {
+    font-size: 9px;
+    font-weight: 700;
+    color: #A3A3B3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 14px;
+    margin-bottom: 6px;
+    margin-top: 4px;
+  }
+
+  /* ─── DESIGN 2: ATHLETIC DASHBOARD ─── */
+  .d2-hero {
+    background: linear-gradient(180deg, rgba(99,102,241,0.2) 0%, transparent 100%);
+    padding: 12px 14px;
+  }
+  .d2-hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .d2-title-block {}
+  .d2-title { font-size: 18px; font-weight: 900; font-style: italic; color: #fff; line-height: 1.1; }
+  .d2-date { font-size: 10px; color: #A3A3B3; margin-top: 2px; }
+  .d2-emoji { font-size: 40px; opacity: 0.8; }
+
+  .progress-bar-row {
+    padding: 0 14px 10px;
+  }
+  .progress-bar-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  .progress-bar-header span { font-size: 10px; color: #A3A3B3; }
+  .progress-bar-header .val { color: #D4FF3A; font-weight: 700; }
+  .prog-track {
+    height: 7px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #D4FF3A, #a8d400);
+    border-radius: 4px;
+    transition: width 0.4s;
+  }
+
+  .d2-mini-leaderboard {
+    margin: 0 14px 8px;
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .d2-lb-hdr {
+    font-size: 9px;
+    font-weight: 700;
+    color: #A3A3B3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 10px 5px;
+  }
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .lb-row.you {
+    background: rgba(212,255,58,0.06);
+    border-top-color: rgba(212,255,58,0.15);
+  }
+  .lb-rank {
+    font-size: 11px;
+    font-weight: 900;
+    color: #A3A3B3;
+    width: 16px;
+  }
+  .lb-rank.gold { color: #FFD700; }
+  .lb-rank.silver { color: #C0C0C0; }
+  .lb-rank.bronze { color: #CD7F32; }
+  .lb-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .lb-name { font-size: 10px; color: #fff; flex: 1; font-weight: 500; }
+  .lb-name .you-tag { color: #D4FF3A; font-weight: 700; }
+  .lb-steps { font-size: 10px; color: #A3A3B3; font-weight: 600; }
+
+  .streak-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: rgba(212,255,58,0.05);
+    border-top: 1px solid rgba(212,255,58,0.1);
+    border-bottom: 1px solid rgba(212,255,58,0.1);
+    margin-bottom: 8px;
+  }
+  .streak-label { font-size: 11px; color: #A3A3B3; }
+  .streak-val { font-size: 13px; font-weight: 900; color: #D4FF3A; }
+
+  /* ─── DESIGN 3: TIMELINE JOURNEY ─── */
+  .timeline-section {
+    padding: 8px 14px 10px;
+    position: relative;
+  }
+  .timeline-hdr {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: #A3A3B3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .timeline-dots {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+  }
+  .tl-node {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  .tl-node::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    right: -50%;
+    height: 2px;
+    background: rgba(255,255,255,0.1);
+  }
+  .tl-node:last-child::before { display: none; }
+  .tl-node.done::before { background: #D4FF3A; }
+  .tl-bubble {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #A3A3B3;
+    position: relative;
+    z-index: 1;
+  }
+  .tl-bubble.done { background: #D4FF3A; border-color: #D4FF3A; color: #050510; font-weight: 700; }
+  .tl-bubble.today { background: rgba(212,255,58,0.2); border-color: #D4FF3A; color: #D4FF3A; }
+  .tl-day-lbl { font-size: 7px; color: #A3A3B3; margin-top: 4px; }
+
+  .d3-stats-float {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 4px 14px 10px;
+  }
+  .float-card {
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+  .float-card.lime-card { border-color: rgba(212,255,58,0.25); background: rgba(212,255,58,0.04); }
+  .float-card.gold-card { border-color: rgba(255,181,71,0.25); background: rgba(255,181,71,0.04); }
+  .float-icon { font-size: 18px; margin-bottom: 4px; }
+  .float-val { font-size: 16px; font-weight: 900; color: #fff; }
+  .float-val.lime { color: #D4FF3A; }
+  .float-val.gold { color: #FFB547; }
+  .float-lbl { font-size: 9px; color: #A3A3B3; margin-top: 2px; }
+
+  /* ─── DESIGN 4: LEADERBOARD FOCUS ─── */
+  .d4-rank-hero {
+    margin: 8px 14px;
+    background: linear-gradient(135deg, rgba(212,255,58,0.1), rgba(212,255,58,0.03));
+    border: 1px solid rgba(212,255,58,0.25);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .rank-circle {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: rgba(212,255,58,0.1);
+    border: 2px solid #D4FF3A;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .rank-num { font-size: 20px; font-weight: 900; color: #D4FF3A; line-height: 1; }
+  .rank-label { font-size: 7px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.3px; }
+  .rank-meta {}
+  .rank-meta-title { font-size: 12px; font-weight: 700; color: #fff; }
+  .rank-meta-sub { font-size: 10px; color: #A3A3B3; margin-top: 2px; }
+  .rank-meta-progress { margin-top: 6px; }
+
+  .prize-threshold {
+    margin: 4px 14px 8px;
+    background: rgba(255,181,71,0.06);
+    border: 1px solid rgba(255,181,71,0.2);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .prize-threshold-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .prize-text { font-size: 10px; color: #A3A3B3; }
+  .prize-val { font-size: 11px; font-weight: 800; color: #FFB547; }
+  .threshold-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+  .threshold-fill { height: 100%; background: #FFB547; border-radius: 2px; }
+  .threshold-marker {
+    position: absolute;
+    top: -2px;
+    width: 2px;
+    height: 8px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 1px;
+  }
+
+  .full-lb {
+    margin: 0 14px 8px;
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .full-lb-hdr {
+    padding: 8px 10px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #A3A3B3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Prize pool distribution (before joining) */
+  .prize-dist {
+    margin: 0 14px 10px;
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 10px;
+  }
+  .prize-dist-hdr { font-size: 9px; font-weight: 700; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .prize-tier {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .prize-tier-rank { font-size: 10px; font-weight: 700; color: #A3A3B3; width: 20px; }
+  .prize-tier-bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+  .prize-tier-bar { height: 100%; background: #D4FF3A; border-radius: 3px; }
+  .prize-tier-amt { font-size: 10px; font-weight: 700; color: #D4FF3A; width: 28px; text-align: right; }
+
+  /* ─── DESIGN 5: COMPACT ANALYTICS ─── */
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 0 14px 8px;
+  }
+  .ana-card {
+    background: #0D0D1A;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .ana-card.wide {
+    grid-column: 1 / -1;
+  }
+  .ana-card.lime { border-color: rgba(212,255,58,0.2); }
+  .ana-card.gold { border-color: rgba(255,181,71,0.2); }
+  .ana-card-title { font-size: 8px; color: #A3A3B3; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 6px; }
+  .ana-big { font-size: 22px; font-weight: 900; color: #fff; line-height: 1; }
+  .ana-big.lime { color: #D4FF3A; }
+  .ana-big.gold { color: #FFB547; }
+  .ana-sub { font-size: 9px; color: #A3A3B3; margin-top: 2px; }
+
+  /* Heatmap calendar */
+  .heatmap {
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    gap: 2px;
+    margin-top: 4px;
+  }
+  .hm-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.06);
+  }
+  .hm-cell.done { background: #D4FF3A; }
+  .hm-cell.today { background: rgba(212,255,58,0.4); }
+  .hm-cell.future { background: rgba(255,255,255,0.03); }
+
+  /* momentum bar */
+  .momentum-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 36px;
+    margin-top: 6px;
+  }
+  .mom-bar {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+    background: rgba(212,255,58,0.25);
+    min-height: 4px;
+  }
+  .mom-bar.high { background: #D4FF3A; }
+
+  /* On-track badge */
+  .ontrack-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 20px;
+    background: rgba(212,255,58,0.1);
+    border: 1px solid rgba(212,255,58,0.3);
+    font-size: 9px;
+    font-weight: 700;
+    color: #D4FF3A;
+    margin-top: 4px;
+  }
+  .ontrack-badge.behind {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.3);
+    color: #EF4444;
+  }
+
+  /* Participant count */
+  .participant-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+  }
+  .participant-avatars {
+    display: flex;
+  }
+  .p-av {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid #050510;
+    margin-left: -6px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a1a2e;
+  }
+  .p-av:first-child { margin-left: 0; }
+  .participant-text { font-size: 10px; color: #A3A3B3; }
+  .participant-text span { color: #fff; font-weight: 600; }
+
+  /* Select overlay */
+  .select-btn {
+    display: block;
+    width: calc(100% - 28px);
+    margin: 0 14px 14px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.03);
+    color: #A3A3B3;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  .phone.selected .select-btn {
+    border-color: #D4FF3A;
+    background: rgba(212,255,58,0.08);
+    color: #D4FF3A;
+  }
+
+  /* Selection indicator */
+  .selection-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #0D0D1A;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 100;
+  }
+  .selection-text { font-size: 13px; color: #A3A3B3; }
+  .selection-text span { color: #D4FF3A; font-weight: 700; }
+  .selection-confirm {
+    padding: 9px 20px;
+    background: #D4FF3A;
+    color: #050510;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+  }
+  .selection-confirm.ready { opacity: 1; }
+</style>
+</head>
+<body>
+
+<h1>Challenge Detail — 5 Design Concepts</h1>
+<p class="subtitle">Each design shows both before-joining and after-joining states. Toggle below.</p>
+
+<div class="state-toggle">
+  <button class="toggle-btn active" onclick="setState('before')">Before joining</button>
+  <button class="toggle-btn" onclick="setState('after')">After joining</button>
+</div>
+
+<div class="designs-grid">
+
+  <!-- ═══ DESIGN 1: MISSION CONTROL ═══ -->
+  <div class="design-wrap">
+    <div class="design-label">Design 1</div>
+    <div class="design-name">Mission Control</div>
+    <div class="design-tagline">Central progress ring + daily check-in strip</div>
+    <div class="phone" id="phone-1" onclick="selectPhone(1)">
+      <div class="phone-screen">
+        <!-- BEFORE STATE -->
+        <div class="screen-before active" id="d1-before">
+          <div class="ph-bar"><span class="ph-back">←</span><span class="ph-share">Share</span></div>
+          <div class="d1-cover">
+            <div class="d1-cover-emoji">👟</div>
+            <div class="d1-cover-inner">
+              <span class="badge-pill">Daily</span>
+              <div class="d1-cover-title">Daily Step Sprint</div>
+              <div class="d1-cover-date">May 25 – May 26</div>
+            </div>
+          </div>
+          <!-- Stats 4-box -->
+          <div style="height:8px"></div>
+          <div class="stats-4">
+            <div class="stat-box"><div class="stat-box-lbl">Goal</div><div class="stat-box-val">10k</div></div>
+            <div class="stat-box"><div class="stat-box-lbl">Daily</div><div class="stat-box-val">5k/d</div></div>
+            <div class="stat-box gold-box"><div class="stat-box-lbl">Reward</div><div class="stat-box-val gold">50¢</div></div>
+            <div class="stat-box"><div class="stat-box-lbl">Days</div><div class="stat-box-val">2d</div></div>
+          </div>
+          <!-- Goals -->
+          <div class="sec-hdr">Daily goals</div>
+          <div class="goal-row"><span class="goal-row-icon">👟</span>~5000 steps per day</div>
+          <div class="goal-row"><span class="goal-row-icon">💧</span>2L water daily</div>
+          <div class="goal-row"><span class="goal-row-icon">🌙</span>7+ hrs sleep</div>
+          <!-- Paid -->
+          <div class="paid-banner">
+            <span class="paid-banner-icon">🔒</span>
+            <div><div class="paid-title">Paid challenge</div><div class="paid-sub">Entry fee: 5¢ · Prize pool: 50¢</div></div>
+          </div>
+          <!-- Participants -->
+          <div class="participant-row">
+            <div class="participant-avatars">
+              <div class="p-av">😎</div><div class="p-av">🏃</div><div class="p-av">💪</div>
+            </div>
+            <div class="participant-text"><span>142 people</span> joined</div>
+          </div>
+          <!-- CTA -->
+          <div class="cta-area">
+            <button class="cta-btn cta-primary gold">🔓 Unlock Now  5¢</button>
+          </div>
+        </div>
+
+        <!-- AFTER STATE -->
+        <div class="screen-after" id="d1-after">
+          <div class="ph-bar"><span class="ph-back">←</span><span class="ph-share">Share</span></div>
+          <div class="d1-cover">
+            <div class="d1-cover-emoji">👟</div>
+            <div class="d1-cover-inner">
+              <span class="badge-pill">Daily</span>
+              <div class="d1-cover-title">Daily Step Sprint</div>
+              <div class="d1-cover-date">May 25 – May 26</div>
+            </div>
+          </div>
+          <!-- Ring -->
+          <div class="ring-section">
+            <div class="ring-wrap">
+              <svg viewBox="0 0 120 120">
+                <circle class="ring-bg" cx="60" cy="60" r="54"/>
+                <circle class="ring-fill" cx="60" cy="60" r="54" style="stroke-dashoffset:135.72"/>
+              </svg>
+              <div class="ring-center">
+                <div class="ring-pct">60%</div>
+                <div class="ring-sub">6,200 / 10k steps</div>
+              </div>
+            </div>
+          </div>
+          <!-- Mini stats -->
+          <div class="d1-stats-row">
+            <div class="stat-mini"><span class="stat-mini-val lime">🏆 #4</span><span class="stat-mini-lbl">Rank</span></div>
+            <div class="stat-mini"><span class="stat-mini-val">1d</span><span class="stat-mini-lbl">Left</span></div>
+            <div class="stat-mini"><span class="stat-mini-val lime">1🔥</span><span class="stat-mini-lbl">Streak</span></div>
+            <div class="stat-mini"><span class="stat-mini-val gold">50¢</span><span class="stat-mini-lbl">Prize</span></div>
+          </div>
+          <!-- Check-in strip -->
+          <div class="checkin-strip">
+            <div class="strip-label">This week</div>
+            <div class="strip-dots">
+              <div class="dot-day"><div class="dot-lbl">M</div><div class="dot-circle done">✓</div></div>
+              <div class="dot-day"><div class="dot-lbl">T</div><div class="dot-circle today">●</div></div>
+              <div class="dot-day"><div class="dot-lbl">W</div><div class="dot-circle"></div></div>
+              <div class="dot-day"><div class="dot-lbl">T</div><div class="dot-circle"></div></div>
+              <div class="dot-day"><div class="dot-lbl">F</div><div class="dot-circle"></div></div>
+              <div class="dot-day"><div class="dot-lbl">S</div><div class="dot-circle"></div></div>
+              <div class="dot-day"><div class="dot-lbl">S</div><div class="dot-circle"></div></div>
+            </div>
+          </div>
+          <!-- CTA -->
+          <div class="cta-area">
+            <button class="cta-btn cta-secondary">✓ Check in today →</button>
+            <button class="cta-btn cta-ghost">View leaderboard</button>
+          </div>
+        </div>
+      </div>
+      <button class="select-btn" onclick="event.stopPropagation();selectPhone(1)">Select Design 1</button>
+    </div>
+  </div>
+
+  <!-- ═══ DESIGN 2: ATHLETIC DASHBOARD ═══ -->
+  <div class="design-wrap">
+    <div class="design-label">Design 2</div>
+    <div class="design-name">Athletic Dashboard</div>
+    <div class="design-tagline">Progress bar + mini leaderboard + streak</div>
+    <div class="phone" id="phone-2" onclick="selectPhone(2)">
+      <div class="phone-screen">
+        <!-- BEFORE -->
+        <div class="screen-before active" id="d2-before">
+          <div class="ph-bar"><span class="ph-back">←</span><span class="ph-share">Share</span></div>
+          <div class="d2-hero">
+            <div class="d2-hero-top">
+              <div class="d2-title-block">
+                <span class="badge-pill">Daily</span>
+                <div class="d2-title" style="margin-top:6px">Daily Step Sprint</div>
+                <div class="d2-date">May 25 – May 26</div>
+              </div>
+              <div class="d2-emoji">👟</div>
+            </div>
+            <!-- Quick stats -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px">
+              <div class="stat-mini"><span class="stat-mini-val">10k</span><span class="stat-mini-lbl">Goal</span></div>
+              <div class="stat-mini"><span class="stat-mini-val gold">50¢</span><span class="stat-mini-lbl">Prize</span></div>
+              <div class="stat-mini"><span class="stat-mini-val">2d</span><span class="stat-mini-lbl">Duration</span></div>
+            </div>
+          </div>
+
+          <div style="height:8px"></div>
+          <!-- Goals -->
+          <div class="sec-hdr">Daily goals</div>
+          <div class="goal-row"><span class="goal-row-icon">👟</span>~5000 steps per day</div>
+          <div class="goal-row"><span class="goal-row-icon">💧</span>2L water daily</div>
+          <div class="goal-row"><span class="goal-row-icon">🌙</span>7+ hrs sleep</div>
+
+          <!-- Prize pool breakdown -->
+          <div class="prize-dist" style="margin-top:8px">
+            <div class="prize-dist-hdr">Prize distribution</div>
+            <div class="prize-tier">
+              <div class="prize-tier-rank">🥇1</div>
+              <div class="prize-tier-bar-wrap"><div class="prize-tier-bar" style="width:100%"></div></div>
+              <div class="prize-tier-amt">20¢</div>
+            </div>
+            <div class="prize-tier">
+              <div class="prize-tier-rank">🥈2</div>
+              <div class="prize-tier-bar-wrap"><div class="prize-tier-bar" style="width:75%"></div></div>
+              <div class="prize-tier-amt">15¢</div>
+            </div>
+            <div class="prize-tier">
+              <div class="prize-tier-rank">🥉3</div>
+              <div class="prize-tier-bar-wrap"><div class="prize-tier-bar" style="width:50%"></div></div>
+              <div class="prize-tier-amt">10¢</div>
+            </div>
+            <div class="prize-tier">
+              <div class="prize-tier-rank" style="font-size:9px">Top</div>
+              <div class="prize-tier-bar-wrap"><div class="prize-tier-bar" style="width:25%"></div></div>
+              <div class="prize-tier-amt">5¢</div>
+            </div>
+          </div>
+
+          <!-- Participants -->
+          <div class="participant-row">
+            <div class="participant-avatars">
+              <div class="p-av">😎</div><div class="p-av">🏃</div><div class="p-av">💪</div><div class="p-av">🧘</div>
+            </div>
+            <div class="participant-text"><span>142</span> participants</div>
+          </div>
+
+          <div class="cta-area">
+            <button class="cta-btn cta-primary gold">🔓 Unlock Now  5¢</button>
+          </div>
+        </div>
+
+        <!-- AFTER -->
+        <div class="screen-after" id="d2-after">
+          <div class="ph-bar"><span class="ph-back">←</span><span class="ph-share">Share</span></div>
+          <div class="d2-hero">
+            <div class="d2-hero-top">
+              <div class="d2-title-block">
+                <span class="badge-pill">Daily · Day 1 of 2</span>
+                <div class="d2-title" style="margin-top:6px">Daily Step Sprint</div>
+                <div class="d2-date">May 25 – May 26</div>
+              </div>
+              <div class="d2-emoji">👟</div>
+            </div>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="progress-bar-row" style="margin-top:8px">
+            <div class="progress-bar-header">
+              <span>6,200 steps</span>
+              <span class="val">60% · 10k goal</span>
+            </div>
+            <div class="prog-track"><div class="prog-fill" style="width:60%"></div></div>
+          </div>
+
+          <!-- Streak -->
+          <div class="streak-row">
+            <span class="streak-label">🔥 Current streak</span>
+            <span class="streak-val">1 day</span>
+          </div>
+
+          <!-- Mini leaderboard -->
+          <div class="d2-mini-leaderboard">
+            <div class="d2-lb-hdr">Live standings</div>
+            <div class="lb-row">
+              <div class="lb-rank gold">1</div>
+              <div class="lb-avatar">🏆</div>
+              <div class="lb-name">Alex M.</div>
+              <div class="lb-steps">9,800</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank silver">2</div>
+              <div class="lb-avatar">⚡</div>
+              <div class="lb-name">Sarah K.</div>
+              <div class="lb-steps">8,400</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank bronze">3</div>
+              <div class="lb-avatar">🚀</div>
+              <div class="lb-name">Jordan L.</div>
+              <div class="lb-steps">7,100</div>
+            </div>
+            <div class="lb-row you">
+              <div class="lb-rank" style="color:#D4FF3A">4</div>
+              <div class="lb-avatar">⭐</div>
+              <div class="lb-name"><span class="you-tag">You</span></div>
+              <div class="lb-steps" style="color:#D4FF3A">6,200</div>
+            </div>
+          </div>
+
+          <div class="cta-area" style="margin-top:4px">
+            <button class="cta-btn cta-secondary">✓ Check in today →</button>
+          </div>
+        </div>
+      </div>
+      <button class="select-btn" onclick="event.stopPropagation();selectPhone(2)">Select Design 2</button>
+    </div>
+  </div>
+
+  <!-- ═══ DESIGN 3: TIMELINE JOURNEY ═══ -->
+  <div class="design-wrap">
+    <div class="design-label">Design 3</div>
+    <div class="design-name">Timeline Journey</div>
+    <div class="design-tagline">Visual day-by-day path + floating stats cards</div>
+    <div class="phone" id="phone-3" onclick="selectPhone(3)">
+      <div class="phone-screen">
+        <!-- BEFORE -->
+        <div class="screen-before active" id="d3-before">
+          <div class="ph-bar"><span class="ph-back">←</span><span class="ph-share">Share</span></div>
+          <div class="d1-cover" style="margin-top:8px">
+            <div class="d1-cover-emoji">👟</div>
+            <div class="d1-cover-inner">
+              <span class="badge-pill">Daily</span>
+              <div class="d1-cover-title">Daily Step Sprint</div>
+              <div class="d1-cover-date">May 25 – May 26</div>
+            </div>
+          </div>
+
+          <!-- Timeline preview (locked) -->
+          <div class="timeline-section" style="margin-top:12px">
+            <div class="timeline-hdr"><span>Journey preview</span><span>2 days</span></div>
+            <div class="timeline-dots">
+              <div class="tl-node">
+                <div class="tl-bubble" style="border-color:rgba(212,255,58,0.4);color:#D4FF3A;font-size:9px">Start</div>
+                <div class="tl-day-lbl">May 25</div>
+              </div>
+              <div class="tl-node">
+                <div class="tl-bubble" style="background:rgba(255,255,255,0.04)"></div>
+                <div class="tl-day-lbl">Day 1</div>
+              </div>
+              <div class="tl-node">
+                <div class="tl-bubble" style="background:rgba(255,255,255,0.04)"></div>
+                <div class="tl-day-lbl">Day 2</div>
+              </div>
+              <div class="tl-node">
+                <div class="tl-bubble" style="border-color:rgba(255,181,71,0.4);color:#FFB547;font-size:9px">🏆</div>
+                <div class="tl-day-lbl">May 26</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Goal cards -->
+          <div class="d3-stats-float">
+            <div class="float-card">
+              <div class="float-icon">👟</div>
+              <div class="float-val">10k</div>
+              <div class="float-lbl">Total steps</div>
+            </div>
+            <div class="float-card gold-card">
+              <div class="float-icon">🏆</div>
+              <div class="float-val gold">50¢</div>
+              <div class="float-lbl">Prize pool</div>
+            </div>
+            <div class="float-card">
+              <div class="float-icon">📅</div>
+              <div class="float-val">5k</div>
+              <div class="float-lbl">Steps/day</div>
+            </div>
+            <div class="float-card">
+              <div class="float-icon">👥</div>
+              <div class="float-val">142</div>
+              <div class="float-lbl">Participants</div>
+            </div>
+          </div>
+
+          <div class="cta-area">
+            <button class="cta-btn cta-primary gold">🔓 Unlock Now  5¢</button>
+          </div>
+        </div>
+
+        <!-- AFTER -->
+        <div class="screen-after" id="d3-after">
+          <div class="ph-bar"><span class="ph-back">←</span><span class="ph-share">Share</span></div>
+          <div class="d1-cover">
+            <div class="d1-cover-emoji">👟</div>
+            <div class="d1-cover-inner">
+              <span class="badge-pill">Daily · Day 1</span>
+              <div class="d1-cover-title">Daily Step Sprint</div>
+              <div class="d1-cover-date">May 25 – May 26</div>
+            </div>
+          </div>
+
+          <!-- Timeline progress -->
+          <div class="timeline-section" style="margin-top:12px">
+            <div class="timeline-hdr"><span>Your journey</span><span>1 day left</span></div>
+            <div class="timeline-dots">
+              <div class="tl-node done">
+                <div class="tl-bubble done">✓</div>
+                <div class="tl-day-lbl">Start</div>
+              </div>
+              <div class="tl-node done">
+                <div class="tl-bubble today">●</div>
+                <div class="tl-day-lbl">Today</div>
+              </div>
+              <div class="tl-node">
+                <div class="tl-bubble"></div>
+                <div class="tl-day-lbl">Day 2</div>
+              </div>
+              <div class="tl-node">
+                <div class="tl-bubble" style="border-color:rgba(255,181,71,0.4);color:#FFB547;font-size:10px">🏆</div>
+                <div class="tl-day-lbl">Finish</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating stats -->
+          <div class="d3-stats-float">
+            <div class="float-card lime-card">
+              <div class="float-icon">📊</div>
+              <div class="float-val lime">60%</div>
+              <div class="float-lbl">6,200 / 10k steps</div>
+            </div>
+            <div class="float-card">
+              <div class="float-icon">🏆</div>
+              <div class="float-val">#4</div>
+              <div class="float-lbl">Your rank</div>
+            </div>
+            <div class="float-card">
+              <div class="float-icon">🔥</div>
+              <div class="float-val lime">1</div>
+              <div class="float-lbl">Day streak</div>
+            </div>
+            <div class="float-card gold-card">
+              <div class="float-icon">🎯</div>
+              <div class="float-val gold">50¢</div>
+              <div class="float-lbl">Prize pool</div>
+            </div>
+          </div>
+
+          <!-- Check-in strip -->
+          <div class="checkin-strip">
+            <div class="strip-label">Daily check-ins</div>
+            <div class="strip-dots">
+              <div class="dot-day"><div class="dot-lbl">M</div><div class="dot-circle done">✓</div></div>
+              <div class="dot-day"><div class="dot-lbl">T</div><div class="dot-circle today">●</div></div>
+              <div class="dot-day"><div class="dot-lbl">W</div><div class="dot-circle"></div></div>
+              <div class="dot-day"><div class="dot-lbl">T</div><div class="dot-circle"></div></div>
+              <div class="dot-day"><div class="dot-lbl">F</div><div class="dot-circle"></div></div>
+              <div class="dot-day"><div class="dot-lbl">S</div><div class="dot-circle"></div></div>
+              <div class="dot-day"><div class="dot-lbl">S</div><div class="dot-circle"></div></div>
+            </div>
+          </div>
+
+          <div class="cta-area">
+            <button class="cta-btn cta-secondary">✓ Check in today →</button>
+          </div>
+        </div>
+      </div>
+      <button class="select-btn" onclick="event.stopPropagation();selectPhone(3)">Select Design 3</button>
+    </div>
+  </div>
+
+  <!-- ═══ DESIGN 4: LEADERBOARD FOCUS ═══ -->
+  <div class="design-wrap">
+    <div class="design-label">Design 4</div>
+    <div class="design-name">Leaderboard First</div>
+    <div class="design-tagline">Your rank is the hero + prize threshold tracker</div>
+    <div class="phone" id="phone-4" onclick="selectPhone(4)">
+      <div class="phone-screen">
+        <!-- BEFORE -->
+        <div class="screen-before active" id="d4-before">
+          <div class="ph-bar"><span class="ph-back">←</span><span class="ph-share">Share</span></div>
+          <!-- Challenge info compact -->
+          <div style="padding:8px 14px 4px">
+            <span class="badge-pill">Daily</span>
+            <div style="font-size:20px;font-weight:900;font-style:italic;color:#fff;margin-top:6px">Daily Step Sprint</div>
+            <div style="font-size:10px;color:#A3A3B3;margin-top:2px">May 25 – May 26 · 10k steps goal</div>
+          </div>
+
+          <!-- Stats row -->
+          <div class="stats-4" style="margin-top:6px">
+            <div class="stat-box"><div class="stat-box-lbl">Goal</div><div class="stat-box-val">10k</div></div>
+            <div class="stat-box"><div class="stat-box-lbl">Players</div><div class="stat-box-val">142</div></div>
+            <div class="stat-box gold-box"><div class="stat-box-lbl">Prize</div><div class="stat-box-val gold">50¢</div></div>
+            <div class="stat-box"><div class="stat-box-lbl">Days</div><div class="stat-box-val">2d</div></div>
+          </div>
+
+          <!-- Prize distribution -->
+          <div class="prize-dist" style="margin-top:4px">
+            <div class="prize-dist-hdr">Prize distribution</div>
+            <div class="prize-tier">
+              <div class="prize-tier-rank">🥇</div>
+              <div class="prize-tier-bar-wrap"><div class="prize-tier-bar" style="width:80%"></div></div>
+              <div class="prize-tier-amt">20¢</div>
+            </div>
+            <div class="prize-tier">
+              <div class="prize-tier-rank">🥈</div>
+              <div class="prize-tier-bar-wrap"><div class="prize-tier-bar" style="width:60%"></div></div>
+              <div class="prize-tier-amt">15¢</div>
+            </div>
+            <div class="prize-tier">
+              <div class="prize-tier-rank">🥉</div>
+              <div class="prize-tier-bar-wrap"><div class="prize-tier-bar" style="width:40%"></div></div>
+              <div class="prize-tier-amt">10¢</div>
+            </div>
+            <div class="prize-tier">
+              <div class="prize-tier-rank" style="font-size:8px">Top<br>50%</div>
+              <div class="prize-tier-bar-wrap"><div class="prize-tier-bar" style="width:20%"></div></div>
+              <div class="prize-tier-amt">5¢</div>
+            </div>
+          </div>
+
+          <!-- Current top 3 preview -->
+          <div class="full-lb" style="margin-top:6px">
+            <div class="full-lb-hdr">Early leaders</div>
+            <div class="lb-row">
+              <div class="lb-rank gold">1</div><div class="lb-avatar">🏆</div>
+              <div class="lb-name">Alex M.</div><div class="lb-steps">9,800</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank silver">2</div><div class="lb-avatar">⚡</div>
+              <div class="lb-name">Sarah K.</div><div class="lb-steps">8,400</div>
+            </div>
+          </div>
+
+          <div class="cta-area" style="margin-top:6px">
+            <button class="cta-btn cta-primary gold">🔓 Unlock Now  5¢</button>
+          </div>
+        </div>
+
+        <!-- AFTER -->
+        <div class="screen-after" id="d4-after">
+          <div class="ph-bar"><span class="ph-back">←</span><span class="ph-share">Share</span></div>
+          <div style="padding:4px 14px 0;font-size:10px;color:#A3A3B3">Daily Step Sprint · Day 1 of 2</div>
+
+          <!-- Rank hero -->
+          <div class="d4-rank-hero">
+            <div class="rank-circle">
+              <div class="rank-num">#4</div>
+              <div class="rank-label">Rank</div>
+            </div>
+            <div class="rank-meta">
+              <div class="rank-meta-title">You're in 4th place</div>
+              <div class="rank-meta-sub">6,200 steps · 3,800 to go</div>
+              <div class="rank-meta-progress" style="margin-top:6px">
+                <div class="prog-track" style="height:5px"><div class="prog-fill" style="width:60%"></div></div>
+              </div>
+              <div style="font-size:9px;color:#A3A3B3;margin-top:3px">3,600 behind 1st place</div>
+            </div>
+          </div>
+
+          <!-- Prize threshold -->
+          <div class="prize-threshold">
+            <div class="prize-threshold-row">
+              <div class="prize-text">Finish top 50% to earn</div>
+              <div class="prize-val">+5¢</div>
+            </div>
+            <div class="threshold-bar">
+              <div class="threshold-fill" style="width:60%"></div>
+              <div class="threshold-marker" style="left:50%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px">
+              <span style="font-size:8px;color:#A3A3B3">You're above threshold ✓</span>
+              <span style="font-size:8px;color:#FFB547">Top 50%</span>
+            </div>
+          </div>
+
+          <!-- Full leaderboard -->
+          <div class="full-lb">
+            <div class="full-lb-hdr">Live standings · 142 players</div>
+            <div class="lb-row">
+              <div class="lb-rank gold">1</div><div class="lb-avatar">🏆</div>
+              <div class="lb-name">Alex M.</div><div class="lb-steps">9,800</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank silver">2</div><div class="lb-avatar">⚡</div>
+              <div class="lb-name">Sarah K.</div><div class="lb-steps">8,400</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank bronze">3</div><div class="lb-avatar">🚀</div>
+              <div class="lb-name">Jordan L.</div><div class="lb-steps">7,100</div>
+            </div>
+            <div class="lb-row you">
+              <div class="lb-rank" style="color:#D4FF3A">4</div><div class="lb-avatar">⭐</div>
+              <div class="lb-name"><span class="you-tag">You</span></div>
+              <div class="lb-steps" style="color:#D4FF3A">6,200</div>
+            </div>
+            <div class="lb-row">
+              <div class="lb-rank">5</div><div class="lb-avatar">🎯</div>
+              <div class="lb-name">Maya R.</div><div class="lb-steps">5,800</div>
+            </div>
+          </div>
+
+          <div class="cta-area" style="margin-top:4px">
+            <button class="cta-btn cta-secondary">✓ Check in today →</button>
+          </div>
+        </div>
+      </div>
+      <button class="select-btn" onclick="event.stopPropagation();selectPhone(4)">Select Design 4</button>
+    </div>
+  </div>
+
+  <!-- ═══ DESIGN 5: ANALYTICS DEEP-DIVE ═══ -->
+  <div class="design-wrap">
+    <div class="design-label">Design 5</div>
+    <div class="design-name">Analytics Deep-Dive</div>
+    <div class="design-tagline">Multi-widget analytics grid + momentum + projection</div>
+    <div class="phone" id="phone-5" onclick="selectPhone(5)">
+      <div class="phone-screen">
+        <!-- BEFORE -->
+        <div class="screen-before active" id="d5-before">
+          <div class="ph-bar"><span class="ph-back">←</span><span class="ph-share">Share</span></div>
+          <!-- Compact header -->
+          <div style="padding:4px 14px 0">
+            <span class="badge-pill">Daily</span>
+            <div style="font-size:19px;font-weight:900;font-style:italic;color:#fff;margin-top:5px">Daily Step Sprint</div>
+            <div style="font-size:10px;color:#A3A3B3;margin-top:2px">May 25 – May 26</div>
+          </div>
+
+          <!-- Stats grid -->
+          <div class="analytics-grid" style="margin-top:10px">
+            <div class="ana-card">
+              <div class="ana-card-title">Total goal</div>
+              <div class="ana-big">10k</div>
+              <div class="ana-sub">steps</div>
+            </div>
+            <div class="ana-card gold">
+              <div class="ana-card-title">Prize pool</div>
+              <div class="ana-big gold">50¢</div>
+              <div class="ana-sub">Top 50% win</div>
+            </div>
+            <div class="ana-card">
+              <div class="ana-card-title">Participants</div>
+              <div class="ana-big">142</div>
+              <div class="ana-sub">joined</div>
+            </div>
+            <div class="ana-card">
+              <div class="ana-card-title">Daily target</div>
+              <div class="ana-big">5k</div>
+              <div class="ana-sub">steps/day</div>
+            </div>
+            <!-- Historical success rate -->
+            <div class="ana-card wide">
+              <div class="ana-card-title">Typical completion rate</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+                <div class="ana-big lime" style="font-size:28px">68%</div>
+                <div style="flex:1">
+                  <div class="prog-track"><div class="prog-fill" style="width:68%"></div></div>
+                  <div style="font-size:9px;color:#A3A3B3;margin-top:3px">of participants finish this challenge</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="goal-row" style="margin-top:4px"><span class="goal-row-icon">👟</span>~5000 steps per day</div>
+          <div class="goal-row"><span class="goal-row-icon">💧</span>2L water daily</div>
+          <div class="paid-banner" style="margin-top:6px">
+            <span class="paid-banner-icon">🔒</span>
+            <div><div class="paid-title">Paid challenge</div><div class="paid-sub">Entry: 5¢ · Prize: 50¢</div></div>
+          </div>
+          <div class="cta-area" style="margin-top:8px">
+            <button class="cta-btn cta-primary gold">🔓 Unlock Now  5¢</button>
+          </div>
+        </div>
+
+        <!-- AFTER -->
+        <div class="screen-after" id="d5-after">
+          <div class="ph-bar"><span class="ph-back">←</span><span class="ph-share">Share</span></div>
+          <div style="padding:4px 14px 0">
+            <span class="badge-pill">Day 1 of 2</span>
+            <div style="font-size:18px;font-weight:900;font-style:italic;color:#fff;margin-top:5px">Daily Step Sprint</div>
+          </div>
+
+          <!-- Analytics grid -->
+          <div class="analytics-grid" style="margin-top:10px">
+            <div class="ana-card lime">
+              <div class="ana-card-title">Progress</div>
+              <div class="ana-big lime">60%</div>
+              <div class="ana-sub">6,200 / 10k steps</div>
+            </div>
+            <div class="ana-card">
+              <div class="ana-card-title">Your rank</div>
+              <div class="ana-big">#4</div>
+              <div class="ana-sub">of 142 players</div>
+            </div>
+            <div class="ana-card">
+              <div class="ana-card-title">Streak</div>
+              <div class="ana-big lime">1🔥</div>
+              <div class="ana-sub">days in a row</div>
+            </div>
+            <div class="ana-card gold">
+              <div class="ana-card-title">Today</div>
+              <div class="ana-big gold" style="font-size:18px">Done ✓</div>
+              <div class="ana-sub">checked in</div>
+            </div>
+          </div>
+
+          <!-- Momentum bars -->
+          <div class="analytics-grid" style="margin-top:0">
+            <div class="ana-card wide">
+              <div class="ana-card-title">Daily activity</div>
+              <div class="momentum-bars">
+                <div class="mom-bar high" style="height:100%"></div>
+                <div class="mom-bar" style="height:40%"></div>
+                <div class="mom-bar" style="height:0;background:rgba(255,255,255,0.05)"></div>
+                <div class="mom-bar" style="height:0;background:rgba(255,255,255,0.05)"></div>
+                <div class="mom-bar" style="height:0;background:rgba(255,255,255,0.05)"></div>
+                <div class="mom-bar" style="height:0;background:rgba(255,255,255,0.05)"></div>
+                <div class="mom-bar" style="height:0;background:rgba(255,255,255,0.05)"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:4px">
+                <span style="font-size:8px;color:#A3A3B3">Day 1</span>
+                <span style="font-size:8px;color:#A3A3B3">Day 2</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Projection -->
+          <div class="analytics-grid" style="margin-top:0">
+            <div class="ana-card wide lime">
+              <div class="ana-card-title">Projection</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="ontrack-badge">📈 On track to finish top 25%</div>
+              </div>
+              <div style="font-size:9px;color:#A3A3B3;margin-top:5px">At current pace you'll finish with ~12,400 steps</div>
+            </div>
+          </div>
+
+          <div class="cta-area" style="margin-top:4px">
+            <button class="cta-btn cta-secondary">✓ Check in today →</button>
+            <button class="cta-btn cta-ghost">View full leaderboard →</button>
+          </div>
+        </div>
+      </div>
+      <button class="select-btn" onclick="event.stopPropagation();selectPhone(5)">Select Design 5</button>
+    </div>
+  </div>
+
+</div><!-- /designs-grid -->
+
+<div class="selection-bar">
+  <div class="selection-text" id="sel-text">Click a design to select it, then tell me what you think in the terminal</div>
+  <button class="selection-confirm" id="confirm-btn">Confirm →</button>
+</div>
+
+<script>
+let selectedPhone = null;
+let currentState = 'before';
+
+function setState(state) {
+  currentState = state;
+  document.querySelectorAll('.toggle-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && state === 'before') || (i === 1 && state === 'after'));
+  });
+  for (let i = 1; i <= 5; i++) {
+    const before = document.getElementById('d' + i + '-before');
+    const after = document.getElementById('d' + i + '-after');
+    if (before) before.classList.toggle('active', state === 'before');
+    if (after) after.classList.toggle('active', state === 'after');
+  }
+  // Save event
+  saveEvent('state-toggle', state, 'Toggle to ' + state + ' state');
+}
+
+function selectPhone(num) {
+  selectedPhone = num;
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('phone-' + i).classList.toggle('selected', i === num);
+  }
+  const names = ['', 'Mission Control', 'Athletic Dashboard', 'Timeline Journey', 'Leaderboard First', 'Analytics Deep-Dive'];
+  document.getElementById('sel-text').innerHTML = 'Selected: <span>Design ' + num + ' — ' + names[num] + '</span>';
+  document.getElementById('confirm-btn').classList.add('ready');
+  saveEvent('click', 'design-' + num, 'Design ' + num + ' — ' + names[num]);
+}
+
+function saveEvent(type, choice, text) {
+  try {
+    fetch('/event', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({type, choice, text, timestamp: Date.now()})
+    });
+  } catch(e) {}
+}
+
+document.getElementById('confirm-btn').addEventListener('click', function() {
+  if (!selectedPhone) return;
+  const names = ['', 'Mission Control', 'Athletic Dashboard', 'Timeline Journey', 'Leaderboard First', 'Analytics Deep-Dive'];
+  saveEvent('confirm', 'design-' + selectedPhone, 'Confirmed: Design ' + selectedPhone + ' — ' + names[selectedPhone]);
+  this.textContent = 'Confirmed ✓';
+  this.style.background = '#a8d400';
+});
+</script>
+</body>
+</html>

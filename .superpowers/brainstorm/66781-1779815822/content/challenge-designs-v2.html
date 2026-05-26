@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Challenge Detail v2 — 5 Concepts</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #08081a;
+  color: #fff;
+  font-family: -apple-system, 'Inter', sans-serif;
+  padding: 24px 20px 90px;
+}
+
+h1 { font-size: 20px; font-weight: 800; color: #D4FF3A; text-align: center; margin-bottom: 4px; }
+.pg-sub { text-align: center; color: #A3A3B3; font-size: 13px; margin-bottom: 20px; }
+
+.state-toggle {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 5px;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 28px;
+}
+.tog {
+  flex: 1;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #A3A3B3;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.tog.active { background: #D4FF3A; color: #050510; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 32px;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.card-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.card-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #D4FF3A;
+  text-transform: uppercase;
+  background: rgba(212,255,58,0.08);
+  border: 1px solid rgba(212,255,58,0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+.card-title { font-size: 15px; font-weight: 800; color: #fff; text-align: center; }
+.card-desc { font-size: 11px; color: #6b6b80; text-align: center; max-width: 230px; }
+
+/* Phone shell */
+.phone {
+  width: 270px;
+  height: 580px;
+  background: #050510;
+  border-radius: 34px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  flex-shrink: 0;
+}
+.phone:hover { transform: translateY(-5px); box-shadow: 0 32px 80px rgba(0,0,0,0.8); }
+.phone.sel {
+  border-color: #D4FF3A;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7), 0 0 0 3px rgba(212,255,58,0.35);
+}
+
+.screen { width: 100%; height: 100%; overflow-y: auto; scrollbar-width: none; }
+.screen::-webkit-scrollbar { display: none; }
+.s-before { display: none; }
+.s-after { display: none; }
+.s-before.vis { display: block; }
+.s-after.vis { display: block; }
+
+/* ── COMMON ATOMS ── */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px 6px;
+}
+.tb-back { font-size: 18px; color: rgba(255,255,255,0.7); }
+.tb-right { font-size: 10px; color: #6b6b80; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+.pill-lime { background: #D4FF3A; color: #050510; }
+.pill-gold { background: #FFB547; color: #050510; }
+.pill-dim  { background: rgba(255,255,255,0.08); color: #A3A3B3; border: 1px solid rgba(255,255,255,0.1); }
+.pill-green { background: rgba(52,211,153,0.15); color: #34D399; border: 1px solid rgba(52,211,153,0.3); }
+
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 9px;
+  color: #34D399;
+  background: rgba(52,211,153,0.08);
+  border: 1px solid rgba(52,211,153,0.25);
+}
+.sync-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #34D399;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.section-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #6b6b80;
+  text-transform: uppercase;
+  padding: 0 16px;
+  margin-bottom: 6px;
+}
+
+.stat-row {
+  display: grid;
+  gap: 6px;
+  padding: 0 14px;
+  margin-bottom: 10px;
+}
+.stat-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.stat-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.stat-row.cols-2 { grid-template-columns: 1fr 1fr; }
+
+.sbox {
+  background: #0D0D1A;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 9px;
+  padding: 8px 6px;
+  text-align: center;
+}
+.sbox.gold { border-color: rgba(255,181,71,0.3); background: rgba(255,181,71,0.06); }
+.sbox.lime { border-color: rgba(212,255,58,0.25); background: rgba(212,255,58,0.04); }
+.sbox.rank { border-color: rgba(212,255,58,0.35); background: rgba(212,255,58,0.06); }
+.sbox-val { font-size: 13px; font-weight: 900; color: #fff; display: block; }
+.sbox-val.lime { color: #D4FF3A; }
+.sbox-val.gold { color: #FFB547; }
+.sbox-val.green { color: #34D399; }
+.sbox-lbl { font-size: 7.5px; color: #6b6b80; display: block; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+.prog-bar {
+  height: 7px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #D4FF3A 0%, #a8d400 100%);
+  border-radius: 4px;
+}
+.prog-fill.gold { background: linear-gradient(90deg, #FFB547, #e8930f); }
+
+.goal-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0D0D1A;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0 14px 5px;
+}
+.goal-icon { font-size: 14px; }
+.goal-text { font-size: 11px; color: rgba(255,255,255,0.85); font-weight: 500; }
+
+.paid-row {
+  margin: 6px 14px;
+  background: rgba(255,181,71,0.06);
+  border: 1px solid rgba(255,181,71,0.2);
+  border-radius: 9px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.paid-row-icon { font-size: 13px; }
+.paid-row-title { font-size: 11px; font-weight: 700; color: #fff; }
+.paid-row-sub { font-size: 9px; color: #A3A3B3; margin-top: 1px; }
+
+.join-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: calc(100% - 28px);
+  margin: 10px 14px;
+  padding: 13px;
+  border-radius: 13px;
+  border: none;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  background: #D4FF3A;
+  color: #050510;
+  letter-spacing: -0.2px;
+}
+.join-btn.gold { background: #FFB547; }
+
+.participants-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+}
+.avatars { display: flex; }
+.av {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid #050510;
+  margin-left: -5px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a30;
+}
+.av:first-child { margin-left: 0; }
+.part-text { font-size: 10px; color: #A3A3B3; }
+.part-text b { color: #fff; }
+
+/* leaderboard mini */
+.lb-wrap {
+  margin: 0 14px 8px;
+  background: #0D0D1A;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.lb-hdr {
+  padding: 7px 10px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #6b6b80;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.lb-row.you-row {
+  background: rgba(212,255,58,0.05);
+  border-top-color: rgba(212,255,58,0.12);
+}
+.lb-pos { font-size: 10px; font-weight: 800; color: #6b6b80; width: 14px; }
+.lb-pos.g { color: #FFD700; } .lb-pos.s { color: #C0C0C0; } .lb-pos.b { color: #CD7F32; }
+.lb-em { font-size: 14px; }
+.lb-name { font-size: 10px; color: #fff; flex: 1; font-weight: 500; }
+.lb-you { color: #D4FF3A; font-weight: 700; }
+.lb-val { font-size: 10px; color: #A3A3B3; font-weight: 600; }
+.lb-val.you-val { color: #D4FF3A; }
+
+/* daily strip */
+.day-strip {
+  display: flex;
+  gap: 4px;
+  padding: 0 14px;
+  margin-bottom: 8px;
+}
+.day-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.day-lbl { font-size: 7.5px; color: #6b6b80; }
+.day-dot {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #6b6b80;
+}
+.day-dot.hit { background: #D4FF3A; border-color: #D4FF3A; color: #050510; }
+.day-dot.partial { background: rgba(212,255,58,0.12); border-color: rgba(212,255,58,0.4); color: #D4FF3A; }
+.day-dot.miss { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.25); color: #EF4444; }
+.day-sub { font-size: 7px; color: #6b6b80; }
+
+/* prize threshold */
+.prize-thresh {
+  margin: 0 14px 8px;
+  background: rgba(255,181,71,0.05);
+  border: 1px solid rgba(255,181,71,0.18);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.pt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.pt-label { font-size: 10px; color: #A3A3B3; }
+.pt-value { font-size: 12px; font-weight: 800; color: #FFB547; }
+.pt-track {
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.pt-fill { height: 100%; background: #FFB547; border-radius: 3px; }
+.pt-marker {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 11px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 1px;
+}
+.pt-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.pt-lbl-text { font-size: 8px; color: #6b6b80; }
+.pt-lbl-text.lime { color: #D4FF3A; }
+
+/* projection card */
+.proj-card {
+  margin: 0 14px 8px;
+  background: rgba(212,255,58,0.04);
+  border: 1px solid rgba(212,255,58,0.18);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.proj-icon { font-size: 22px; }
+.proj-text-title { font-size: 11px; font-weight: 700; color: #D4FF3A; }
+.proj-text-sub { font-size: 9px; color: #A3A3B3; margin-top: 1px; }
+
+/* spacer */
+.sp { height: var(--h, 8px); }
+
+/* ─── DESIGN 1: RING HERO ─── */
+.ring-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 14px 8px;
+}
+.ring-outer {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+.ring-svg { transform: rotate(-90deg); width: 140px; height: 140px; }
+.r-bg { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 11; }
+.r-fg { fill: none; stroke: #D4FF3A; stroke-width: 11; stroke-linecap: round;
+  stroke-dasharray: 363.17; }
+.r-fg-daily { stroke: rgba(212,255,58,0.3); }
+.ring-inner {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  text-align: center;
+  pointer-events: none;
+}
+.ring-pct { font-size: 26px; font-weight: 900; color: #D4FF3A; line-height: 1; }
+.ring-pct-lbl { font-size: 8px; color: #6b6b80; margin-top: 2px; }
+.ring-steps-big { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.6); }
+
+.steps-today-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 8px;
+}
+.steps-big { font-size: 30px; font-weight: 900; color: #fff; line-height: 1; }
+.steps-unit { font-size: 12px; color: #6b6b80; }
+.steps-goal { font-size: 11px; color: #6b6b80; }
+
+/* ─── DESIGN 2: SPLIT HERO ─── */
+.d2-top-strip {
+  background: linear-gradient(180deg, rgba(99,102,241,0.2) 0%, rgba(99,102,241,0) 100%);
+  padding: 10px 16px 12px;
+}
+.d2-title-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.d2-title { font-size: 18px; font-weight: 900; font-style: italic; color: #fff; line-height: 1.1; }
+.d2-em { font-size: 44px; opacity: 0.85; line-height: 1; }
+
+.d2-prog-section { padding: 0 14px; margin-bottom: 10px; }
+.d2-prog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 5px;
+}
+.d2-steps-main { font-size: 22px; font-weight: 900; color: #fff; line-height: 1; }
+.d2-steps-goal { font-size: 10px; color: #6b6b80; }
+.d2-pct { font-size: 13px; font-weight: 800; color: #D4FF3A; }
+
+/* ─── DESIGN 3: ACTIVITY CARD ─── */
+.activity-hero {
+  margin: 8px 14px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.08));
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 14px;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.ah-bg-em {
+  position: absolute;
+  right: 10px;
+  bottom: -4px;
+  font-size: 70px;
+  opacity: 0.1;
+}
+.ah-title { font-size: 18px; font-weight: 900; font-style: italic; color: #fff; line-height: 1.1; }
+.ah-date { font-size: 10px; color: #A3A3B3; margin-top: 2px; }
+
+.d3-steps-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(212,255,58,0.04);
+  border-top: 1px solid rgba(212,255,58,0.1);
+  border-bottom: 1px solid rgba(212,255,58,0.1);
+  margin-bottom: 8px;
+}
+.d3-big-num { font-size: 32px; font-weight: 900; color: #D4FF3A; line-height: 1; }
+.d3-step-info { flex: 1; }
+.d3-goal-text { font-size: 10px; color: #6b6b80; }
+.d3-pct-text { font-size: 12px; font-weight: 700; color: #fff; }
+
+/* ─── DESIGN 4: DARK SPORT ─── */
+.d4-header {
+  padding: 8px 14px 12px;
+  position: relative;
+}
+.d4-bg-stripe {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(212,255,58,0.07) 0%, transparent 60%);
+}
+.d4-day-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b6b80;
+  margin-bottom: 2px;
+}
+.d4-title { font-size: 20px; font-weight: 900; font-style: italic; color: #fff; position: relative; line-height: 1.1; }
+
+.d4-rank-panel {
+  margin: 0 14px 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(212,255,58,0.2);
+}
+.d4-rank-bg {
+  background: linear-gradient(135deg, rgba(212,255,58,0.12), rgba(212,255,58,0.04));
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rank-bubble {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: rgba(212,255,58,0.12);
+  border: 2px solid #D4FF3A;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.rank-num { font-size: 22px; font-weight: 900; color: #D4FF3A; line-height: 1; }
+.rank-sub-lbl { font-size: 7px; color: #A3A3B3; text-transform: uppercase; }
+.rank-info-title { font-size: 13px; font-weight: 800; color: #fff; }
+.rank-info-sub { font-size: 10px; color: #A3A3B3; margin-top: 2px; }
+.rank-info-steps { font-size: 11px; font-weight: 700; color: #D4FF3A; margin-top: 4px; }
+
+/* ─── DESIGN 5: MINIMAL ─── */
+.d5-top {
+  padding: 6px 14px 10px;
+}
+.d5-em-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.d5-em { font-size: 36px; }
+.d5-title { font-size: 19px; font-weight: 900; font-style: italic; color: #fff; line-height: 1.1; }
+
+.d5-big-step {
+  padding: 8px 14px 4px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.d5-num { font-size: 42px; font-weight: 900; color: #fff; line-height: 1; }
+.d5-unit { font-size: 13px; color: #6b6b80; }
+
+.d5-today-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px 6px;
+}
+
+/* prize distribution (before) */
+.prize-dist {
+  margin: 0 14px 8px;
+  background: #0D0D1A;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 10px;
+}
+.pd-hdr { font-size: 9px; font-weight: 700; color: #6b6b80; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.pd-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.pd-rank { font-size: 10px; font-weight: 700; color: #6b6b80; width: 22px; }
+.pd-bar-wrap { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+.pd-bar { height: 100%; background: #D4FF3A; border-radius: 3px; }
+.pd-amt { font-size: 10px; font-weight: 700; color: #D4FF3A; min-width: 24px; text-align: right; }
+
+/* ── bottom bar ── */
+.bottom-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #0D0D1A;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 200;
+}
+.bb-text { font-size: 13px; color: #A3A3B3; }
+.bb-text span { color: #D4FF3A; font-weight: 700; }
+.bb-confirm {
+  padding: 9px 22px;
+  border-radius: 8px;
+  border: none;
+  background: #D4FF3A;
+  color: #050510;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  opacity: 0.35;
+  transition: opacity 0.2s;
+}
+.bb-confirm.on { opacity: 1; }
+</style>
+</head>
+<body>
+
+<h1>Challenge Detail — 5 Redesigns</h1>
+<p class="pg-sub">Activity auto-syncs from device. Toggle before / after joining below.</p>
+
+<div class="state-toggle">
+  <button class="tog active" onclick="setView('before')">Before joining</button>
+  <button class="tog" onclick="setView('after')">After joining</button>
+</div>
+
+<div class="grid">
+
+<!-- ══════════════════════════════════════ -->
+<!-- DESIGN 1 — RING HERO                  -->
+<!-- ══════════════════════════════════════ -->
+<div class="card-wrap">
+  <div class="card-badge">Design 1</div>
+  <div class="card-title">Ring Hero</div>
+  <div class="card-desc">Circular progress ring dominates; your steps + rank in plain view</div>
+  <div class="phone" id="p1" onclick="pick(1)">
+
+    <!-- BEFORE -->
+    <div class="screen s-before vis" id="b1">
+      <div class="topbar"><span class="tb-back">←</span><span class="tb-right">Share</span></div>
+      <div style="padding:0 14px 8px">
+        <span class="pill pill-lime">Daily</span>
+        <div style="font-size:21px;font-weight:900;font-style:italic;color:#fff;margin-top:8px;line-height:1.1">Daily Step Sprint</div>
+        <div style="font-size:10px;color:#6b6b80;margin-top:3px">May 25 – May 26</div>
+      </div>
+      <div class="stat-row cols-4">
+        <div class="sbox"><span class="sbox-val">10k</span><span class="sbox-lbl">Goal</span></div>
+        <div class="sbox"><span class="sbox-val">5k</span><span class="sbox-lbl">Daily</span></div>
+        <div class="sbox gold"><span class="sbox-val gold">50¢</span><span class="sbox-lbl">Prize</span></div>
+        <div class="sbox"><span class="sbox-val">2d</span><span class="sbox-lbl">Duration</span></div>
+      </div>
+      <div class="section-lbl">Daily goals</div>
+      <div class="goal-item"><span class="goal-icon">👟</span><span class="goal-text">~5,000 steps per day</span></div>
+      <div class="goal-item"><span class="goal-icon">💧</span><span class="goal-text">2L water daily</span></div>
+      <div class="goal-item"><span class="goal-icon">🌙</span><span class="goal-text">7+ hours sleep</span></div>
+      <div class="prize-dist" style="margin-top:8px">
+        <div class="pd-hdr">Prize breakdown</div>
+        <div class="pd-row"><div class="pd-rank">🥇</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:100%"></div></div><div class="pd-amt">20¢</div></div>
+        <div class="pd-row"><div class="pd-rank">🥈</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:75%"></div></div><div class="pd-amt">15¢</div></div>
+        <div class="pd-row"><div class="pd-rank">Top½</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:40%"></div></div><div class="pd-amt">5¢</div></div>
+      </div>
+      <div class="paid-row">
+        <span class="paid-row-icon">🔒</span>
+        <div><div class="paid-row-title">Paid challenge</div><div class="paid-row-sub">Entry fee: 5¢ · Prize pool: 50¢</div></div>
+      </div>
+      <div class="participants-line">
+        <div class="avatars"><div class="av">😎</div><div class="av">🏃</div><div class="av">💪</div></div>
+        <div class="part-text"><b>142 people</b> joined</div>
+      </div>
+      <button class="join-btn gold">🔓 Unlock Now — 5¢</button>
+    </div>
+
+    <!-- AFTER -->
+    <div class="screen s-after" id="a1">
+      <div class="topbar">
+        <span class="tb-back">←</span>
+        <span class="sync-badge"><span class="sync-dot"></span>Syncing live</span>
+      </div>
+      <div style="padding:0 14px 4px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:13px;font-weight:800;color:#fff">Daily Step Sprint</div>
+          <div style="font-size:10px;color:#6b6b80;margin-top:1px">Day 1 of 2 · 1 day left</div>
+        </div>
+        <span class="pill pill-lime">On track 📈</span>
+      </div>
+
+      <!-- BIG RING -->
+      <div class="ring-hero">
+        <div class="ring-outer">
+          <svg class="ring-svg" viewBox="0 0 140 140">
+            <circle class="r-bg" cx="70" cy="70" r="58"/>
+            <circle class="r-fg r-fg-daily" cx="70" cy="70" r="58" style="stroke-dashoffset:127"/>
+          </svg>
+          <div class="ring-inner">
+            <div class="ring-pct">62%</div>
+            <div class="ring-steps-big">today</div>
+          </div>
+        </div>
+        <div class="steps-today-row">
+          <span class="steps-big">6,200</span>
+          <span class="steps-unit">steps</span>
+          <span class="steps-goal">/ 10k goal</span>
+        </div>
+      </div>
+
+      <!-- 4 stats -->
+      <div class="stat-row cols-4">
+        <div class="sbox rank"><span class="sbox-val lime">#4</span><span class="sbox-lbl">Rank</span></div>
+        <div class="sbox"><span class="sbox-val">1d</span><span class="sbox-lbl">Left</span></div>
+        <div class="sbox lime"><span class="sbox-val lime">1🔥</span><span class="sbox-lbl">Streak</span></div>
+        <div class="sbox gold"><span class="sbox-val gold">50¢</span><span class="sbox-lbl">Prize</span></div>
+      </div>
+
+      <!-- Daily strip -->
+      <div class="section-lbl">Daily progress</div>
+      <div class="day-strip">
+        <div class="day-cell"><div class="day-lbl">Day 1</div><div class="day-dot hit">✓</div><div class="day-sub">5.2k</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 2</div><div class="day-dot partial">●</div><div class="day-sub">1k</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 3</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 4</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 5</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 6</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 7</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+      </div>
+
+      <!-- Mini leaderboard -->
+      <div class="lb-wrap">
+        <div class="lb-hdr">Live standings · 142 players</div>
+        <div class="lb-row"><div class="lb-pos g">1</div><div class="lb-em">🏆</div><div class="lb-name">Alex M.</div><div class="lb-val">9,800</div></div>
+        <div class="lb-row"><div class="lb-pos s">2</div><div class="lb-em">⚡</div><div class="lb-name">Sarah K.</div><div class="lb-val">8,400</div></div>
+        <div class="lb-row you-row"><div class="lb-pos" style="color:#D4FF3A">4</div><div class="lb-em">⭐</div><div class="lb-name lb-you">You</div><div class="lb-val you-val">6,200</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- DESIGN 2 — SPLIT DASHBOARD            -->
+<!-- ══════════════════════════════════════ -->
+<div class="card-wrap">
+  <div class="card-badge">Design 2</div>
+  <div class="card-title">Split Dashboard</div>
+  <div class="card-desc">Today's steps + overall progress bar + live mini-leaderboard</div>
+  <div class="phone" id="p2" onclick="pick(2)">
+
+    <!-- BEFORE -->
+    <div class="screen s-before vis" id="b2">
+      <div class="topbar"><span class="tb-back">←</span><span class="tb-right">Share</span></div>
+      <div class="d2-top-strip">
+        <div class="d2-title-row">
+          <div>
+            <span class="pill pill-lime">Daily</span>
+            <div class="d2-title" style="margin-top:6px">Daily Step Sprint</div>
+            <div style="font-size:10px;color:#A3A3B3;margin-top:2px">May 25 – May 26</div>
+          </div>
+          <div class="d2-em">👟</div>
+        </div>
+        <div class="stat-row cols-3" style="margin-top:8px;padding:0">
+          <div class="sbox"><span class="sbox-val">10k</span><span class="sbox-lbl">Steps goal</span></div>
+          <div class="sbox gold"><span class="sbox-val gold">50¢</span><span class="sbox-lbl">Prize pool</span></div>
+          <div class="sbox"><span class="sbox-val">2d</span><span class="sbox-lbl">Duration</span></div>
+        </div>
+      </div>
+      <div class="sp" style="--h:6px"></div>
+      <div class="section-lbl">Daily goals</div>
+      <div class="goal-item"><span class="goal-icon">👟</span><span class="goal-text">~5,000 steps per day</span></div>
+      <div class="goal-item"><span class="goal-icon">💧</span><span class="goal-text">2L water daily</span></div>
+      <div class="goal-item"><span class="goal-icon">🌙</span><span class="goal-text">7+ hours sleep</span></div>
+      <div class="prize-dist" style="margin-top:8px">
+        <div class="pd-hdr">Prize distribution</div>
+        <div class="pd-row"><div class="pd-rank">🥇 1st</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:100%"></div></div><div class="pd-amt">20¢</div></div>
+        <div class="pd-row"><div class="pd-rank">🥈 2nd</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:65%"></div></div><div class="pd-amt">15¢</div></div>
+        <div class="pd-row"><div class="pd-rank">🥉 3rd</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:40%"></div></div><div class="pd-amt">10¢</div></div>
+        <div class="pd-row"><div class="pd-rank" style="font-size:8px">Top 50%</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:20%"></div></div><div class="pd-amt">5¢</div></div>
+      </div>
+      <div class="participants-line">
+        <div class="avatars"><div class="av">😎</div><div class="av">🏃</div><div class="av">💪</div><div class="av">🎯</div></div>
+        <div class="part-text"><b>142</b> participants</div>
+      </div>
+      <button class="join-btn gold">🔓 Unlock Now — 5¢</button>
+    </div>
+
+    <!-- AFTER -->
+    <div class="screen s-after" id="a2">
+      <div class="topbar">
+        <span class="tb-back">←</span>
+        <span class="sync-badge"><span class="sync-dot"></span>Live sync</span>
+      </div>
+      <div class="d2-top-strip" style="padding-bottom:8px">
+        <div class="d2-title-row">
+          <div>
+            <span class="pill pill-dim">Day 1 of 2</span>
+            <div class="d2-title" style="margin-top:6px">Daily Step Sprint</div>
+          </div>
+          <div class="d2-em">👟</div>
+        </div>
+      </div>
+
+      <!-- Today progress -->
+      <div class="d2-prog-section" style="margin-top:10px">
+        <div class="d2-prog-header">
+          <div>
+            <div class="d2-steps-main">6,200</div>
+            <div class="d2-steps-goal">steps today</div>
+          </div>
+          <div style="text-align:right">
+            <div class="d2-pct">62%</div>
+            <div class="d2-steps-goal">10k goal</div>
+          </div>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" style="width:62%"></div></div>
+        <div style="font-size:9px;color:#6b6b80;margin-top:4px">3,800 steps remaining today</div>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="stat-row cols-4" style="margin-bottom:8px">
+        <div class="sbox rank"><span class="sbox-val lime">#4</span><span class="sbox-lbl">Rank</span></div>
+        <div class="sbox"><span class="sbox-val">1d</span><span class="sbox-lbl">Left</span></div>
+        <div class="sbox lime"><span class="sbox-val green">1🔥</span><span class="sbox-lbl">Streak</span></div>
+        <div class="sbox gold"><span class="sbox-val gold">50¢</span><span class="sbox-lbl">Prize</span></div>
+      </div>
+
+      <!-- Prize threshold -->
+      <div class="prize-thresh">
+        <div class="pt-header">
+          <span class="pt-label">🏆 Top 50% threshold</span>
+          <span class="pt-value">You qualify ✓</span>
+        </div>
+        <div class="pt-track">
+          <div class="pt-fill" style="width:62%"></div>
+          <div class="pt-marker" style="left:50%"></div>
+        </div>
+        <div class="pt-labels">
+          <span class="pt-lbl-text lime">▲ You (6,200)</span>
+          <span class="pt-lbl-text">Threshold: 5,800</span>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="section-lbl" style="margin-top:4px">Live standings</div>
+      <div class="lb-wrap">
+        <div class="lb-hdr">142 players</div>
+        <div class="lb-row"><div class="lb-pos g">1</div><div class="lb-em">🏆</div><div class="lb-name">Alex M.</div><div class="lb-val">9,800</div></div>
+        <div class="lb-row"><div class="lb-pos s">2</div><div class="lb-em">⚡</div><div class="lb-name">Sarah K.</div><div class="lb-val">8,400</div></div>
+        <div class="lb-row"><div class="lb-pos b">3</div><div class="lb-em">🚀</div><div class="lb-name">Jordan L.</div><div class="lb-val">7,100</div></div>
+        <div class="lb-row you-row"><div class="lb-pos" style="color:#D4FF3A">4</div><div class="lb-em">⭐</div><div class="lb-name lb-you">You</div><div class="lb-val you-val">6,200</div></div>
+        <div class="lb-row"><div class="lb-pos">5</div><div class="lb-em">🎯</div><div class="lb-name">Maya R.</div><div class="lb-val">5,800</div></div>
+      </div>
+      <div class="sp"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- DESIGN 3 — STEPS FIRST                -->
+<!-- ══════════════════════════════════════ -->
+<div class="card-wrap">
+  <div class="card-badge">Design 3</div>
+  <div class="card-title">Steps First</div>
+  <div class="card-desc">Massive step counter dominates + day-by-day history grid</div>
+  <div class="phone" id="p3" onclick="pick(3)">
+
+    <!-- BEFORE -->
+    <div class="screen s-before vis" id="b3">
+      <div class="topbar"><span class="tb-back">←</span><span class="tb-right">Share</span></div>
+      <div class="activity-hero">
+        <div class="ah-bg-em">👟</div>
+        <span class="pill pill-lime">Daily</span>
+        <div class="ah-title" style="margin-top:8px">Daily Step Sprint</div>
+        <div class="ah-date">May 25 – May 26 · 2 days</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <div style="flex:1;background:rgba(0,0,0,0.3);border-radius:7px;padding:7px;text-align:center">
+            <div style="font-size:13px;font-weight:900;color:#fff">10k</div>
+            <div style="font-size:8px;color:#6b6b80;margin-top:1px">total goal</div>
+          </div>
+          <div style="flex:1;background:rgba(0,0,0,0.3);border-radius:7px;padding:7px;text-align:center">
+            <div style="font-size:13px;font-weight:900;color:#D4FF3A">5k/d</div>
+            <div style="font-size:8px;color:#6b6b80;margin-top:1px">per day</div>
+          </div>
+          <div style="flex:1;background:rgba(0,0,0,0.3);border-radius:7px;padding:7px;text-align:center">
+            <div style="font-size:13px;font-weight:900;color:#FFB547">50¢</div>
+            <div style="font-size:8px;color:#6b6b80;margin-top:1px">prize</div>
+          </div>
+        </div>
+      </div>
+      <div class="sp" style="--h:8px"></div>
+      <div class="section-lbl">What to do each day</div>
+      <div class="goal-item"><span class="goal-icon">👟</span><span class="goal-text">~5,000 steps per day</span></div>
+      <div class="goal-item"><span class="goal-icon">💧</span><span class="goal-text">2L water daily</span></div>
+      <div class="goal-item"><span class="goal-icon">🌙</span><span class="goal-text">7+ hours sleep</span></div>
+      <div class="paid-row" style="margin-top:8px">
+        <span class="paid-row-icon">🔒</span>
+        <div><div class="paid-row-title">Paid challenge</div><div class="paid-row-sub">Entry fee: 5¢ · Prize pool: 50¢</div></div>
+      </div>
+      <div class="participants-line">
+        <div class="avatars"><div class="av">😎</div><div class="av">🏃</div><div class="av">💪</div></div>
+        <div class="part-text"><b>142 people</b> already in</div>
+      </div>
+      <button class="join-btn gold">🔓 Unlock Now — 5¢</button>
+    </div>
+
+    <!-- AFTER -->
+    <div class="screen s-after" id="a3">
+      <div class="topbar">
+        <span class="tb-back">←</span>
+        <span class="sync-badge"><span class="sync-dot"></span>Auto-syncing</span>
+      </div>
+      <div style="padding:4px 14px 0;display:flex;justify-content:space-between;align-items:center">
+        <span class="pill pill-dim">Daily Step Sprint · Day 1 of 2</span>
+        <span class="pill pill-green">+1 streak 🔥</span>
+      </div>
+
+      <!-- BIG STEP COUNT -->
+      <div class="d3-steps-block">
+        <div>
+          <div class="d3-big-num">6,200</div>
+          <div class="d3-goal-text">steps today</div>
+        </div>
+        <div class="d3-step-info">
+          <div class="d3-pct-text">62% of today's goal</div>
+          <div class="prog-bar" style="margin-top:5px"><div class="prog-fill" style="width:62%"></div></div>
+          <div style="font-size:9px;color:#6b6b80;margin-top:3px">3,800 more to hit 10k</div>
+        </div>
+      </div>
+
+      <!-- Stats 4-grid -->
+      <div class="stat-row cols-2" style="margin-bottom:8px">
+        <div class="sbox rank" style="padding:10px">
+          <span class="sbox-val lime" style="font-size:20px">#4</span>
+          <span class="sbox-lbl">Your rank of 142</span>
+        </div>
+        <div class="sbox gold" style="padding:10px">
+          <span class="sbox-val gold" style="font-size:20px">50¢</span>
+          <span class="sbox-lbl">Prize pool</span>
+        </div>
+      </div>
+
+      <!-- Day-by-day grid -->
+      <div class="section-lbl">Each day's progress</div>
+      <div class="day-strip">
+        <div class="day-cell"><div class="day-lbl">Day 1</div><div class="day-dot hit">✓</div><div class="day-sub">5.2k</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 2</div><div class="day-dot partial">→</div><div class="day-sub">1k↑</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 3</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 4</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 5</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 6</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 7</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+      </div>
+
+      <!-- Prize threshold -->
+      <div class="prize-thresh">
+        <div class="pt-header">
+          <span class="pt-label">Top 50% to earn 5¢</span>
+          <span class="pt-value">Above threshold ✓</span>
+        </div>
+        <div class="pt-track">
+          <div class="pt-fill" style="width:62%"></div>
+          <div class="pt-marker" style="left:50%"></div>
+        </div>
+        <div class="pt-labels">
+          <span class="pt-lbl-text lime">You: 6,200</span>
+          <span class="pt-lbl-text">Cut-off: ~5,800</span>
+        </div>
+      </div>
+
+      <!-- Projection -->
+      <div class="proj-card">
+        <div class="proj-icon">📈</div>
+        <div>
+          <div class="proj-text-title">On track for top 25%</div>
+          <div class="proj-text-sub">At current pace: ~12,400 steps final</div>
+        </div>
+      </div>
+      <div class="sp"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- DESIGN 4 — RANK HERO                  -->
+<!-- ══════════════════════════════════════ -->
+<div class="card-wrap">
+  <div class="card-badge">Design 4</div>
+  <div class="card-title">Rank Hero</div>
+  <div class="card-desc">Your leaderboard position leads + full live standings below</div>
+  <div class="phone" id="p4" onclick="pick(4)">
+
+    <!-- BEFORE -->
+    <div class="screen s-before vis" id="b4">
+      <div class="topbar"><span class="tb-back">←</span><span class="tb-right">Share</span></div>
+      <div class="d4-header">
+        <div class="d4-bg-stripe"></div>
+        <span class="pill pill-lime" style="position:relative">Daily</span>
+        <div class="d4-title">Daily Step Sprint</div>
+        <div style="font-size:10px;color:#6b6b80;margin-top:2px;position:relative">May 25 – May 26 · 10k steps</div>
+      </div>
+      <div class="stat-row cols-4" style="margin-top:2px">
+        <div class="sbox"><span class="sbox-val">10k</span><span class="sbox-lbl">Goal</span></div>
+        <div class="sbox"><span class="sbox-val">142</span><span class="sbox-lbl">Players</span></div>
+        <div class="sbox gold"><span class="sbox-val gold">50¢</span><span class="sbox-lbl">Prize</span></div>
+        <div class="sbox"><span class="sbox-val">2d</span><span class="sbox-lbl">Days</span></div>
+      </div>
+      <!-- Prize breakdown -->
+      <div class="prize-dist">
+        <div class="pd-hdr">Who wins what</div>
+        <div class="pd-row"><div class="pd-rank">🥇</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:100%"></div></div><div class="pd-amt">20¢</div></div>
+        <div class="pd-row"><div class="pd-rank">🥈</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:75%"></div></div><div class="pd-amt">15¢</div></div>
+        <div class="pd-row"><div class="pd-rank">🥉</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:50%"></div></div><div class="pd-amt">10¢</div></div>
+        <div class="pd-row"><div class="pd-rank" style="font-size:8px">Top 50%</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:20%"></div></div><div class="pd-amt">5¢</div></div>
+      </div>
+      <!-- Early leaders -->
+      <div class="lb-wrap">
+        <div class="lb-hdr">Early leaders</div>
+        <div class="lb-row"><div class="lb-pos g">1</div><div class="lb-em">🏆</div><div class="lb-name">Alex M.</div><div class="lb-val">9,800</div></div>
+        <div class="lb-row"><div class="lb-pos s">2</div><div class="lb-em">⚡</div><div class="lb-name">Sarah K.</div><div class="lb-val">8,400</div></div>
+        <div class="lb-row"><div class="lb-pos b">3</div><div class="lb-em">🚀</div><div class="lb-name">Jordan L.</div><div class="lb-val">7,100</div></div>
+      </div>
+      <div class="participants-line">
+        <div class="avatars"><div class="av">😎</div><div class="av">🏃</div><div class="av">💪</div></div>
+        <div class="part-text"><b>142</b> participants</div>
+      </div>
+      <button class="join-btn gold">🔓 Unlock Now — 5¢</button>
+    </div>
+
+    <!-- AFTER -->
+    <div class="screen s-after" id="a4">
+      <div class="topbar">
+        <span class="tb-back">←</span>
+        <span class="sync-badge"><span class="sync-dot"></span>Live</span>
+      </div>
+      <div style="padding:0 14px 6px;font-size:10px;color:#6b6b80">Daily Step Sprint · Day 1 of 2</div>
+
+      <!-- Rank hero panel -->
+      <div class="d4-rank-panel">
+        <div class="d4-rank-bg">
+          <div class="rank-bubble">
+            <div class="rank-num">#4</div>
+            <div class="rank-sub-lbl">Rank</div>
+          </div>
+          <div>
+            <div class="rank-info-title">You're 4th of 142</div>
+            <div class="rank-info-sub">3,600 behind 1st · 400 ahead of 5th</div>
+            <div class="rank-info-steps">6,200 steps today</div>
+            <div style="margin-top:6px">
+              <div class="prog-bar"><div class="prog-fill" style="width:62%"></div></div>
+              <div style="font-size:8px;color:#6b6b80;margin-top:2px">62% · 3,800 to 10k goal</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:8px 12px;display:flex;justify-content:space-between;background:rgba(0,0,0,0.2)">
+          <span style="font-size:9px;color:#6b6b80">🔥 1 day streak</span>
+          <span style="font-size:9px;color:#FFB547">💰 On track to earn 5¢</span>
+        </div>
+      </div>
+
+      <!-- Prize threshold -->
+      <div class="prize-thresh" style="margin-top:6px">
+        <div class="pt-header">
+          <span class="pt-label">Top 50% prize threshold</span>
+          <span class="pt-value">Qualifying ✓</span>
+        </div>
+        <div class="pt-track">
+          <div class="pt-fill" style="width:62%"></div>
+          <div class="pt-marker" style="left:50%"></div>
+        </div>
+        <div class="pt-labels">
+          <span class="pt-lbl-text lime">▲ You</span>
+          <span class="pt-lbl-text">Prize cutoff</span>
+        </div>
+      </div>
+
+      <!-- Full leaderboard -->
+      <div class="section-lbl">Live standings</div>
+      <div class="lb-wrap">
+        <div class="lb-hdr">142 players</div>
+        <div class="lb-row"><div class="lb-pos g">1</div><div class="lb-em">🏆</div><div class="lb-name">Alex M.</div><div class="lb-val">9,800</div></div>
+        <div class="lb-row"><div class="lb-pos s">2</div><div class="lb-em">⚡</div><div class="lb-name">Sarah K.</div><div class="lb-val">8,400</div></div>
+        <div class="lb-row"><div class="lb-pos b">3</div><div class="lb-em">🚀</div><div class="lb-name">Jordan L.</div><div class="lb-val">7,100</div></div>
+        <div class="lb-row you-row"><div class="lb-pos" style="color:#D4FF3A">4</div><div class="lb-em">⭐</div><div class="lb-name lb-you">You</div><div class="lb-val you-val">6,200</div></div>
+        <div class="lb-row"><div class="lb-pos">5</div><div class="lb-em">🎯</div><div class="lb-name">Maya R.</div><div class="lb-val">5,800</div></div>
+        <div class="lb-row"><div class="lb-pos">6</div><div class="lb-em">😤</div><div class="lb-name">Chris B.</div><div class="lb-val">5,200</div></div>
+      </div>
+      <div class="sp"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- DESIGN 5 — MINIMAL + PROJECTION       -->
+<!-- ══════════════════════════════════════ -->
+<div class="card-wrap">
+  <div class="card-badge">Design 5</div>
+  <div class="card-title">Minimal + Projection</div>
+  <div class="card-desc">Raw big step number + smart "where you'll finish" projection</div>
+  <div class="phone" id="p5" onclick="pick(5)">
+
+    <!-- BEFORE -->
+    <div class="screen s-before vis" id="b5">
+      <div class="topbar"><span class="tb-back">←</span><span class="tb-right">Share</span></div>
+      <div class="d5-top">
+        <div class="d5-em-row">
+          <div>
+            <span class="pill pill-lime">Daily</span>
+            <div class="d5-title" style="margin-top:6px">Daily Step Sprint</div>
+            <div style="font-size:10px;color:#6b6b80;margin-top:2px">May 25 – May 26</div>
+          </div>
+          <div class="d5-em">👟</div>
+        </div>
+      </div>
+
+      <div class="stat-row cols-2" style="margin-bottom:8px">
+        <div class="sbox" style="padding:10px">
+          <span class="sbox-val" style="font-size:18px">10,000</span>
+          <span class="sbox-lbl">Total steps goal</span>
+        </div>
+        <div class="sbox gold" style="padding:10px">
+          <span class="sbox-val gold" style="font-size:18px">50¢</span>
+          <span class="sbox-lbl">Prize pool</span>
+        </div>
+      </div>
+
+      <div class="section-lbl">Daily targets</div>
+      <div class="goal-item"><span class="goal-icon">👟</span><span class="goal-text">~5,000 steps per day</span></div>
+      <div class="goal-item"><span class="goal-icon">💧</span><span class="goal-text">2L water daily</span></div>
+      <div class="goal-item"><span class="goal-icon">🌙</span><span class="goal-text">7+ hours sleep</span></div>
+
+      <div class="prize-dist" style="margin-top:8px">
+        <div class="pd-hdr">Earnings by rank</div>
+        <div class="pd-row"><div class="pd-rank">🥇 1st</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:100%"></div></div><div class="pd-amt">20¢</div></div>
+        <div class="pd-row"><div class="pd-rank">🥈 2nd</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:75%"></div></div><div class="pd-amt">15¢</div></div>
+        <div class="pd-row"><div class="pd-rank">🥉 3rd</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:50%"></div></div><div class="pd-amt">10¢</div></div>
+        <div class="pd-row"><div class="pd-rank" style="font-size:8px">Top 50%</div><div class="pd-bar-wrap"><div class="pd-bar" style="width:20%"></div></div><div class="pd-amt">5¢</div></div>
+      </div>
+
+      <div class="paid-row">
+        <span class="paid-row-icon">🔒</span>
+        <div><div class="paid-row-title">Paid challenge</div><div class="paid-row-sub">5¢ entry · 50¢ prize · 142 players</div></div>
+      </div>
+      <button class="join-btn gold">🔓 Unlock Now — 5¢</button>
+    </div>
+
+    <!-- AFTER -->
+    <div class="screen s-after" id="a5">
+      <div class="topbar">
+        <span class="tb-back">←</span>
+        <span class="sync-badge"><span class="sync-dot"></span>Auto-syncing</span>
+      </div>
+      <div style="padding:0 14px 0;font-size:10px;color:#6b6b80">Daily Step Sprint · Day 1 of 2 · 1 day left</div>
+
+      <!-- BIG NUMBER -->
+      <div class="d5-big-step">
+        <div class="d5-num">6,200</div>
+        <div class="d5-unit">steps<br>today</div>
+      </div>
+      <div class="d5-today-label">
+        <div class="prog-bar" style="flex:1"><div class="prog-fill" style="width:62%"></div></div>
+        <div style="font-size:10px;font-weight:700;color:#D4FF3A">62%</div>
+        <div style="font-size:9px;color:#6b6b80">of 10k</div>
+      </div>
+
+      <!-- 4 key stats -->
+      <div class="stat-row cols-4" style="margin-top:8px">
+        <div class="sbox rank"><span class="sbox-val lime">#4</span><span class="sbox-lbl">Rank</span></div>
+        <div class="sbox"><span class="sbox-val">3.8k</span><span class="sbox-lbl">To go</span></div>
+        <div class="sbox lime"><span class="sbox-val green">1🔥</span><span class="sbox-lbl">Streak</span></div>
+        <div class="sbox gold"><span class="sbox-val gold">50¢</span><span class="sbox-lbl">Prize</span></div>
+      </div>
+
+      <!-- Projection card -->
+      <div class="proj-card" style="border-color:rgba(212,255,58,0.25)">
+        <div class="proj-icon">📈</div>
+        <div>
+          <div class="proj-text-title">Projected finish: Top 25%</div>
+          <div class="proj-text-sub">Est. final: ~12,400 steps at current pace</div>
+        </div>
+      </div>
+
+      <!-- Prize threshold -->
+      <div class="prize-thresh">
+        <div class="pt-header">
+          <span class="pt-label">Prize threshold (top 50%)</span>
+          <span class="pt-value">Earning 5¢ ✓</span>
+        </div>
+        <div class="pt-track">
+          <div class="pt-fill" style="width:62%"></div>
+          <div class="pt-marker" style="left:50%"></div>
+        </div>
+        <div class="pt-labels">
+          <span class="pt-lbl-text lime">You: 6,200</span>
+          <span class="pt-lbl-text">Cut: ~5,800</span>
+        </div>
+      </div>
+
+      <!-- Day history -->
+      <div class="section-lbl">Day by day</div>
+      <div class="day-strip">
+        <div class="day-cell"><div class="day-lbl">Day 1</div><div class="day-dot hit">✓</div><div class="day-sub">5.2k</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 2</div><div class="day-dot partial">↑</div><div class="day-sub">1k</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 3</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 4</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 5</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 6</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+        <div class="day-cell"><div class="day-lbl">Day 7</div><div class="day-dot"></div><div class="day-sub">—</div></div>
+      </div>
+
+      <!-- Leaderboard snippet -->
+      <div class="lb-wrap">
+        <div class="lb-hdr">Live standings · 142 players</div>
+        <div class="lb-row"><div class="lb-pos g">1</div><div class="lb-em">🏆</div><div class="lb-name">Alex M.</div><div class="lb-val">9,800</div></div>
+        <div class="lb-row you-row"><div class="lb-pos" style="color:#D4FF3A">4</div><div class="lb-em">⭐</div><div class="lb-name lb-you">You</div><div class="lb-val you-val">6,200</div></div>
+        <div class="lb-row"><div class="lb-pos">5</div><div class="lb-em">🎯</div><div class="lb-name">Maya R.</div><div class="lb-val">5,800</div></div>
+      </div>
+      <div class="sp" style="--h:12px"></div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /grid -->
+
+<!-- Selection bar -->
+<div class="bottom-bar">
+  <div class="bb-text" id="bb-text">Click any design to select it, then tell me what you like</div>
+  <button class="bb-confirm" id="bb-btn" onclick="confirm()">Confirm →</button>
+</div>
+
+<script>
+const names = {1:'Ring Hero',2:'Split Dashboard',3:'Steps First',4:'Rank Hero',5:'Minimal + Projection'};
+let chosen = null;
+
+function setView(s) {
+  document.querySelectorAll('.tog').forEach((b,i)=>b.classList.toggle('active',(s==='before'&&i===0)||(s==='after'&&i===1)));
+  for(let i=1;i<=5;i++){
+    ['before','after'].forEach(t=>{
+      const el = document.getElementById((t==='before'?'b':'a')+i);
+      if(el) el.classList.toggle('vis', t===s);
+    });
+  }
+  post({type:'toggle',choice:s,text:'State: '+s});
+}
+
+function pick(n) {
+  chosen = n;
+  for(let i=1;i<=5;i++) document.getElementById('p'+i).classList.toggle('sel',i===n);
+  document.getElementById('bb-text').innerHTML = 'Selected: <span>Design '+n+' — '+names[n]+'</span>';
+  document.getElementById('bb-btn').classList.add('on');
+  post({type:'click',choice:'design-'+n,text:'Design '+n+' '+names[n]});
+}
+
+function confirm() {
+  if(!chosen) return;
+  post({type:'confirm',choice:'design-'+chosen,text:'Confirmed design '+chosen});
+  const btn = document.getElementById('bb-btn');
+  btn.textContent = 'Confirmed ✓';
+  btn.style.background = '#a8d400';
+}
+
+function post(data) {
+  try{ fetch('/event',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,timestamp:Date.now()})}); } catch(e){}
+}
+</script>
+</body>
+</html>

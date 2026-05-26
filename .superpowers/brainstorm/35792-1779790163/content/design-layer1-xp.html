@@ -1,0 +1,114 @@
+<h2>Layer 1 — XP Engine</h2>
+<p class="subtitle">All XP sources unified, level-up coin rewards, screens wired to real API</p>
+
+<div class="section">
+  <div class="label">XP SOURCES & VALUES</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+
+    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:14px">
+      <div style="color:#d4ff3a;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:10px">ACTIVITY (existing, keep)</div>
+      <div style="color:#ccc;font-size:13px;line-height:2">
+        Steps<br>
+        <span style="color:#666;font-size:11px">10 XP per 1,000 steps · awarded on sync</span>
+      </div>
+    </div>
+
+    <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:14px">
+      <div style="color:#d4ff3a;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:10px">MISSIONS (fix bug)</div>
+      <div style="color:#ccc;font-size:13px;line-height:2">
+        Daily mission complete → mission.xp_reward<br>
+        Weekly mission complete → mission.xp_reward<br>
+        <span style="color:#666;font-size:11px">Fix: broken rpc call in awardMissionReward()</span>
+      </div>
+    </div>
+
+    <div style="background:#1a1a1a;border:1px solid #ffc94a33;border-radius:10px;padding:14px">
+      <div style="color:#ffc94a;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:10px">CHALLENGES (new)</div>
+      <div style="color:#ccc;font-size:13px;line-height:1.9">
+        Free daily — any finish<span style="color:#d4ff3a;float:right">50 XP</span><br>
+        Free weekly — any finish<span style="color:#d4ff3a;float:right">150 XP</span><br>
+        Paid — top 50% finish<span style="color:#d4ff3a;float:right">200 XP</span><br>
+        Paid — top 10% finish<span style="color:#d4ff3a;float:right">400 XP</span><br>
+        <span style="color:#666;font-size:11px">Added in payout.job.ts after coin payout</span>
+      </div>
+    </div>
+
+    <div style="background:#1a1a1a;border:1px solid #ffc94a33;border-radius:10px;padding:14px">
+      <div style="color:#ffc94a;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:10px">LEVEL-UP COIN REWARD (new)</div>
+      <div style="color:#ccc;font-size:13px;line-height:1.9">
+        Formula: <span style="color:#d4ff3a">level × 10 coins</span><br>
+        Level 5 → 50 coins<br>
+        Level 20 → 200 coins<br>
+        Level 50 → 500 coins<br>
+        <span style="color:#666;font-size:11px">Triggered on XP threshold crossing</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">LEVEL PROGRESSION (existing formula, keep)</div>
+  <div style="margin-top:10px;background:#1a1a1a;border-radius:10px;padding:14px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div style="text-align:center;padding:8px 12px;background:#0a0a0a;border-radius:8px;border:1px solid #d4ff3a44">
+        <div style="color:#d4ff3a;font-size:18px;font-weight:700">LV1</div>
+        <div style="color:#666;font-size:10px">Walker</div>
+        <div style="color:#888;font-size:10px">0 XP</div>
+      </div>
+      <div style="text-align:center;padding:8px 12px;background:#0a0a0a;border-radius:8px">
+        <div style="color:#aaa;font-size:18px;font-weight:700">LV10</div>
+        <div style="color:#666;font-size:10px">Mover</div>
+        <div style="color:#888;font-size:10px">~4K XP</div>
+      </div>
+      <div style="text-align:center;padding:8px 12px;background:#0a0a0a;border-radius:8px">
+        <div style="color:#aaa;font-size:18px;font-weight:700">LV20</div>
+        <div style="color:#666;font-size:10px">Challenger</div>
+        <div style="color:#888;font-size:10px">~16K XP</div>
+      </div>
+      <div style="text-align:center;padding:8px 12px;background:#0a0a0a;border-radius:8px">
+        <div style="color:#aaa;font-size:18px;font-weight:700">LV35</div>
+        <div style="color:#666;font-size:10px">Athlete</div>
+        <div style="color:#888;font-size:10px">~65K XP</div>
+      </div>
+      <div style="text-align:center;padding:8px 12px;background:#0a0a0a;border-radius:8px">
+        <div style="color:#aaa;font-size:18px;font-weight:700">LV50</div>
+        <div style="color:#666;font-size:10px">Elite</div>
+        <div style="color:#888;font-size:10px">~260K XP</div>
+      </div>
+      <div style="text-align:center;padding:8px 12px;background:#0a0a0a;border-radius:8px">
+        <div style="color:#aaa;font-size:18px;font-weight:700">LV75</div>
+        <div style="color:#666;font-size:10px">Legend</div>
+        <div style="color:#888;font-size:10px">~1.1M XP</div>
+      </div>
+      <div style="text-align:center;padding:8px 12px;background:#0a0a0a;border-radius:8px">
+        <div style="color:#aaa;font-size:18px;font-weight:700">LV100</div>
+        <div style="color:#666;font-size:10px">Immortal</div>
+        <div style="color:#888;font-size:10px">~4.5M XP</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;color:#666;font-size:11px">Formula: <code style="color:#d4ff3a">floor(1000 × 1.15^(level-1))</code> XP to reach next level</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">FLUTTER CHANGES</div>
+  <div style="margin-top:10px;background:#1a1a1a;border-radius:10px;padding:14px;color:#ccc;font-size:13px;line-height:2">
+    <span style="color:#d4ff3a">xp_level_screen.dart</span> — remove hardcoded values, add <code>xpLevelProvider</code> → <code>GET /steps/levels</code><br>
+    <span style="color:#d4ff3a">home_screen.dart</span> — show level + XP bar from same provider<br>
+    <span style="color:#ffc94a">New: level-up celebration overlay</span> — modal shown when user levels up (with coin reward amount)
+  </div>
+</div>
+
+<div style="margin-top:20px;text-align:center">
+  <p class="subtitle">Does this XP design look right? Click to confirm or reply with changes.</p>
+  <div class="options" style="max-width:400px;margin:0 auto">
+    <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content"><h3>Approve Layer 1</h3><p>Move to Layer 2 — Streak design</p></div>
+    </div>
+    <div class="option" data-choice="change" onclick="toggleSelect(this)">
+      <div class="letter">✎</div>
+      <div class="content"><h3>Request changes</h3><p>Tell me what to adjust in the terminal</p></div>
+    </div>
+  </div>
+</div>

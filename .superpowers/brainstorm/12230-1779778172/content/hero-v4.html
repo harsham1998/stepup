@@ -68,12 +68,7 @@
     position: relative;
   }
 
-  /* subtle glow line at the bottom of the panel area */
-  .panels::after {
-    content: '';
-    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--volt-line), transparent);
-  }
+  .panels::after { content: none; }
 
   .panel {
     flex: 1;
@@ -161,7 +156,8 @@
      PROGRESS FOOTER
      ════════════════════════ */
   .prog-foot {
-    padding: 14px 18px 18px;
+    padding: 14px 18px 16px;
+    position: relative;
   }
 
   /* "160 XP to reach PLATINUM" label row */
@@ -201,21 +197,7 @@
   }
   .prog-fill.active::after { opacity: 1; }
 
-  /* shimmer sweep over the fill */
-  @keyframes shimmer {
-    0%   { transform: translateX(-100%); }
-    100% { transform: translateX(300%); }
-  }
-  .prog-fill::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(90deg, transparent 20%, rgba(255,255,255,.3) 50%, transparent 80%);
-    border-radius: 99px;
-    animation: shimmer 2.2s ease-in-out 1.5s infinite;
-    opacity: 0;
-    transition: opacity .1s 1.4s;
-  }
-  .prog-fill.active::before { opacity: 1; }
+  .prog-fill::before { content: none; }
 
   /* tier milestone markers below the bar */
   .milestones {
@@ -284,7 +266,7 @@
     text-shadow: 0 0 8px rgba(212,255,58,.4);
   }
 
-  /* "GOLD → PLATINUM" flash hint that appears below the bar briefly */
+  /* "GOLD → PLATINUM" flash hint — absolutely positioned so it takes no layout space */
   @keyframes tier-flash {
     0%   { opacity: 0; transform: translateY(4px); }
     12%  { opacity: 1; transform: translateY(0); }
@@ -292,9 +274,11 @@
     100% { opacity: 0; transform: translateY(-4px); }
   }
   .tier-hint {
-    text-align: center; margin-top: 10px;
+    position: absolute; left: 0; right: 0;
+    text-align: center; top: calc(100% + 6px);
     font-size: 10px; font-weight: 700; letter-spacing: .4px; color: var(--ink2);
     animation: tier-flash 3s ease-out 2.4s both;
+    pointer-events: none;
   }
   .tier-hint .g { color: var(--amber); }
   .tier-hint .p { color: var(--plat); }
@@ -334,7 +318,6 @@
       <div class="season-chip">SEASON 3</div>
       <div class="rank">
         <div class="rank-num">#12</div>
-        <div class="rank-lbl">of 340 members</div>
       </div>
     </div>
 
@@ -380,13 +363,6 @@
       </div>
     </div>
 
-    <!-- tier journey hint — animates in after fill -->
-    <div class="tier-hint">
-      <span class="g">GOLD</span>
-      <span class="arrow">→</span>
-      <span class="p">PLATINUM</span>
-      &nbsp;·&nbsp; 160 XP away
-    </div>
 
   </div><!-- /prog-foot -->
 

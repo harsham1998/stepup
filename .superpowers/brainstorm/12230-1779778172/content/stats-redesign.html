@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stats Row Redesigns</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:ital,wght@0,700;0,900;1,900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  :root {
+    --volt:   #D4FF3A;
+    --amber:  #FFB547;
+    --bg:     #050510;
+    --surf:   #0D0D1A;
+    --surf2:  #13131F;
+    --ink2:   #A3A3B3;
+    --ink3:   #4B5563;
+    --bord:   rgba(255,255,255,0.07);
+    --plat:   #94A3B8;
+    --red:    #F87171;
+    --cyan:   #67E8F9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #07071a; color: #fff;
+    font-family: 'Inter', sans-serif;
+    padding: 32px 16px 100px;
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+  }
+  h1 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 22px; color: var(--volt);
+    text-align: center; margin-bottom: 4px;
+  }
+  .sub { color: var(--ink2); font-size: 12px; text-align: center; margin-bottom: 36px; }
+
+  /* ── card shell (same hero top for context) ── */
+  .card {
+    width: 100%; max-width: 400px;
+    background: var(--surf);
+    border-radius: 20px;
+    border: 1px solid var(--bord);
+    overflow: hidden;
+    margin-bottom: 40px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color .2s, box-shadow .2s, transform .15s;
+  }
+  .card:hover { transform: translateY(-2px); border-color: rgba(212,255,58,.2); }
+  .card.sel   { border-color: var(--volt); box-shadow: 0 0 0 1px var(--volt), 0 8px 32px rgba(212,255,58,.14); }
+  .card.sel .tag { background: var(--volt); color: #050510; }
+
+  .tag {
+    padding: 7px 14px; background: rgba(255,255,255,.03);
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 11px; letter-spacing: .8px; color: var(--ink2);
+    display: flex; justify-content: space-between;
+    transition: background .2s, color .2s;
+  }
+  .ck { display: none; }
+  .card.sel .ck { display: inline; }
+
+  /* ── hero stub (same panels every card) ── */
+  .hero { display: flex; align-items: stretch; }
+  .panel { flex: 1; display: flex; flex-direction: column; padding: 16px 18px 14px; }
+  .vdiv {
+    width: 1px; flex-shrink: 0; margin: 12px 0;
+    background: linear-gradient(180deg, transparent, rgba(212,255,58,.22), transparent);
+  }
+  .ey {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 9px; font-weight: 700; letter-spacing: 1.2px;
+    color: var(--ink3); text-transform: uppercase; margin-bottom: 8px;
+  }
+  .dot { width: 4px; height: 4px; border-radius: 50%; }
+  .dv { background: var(--volt); } .da { background: var(--amber); }
+  .xpi { display: flex; align-items: baseline; gap: 5px; }
+  .xpn {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 46px; line-height: .85;
+    color: var(--volt); letter-spacing: -1.5px;
+    text-shadow: 0 0 24px rgba(212,255,58,.2);
+  }
+  .xpu {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 16px; color: rgba(212,255,58,.45);
+  }
+  .sp { flex: 1; min-height: 14px; }
+  .strk {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 99px; align-self: flex-start;
+    background: rgba(212,255,58,.1); border: 1px solid rgba(212,255,58,.22);
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 10px; color: var(--volt);
+  }
+  .tn {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-style: italic; font-size: 30px; line-height: .9;
+    background: linear-gradient(130deg, #FFE082, var(--amber) 55%, #CC7700);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .sc2 {
+    display: inline-flex; align-items: center;
+    padding: 3px 8px; border-radius: 6px; align-self: flex-start;
+    background: rgba(255,181,71,.1); border: 1px solid rgba(255,181,71,.28);
+    font-size: 9px; font-weight: 700; color: var(--amber); letter-spacing: .5px;
+    margin-top: 6px;
+  }
+  .rk {
+    display: flex; align-items: baseline; gap: 4px;
+    margin-top: auto; padding-top: 12px;
+  }
+  .rn {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 20px; color: #fff; line-height: 1;
+  }
+  /* progress footer */
+  .pf-wrap { padding: 12px 18px 14px; border-top: 1px solid var(--bord); }
+  .pm {
+    display: flex; justify-content: space-between; margin-bottom: 6px;
+    font-size: 10px;
+  }
+  .pm .fr { color: var(--volt); font-weight: 700; }
+  .pm .to { color: var(--ink2); }
+  .pm .to strong { color: var(--plat); }
+  .pt { background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; }
+  .pf { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--amber), var(--volt)); }
+  /* milestones */
+  .ms-row { display: flex; margin-top: 8px; }
+  .ms { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .ms-t { width: 1.5px; height: 5px; border-radius: 1px; background: var(--ink3); }
+  .ms-t.r { background: var(--volt); }
+  .ms-t.c { background: var(--amber); box-shadow: 0 0 6px rgba(255,181,71,.5); }
+  .ms-l { font-size: 7.5px; font-weight: 700; letter-spacing: .4px; color: var(--ink3); text-transform: uppercase; }
+  .ms-l.r { color: rgba(212,255,58,.55); }
+  .ms-l.c { color: var(--amber); }
+  .ms-l.n { color: var(--plat); }
+
+  /* ════════════════════════════════════════
+     STATS VARIANT 1 — ICON PILL ROW
+     Each metric = horizontal pill: emoji + value + label
+     Two rows of slightly different sizing
+     ════════════════════════════════════════ */
+  .s1 {
+    display: flex; gap: 6px; padding: 14px 14px 16px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--bord);
+    background: var(--surf);
+  }
+  .s1 .pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 11px; border-radius: 10px;
+    background: rgba(255,255,255,.04); border: 1px solid var(--bord);
+    flex: 1; min-width: 80px;
+  }
+  .s1 .pill .icon { font-size: 15px; line-height: 1; flex-shrink: 0; }
+  .s1 .pill .txt { display: flex; flex-direction: column; gap: 1px; }
+  .s1 .pill .val {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 16px; color: #fff; line-height: 1;
+  }
+  .s1 .pill .lbl {
+    font-size: 8px; font-weight: 700; letter-spacing: .5px; color: var(--ink2); text-transform: uppercase;
+  }
+  /* accent colours per metric */
+  .s1 .pill.steps  { border-color: rgba(212,255,58,.15); }
+  .s1 .pill.steps .val  { color: var(--volt); }
+  .s1 .pill.kcal   { border-color: rgba(255,100,60,.15); }
+  .s1 .pill.kcal .val   { color: #FB923C; }
+  .s1 .pill.bpm    { border-color: rgba(248,113,113,.15); }
+  .s1 .pill.bpm .val    { color: var(--red); }
+
+  /* ════════════════════════════════════════
+     STATS VARIANT 2 — FEATURED + MINI
+     Steps gets a wide featured cell.
+     Other 4 in a tight 2×2 or 4-col strip.
+     ════════════════════════════════════════ */
+  .s2 {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    border-top: 1px solid var(--bord);
+    background: var(--surf);
+  }
+  .s2 .vd { background: var(--bord); }
+  .s2 .featured {
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .s2 .feat-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--ink3); text-transform: uppercase;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .s2 .feat-num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 38px; line-height: .85;
+    color: var(--volt); letter-spacing: -1px;
+  }
+  .s2 .feat-sub { font-size: 10px; color: var(--ink2); margin-top: 2px; }
+  .s2 .mini-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .s2 .mc {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 10px 6px; gap: 2px;
+  }
+  .s2 .mc:nth-child(1) { border-bottom: 1px solid var(--bord); border-right: 1px solid var(--bord); }
+  .s2 .mc:nth-child(2) { border-bottom: 1px solid var(--bord); }
+  .s2 .mc:nth-child(3) { border-right: 1px solid var(--bord); }
+  .s2 .mi { font-size: 12px; line-height: 1; }
+  .s2 .mv {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 17px; color: #fff; line-height: 1;
+  }
+  .s2 .ml { font-size: 8px; font-weight: 700; letter-spacing: .5px; color: var(--ink2); text-transform: uppercase; }
+
+  /* ════════════════════════════════════════
+     STATS VARIANT 3 — COLOUR-CODED TILES
+     5 tiles each with a unique tint + icon on top, value below
+     ════════════════════════════════════════ */
+  .s3 {
+    display: flex; gap: 6px;
+    padding: 12px 12px 14px;
+    border-top: 1px solid var(--bord);
+    background: var(--surf);
+  }
+  .s3 .tile {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 9px 4px 8px; border-radius: 10px; gap: 4px;
+  }
+  .s3 .tile .icon { font-size: 16px; line-height: 1; }
+  .s3 .tile .val {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 17px; line-height: 1;
+  }
+  .s3 .tile .lbl {
+    font-size: 7.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  }
+  /* per-tile colors */
+  .s3 .t-steps { background: rgba(212,255,58,.07); }
+  .s3 .t-steps .val { color: var(--volt); }
+  .s3 .t-steps .lbl { color: rgba(212,255,58,.5); }
+
+  .s3 .t-km    { background: rgba(103,232,249,.07); }
+  .s3 .t-km .val    { color: var(--cyan); }
+  .s3 .t-km .lbl    { color: rgba(103,232,249,.5); }
+
+  .s3 .t-kcal  { background: rgba(251,146,60,.07); }
+  .s3 .t-kcal .val  { color: #FB923C; }
+  .s3 .t-kcal .lbl  { color: rgba(251,146,60,.5); }
+
+  .s3 .t-min   { background: rgba(163,163,179,.06); }
+  .s3 .t-min .val   { color: #fff; }
+  .s3 .t-min .lbl   { color: var(--ink2); }
+
+  .s3 .t-bpm   { background: rgba(248,113,113,.07); }
+  .s3 .t-bpm .val   { color: var(--red); }
+  .s3 .t-bpm .lbl   { color: rgba(248,113,113,.5); }
+
+  /* ════════════════════════════════════════
+     STATS VARIANT 4 — HORIZONTAL SCROLL CARDS
+     Wide mini-cards that scroll horizontally on mobile
+     ════════════════════════════════════════ */
+  .s4 {
+    padding: 12px 14px 14px;
+    border-top: 1px solid var(--bord);
+    background: var(--surf);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .s4::-webkit-scrollbar { display: none; }
+  .s4 .row { display: flex; gap: 8px; width: max-content; }
+  .s4 .card2 {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 10px 14px; border-radius: 12px;
+    background: var(--surf2); border: 1px solid var(--bord);
+    min-width: 70px; align-items: flex-start;
+  }
+  .s4 .top-row { display: flex; align-items: center; gap: 6px; }
+  .s4 .ico { font-size: 14px; line-height: 1; }
+  .s4 .lbl {
+    font-size: 8px; font-weight: 700; letter-spacing: .8px;
+    color: var(--ink3); text-transform: uppercase;
+  }
+  .s4 .num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 22px; line-height: 1;
+  }
+  /* per-card accent on the num */
+  .s4 .c-steps .num { color: var(--volt); }
+  .s4 .c-km    .num { color: var(--cyan); }
+  .s4 .c-kcal  .num { color: #FB923C; }
+  .s4 .c-min   .num { color: #fff; }
+  .s4 .c-bpm   .num { color: var(--red); }
+
+  /* selection bar */
+  #sbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 12px 20px; z-index: 200;
+    background: rgba(7,7,26,.96); backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(212,255,58,.12);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; color: var(--ink2);
+  }
+</style>
+</head>
+<body>
+
+<h1>Stats Row — Redesigns</h1>
+<p class="sub">Same hero above each · tap to select your favourite</p>
+
+<!-- ══ VARIANT 1: ICON PILLS ══ -->
+<div class="card" data-choice="1" onclick="toggle(this)">
+  <div class="tag">VARIANT 1 — ICON PILL ROW <span class="ck">✓</span></div>
+  <div class="hero">
+    <div class="panel">
+      <div class="ey"><div class="dot dv"></div>SEASON 3 XP</div>
+      <div class="xpi"><div class="xpn">2,840</div><div class="xpu">XP</div></div>
+      <div class="sp"></div>
+      <div class="strk">🔥 7 Day Streak</div>
+    </div>
+    <div class="vdiv"></div>
+    <div class="panel">
+      <div class="ey"><div class="dot da"></div>CURRENT TIER</div>
+      <div class="tn">GOLD</div>
+      <div class="sc2">SEASON 3</div>
+      <div class="rk"><div class="rn">#12</div></div>
+    </div>
+  </div>
+  <div class="pf-wrap">
+    <div class="pm"><span class="fr">2,840 XP</span><span class="to">160 XP to reach <strong>PLATINUM</strong></span></div>
+    <div class="pt" style="height:6px"><div class="pf" style="width:63%"></div></div>
+    <div class="ms-row">
+      <div class="ms"><div class="ms-t r"></div><div class="ms-l r">BRNZ</div></div>
+      <div class="ms"><div class="ms-t r"></div><div class="ms-l r">SLVR</div></div>
+      <div class="ms"><div class="ms-t c"></div><div class="ms-l c">GOLD</div></div>
+      <div class="ms"><div class="ms-t"></div><div class="ms-l n">PLAT</div></div>
+      <div class="ms"><div class="ms-t"></div><div class="ms-l">DMND</div></div>
+    </div>
+  </div>
+  <!-- STATS V1 -->
+  <div class="s1">
+    <div class="pill steps"><div class="icon">👟</div><div class="txt"><div class="val">287</div><div class="lbl">STEPS</div></div></div>
+    <div class="pill"><div class="icon">⚡</div><div class="txt"><div class="val">0.2</div><div class="lbl">KM</div></div></div>
+    <div class="pill kcal"><div class="icon">🔥</div><div class="txt"><div class="val">138</div><div class="lbl">KCAL</div></div></div>
+    <div class="pill"><div class="icon">⏱</div><div class="txt"><div class="val">0</div><div class="lbl">MIN</div></div></div>
+    <div class="pill bpm"><div class="icon">❤️</div><div class="txt"><div class="val">71</div><div class="lbl">BPM</div></div></div>
+  </div>
+</div>
+
+<!-- ══ VARIANT 2: FEATURED STEPS + 2×2 MINI ══ -->
+<div class="card" data-choice="2" onclick="toggle(this)">
+  <div class="tag">VARIANT 2 — FEATURED STEPS + MINI GRID <span class="ck">✓</span></div>
+  <div class="hero">
+    <div class="panel">
+      <div class="ey"><div class="dot dv"></div>SEASON 3 XP</div>
+      <div class="xpi"><div class="xpn">2,840</div><div class="xpu">XP</div></div>
+      <div class="sp"></div>
+      <div class="strk">🔥 7 Day Streak</div>
+    </div>
+    <div class="vdiv"></div>
+    <div class="panel">
+      <div class="ey"><div class="dot da"></div>CURRENT TIER</div>
+      <div class="tn">GOLD</div>
+      <div class="sc2">SEASON 3</div>
+      <div class="rk"><div class="rn">#12</div></div>
+    </div>
+  </div>
+  <div class="pf-wrap">
+    <div class="pm"><span class="fr">2,840 XP</span><span class="to">160 XP to reach <strong>PLATINUM</strong></span></div>
+    <div class="pt" style="height:6px"><div class="pf" style="width:63%"></div></div>
+    <div class="ms-row">
+      <div class="ms"><div class="ms-t r"></div><div class="ms-l r">BRNZ</div></div>
+      <div class="ms"><div class="ms-t r"></div><div class="ms-l r">SLVR</div></div>
+      <div class="ms"><div class="ms-t c"></div><div class="ms-l c">GOLD</div></div>
+      <div class="ms"><div class="ms-t"></div><div class="ms-l n">PLAT</div></div>
+      <div class="ms"><div class="ms-t"></div><div class="ms-l">DMND</div></div>
+    </div>
+  </div>
+  <!-- STATS V2 -->
+  <div class="s2">
+    <div class="featured">
+      <div class="feat-label">👟 TODAY'S STEPS</div>
+      <div class="feat-num">287</div>
+      <div class="feat-sub">0.2 km covered</div>
+    </div>
+    <div class="vd"></div>
+    <div class="mini-grid">
+      <div class="mc"><div class="mi">🔥</div><div class="mv">138</div><div class="ml">KCAL</div></div>
+      <div class="mc"><div class="mi">⏱</div><div class="mv">0</div><div class="ml">MIN</div></div>
+      <div class="mc"><div class="mi">❤️</div><div class="mv">71</div><div class="ml">BPM</div></div>
+      <div class="mc"><div class="mi">⚡</div><div class="mv">0.2</div><div class="ml">KM</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VARIANT 3: COLOUR-CODED TILES ══ -->
+<div class="card" data-choice="3" onclick="toggle(this)">
+  <div class="tag">VARIANT 3 — COLOUR-CODED TILES <span class="ck">✓</span></div>
+  <div class="hero">
+    <div class="panel">
+      <div class="ey"><div class="dot dv"></div>SEASON 3 XP</div>
+      <div class="xpi"><div class="xpn">2,840</div><div class="xpu">XP</div></div>
+      <div class="sp"></div>
+      <div class="strk">🔥 7 Day Streak</div>
+    </div>
+    <div class="vdiv"></div>
+    <div class="panel">
+      <div class="ey"><div class="dot da"></div>CURRENT TIER</div>
+      <div class="tn">GOLD</div>
+      <div class="sc2">SEASON 3</div>
+      <div class="rk"><div class="rn">#12</div></div>
+    </div>
+  </div>
+  <div class="pf-wrap">
+    <div class="pm"><span class="fr">2,840 XP</span><span class="to">160 XP to reach <strong>PLATINUM</strong></span></div>
+    <div class="pt" style="height:6px"><div class="pf" style="width:63%"></div></div>
+    <div class="ms-row">
+      <div class="ms"><div class="ms-t r"></div><div class="ms-l r">BRNZ</div></div>
+      <div class="ms"><div class="ms-t r"></div><div class="ms-l r">SLVR</div></div>
+      <div class="ms"><div class="ms-t c"></div><div class="ms-l c">GOLD</div></div>
+      <div class="ms"><div class="ms-t"></div><div class="ms-l n">PLAT</div></div>
+      <div class="ms"><div class="ms-t"></div><div class="ms-l">DMND</div></div>
+    </div>
+  </div>
+  <!-- STATS V3 -->
+  <div class="s3">
+    <div class="tile t-steps"><div class="icon">👟</div><div class="val">287</div><div class="lbl">STEPS</div></div>
+    <div class="tile t-km">   <div class="icon">⚡</div><div class="val">0.2</div><div class="lbl">KM</div></div>
+    <div class="tile t-kcal"> <div class="icon">🔥</div><div class="val">138</div><div class="lbl">KCAL</div></div>
+    <div class="tile t-min">  <div class="icon">⏱</div><div class="val">0</div>  <div class="lbl">MIN</div></div>
+    <div class="tile t-bpm">  <div class="icon">❤️</div><div class="val">71</div> <div class="lbl">BPM</div></div>
+  </div>
+</div>
+
+<!-- ══ VARIANT 4: HORIZONTAL SCROLL CARDS ══ -->
+<div class="card" data-choice="4" onclick="toggle(this)">
+  <div class="tag">VARIANT 4 — SCROLL CARDS <span class="ck">✓</span></div>
+  <div class="hero">
+    <div class="panel">
+      <div class="ey"><div class="dot dv"></div>SEASON 3 XP</div>
+      <div class="xpi"><div class="xpn">2,840</div><div class="xpu">XP</div></div>
+      <div class="sp"></div>
+      <div class="strk">🔥 7 Day Streak</div>
+    </div>
+    <div class="vdiv"></div>
+    <div class="panel">
+      <div class="ey"><div class="dot da"></div>CURRENT TIER</div>
+      <div class="tn">GOLD</div>
+      <div class="sc2">SEASON 3</div>
+      <div class="rk"><div class="rn">#12</div></div>
+    </div>
+  </div>
+  <div class="pf-wrap">
+    <div class="pm"><span class="fr">2,840 XP</span><span class="to">160 XP to reach <strong>PLATINUM</strong></span></div>
+    <div class="pt" style="height:6px"><div class="pf" style="width:63%"></div></div>
+    <div class="ms-row">
+      <div class="ms"><div class="ms-t r"></div><div class="ms-l r">BRNZ</div></div>
+      <div class="ms"><div class="ms-t r"></div><div class="ms-l r">SLVR</div></div>
+      <div class="ms"><div class="ms-t c"></div><div class="ms-l c">GOLD</div></div>
+      <div class="ms"><div class="ms-t"></div><div class="ms-l n">PLAT</div></div>
+      <div class="ms"><div class="ms-t"></div><div class="ms-l">DMND</div></div>
+    </div>
+  </div>
+  <!-- STATS V4 -->
+  <div class="s4">
+    <div class="row">
+      <div class="card2 c-steps"><div class="top-row"><div class="ico">👟</div><div class="lbl">STEPS</div></div><div class="num">287</div></div>
+      <div class="card2 c-km">   <div class="top-row"><div class="ico">⚡</div><div class="lbl">KM</div></div>   <div class="num">0.2</div></div>
+      <div class="card2 c-kcal"> <div class="top-row"><div class="ico">🔥</div><div class="lbl">KCAL</div></div> <div class="num">138</div></div>
+      <div class="card2 c-min">  <div class="top-row"><div class="ico">⏱</div><div class="lbl">MIN</div></div>  <div class="num">0</div></div>
+      <div class="card2 c-bpm">  <div class="top-row"><div class="ico">❤️</div><div class="lbl">BPM</div></div>  <div class="num">71</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="sbar">
+  <span id="st">Tap a variant to select it</span>
+  <span id="sc" style="font-size:11px;color:#4B5563"></span>
+</div>
+
+<script>
+const sel = new Set();
+function toggle(el) {
+  const c = el.dataset.choice;
+  if (sel.has(c)) { sel.delete(c); el.classList.remove('sel'); }
+  else            { sel.add(c);    el.classList.add('sel'); }
+  const t = document.getElementById('st');
+  const s = document.getElementById('sc');
+  if (!sel.size) { t.textContent = 'Tap a variant to select it'; s.textContent = ''; return; }
+  t.innerHTML = '<strong style="font-family:\'Big Shoulders Display\',sans-serif;font-weight:900;font-size:16px;color:#D4FF3A">Selected: Variant ' + [...sel].join(', ') + '</strong>';
+  s.textContent = sel.size + ' selected';
+  try { fetch('/event',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({type:'click',choice:[...sel].join(','),text:'stats variant: '+[...sel].join(', '),timestamp:Date.now()})}); } catch(e){}
+}
+</script>
+</body>
+</html>

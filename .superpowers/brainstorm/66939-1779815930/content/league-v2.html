@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>League Section — Redesigned</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #07070f;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  padding: 28px 20px 80px;
+  min-height: 100vh;
+}
+
+h1 { font-size: 20px; font-weight: 800; color: #D4FF3A; letter-spacing: -0.3px; margin-bottom: 5px; }
+.page-sub { font-size: 12px; color: #555570; margin-bottom: 28px; line-height: 1.5; }
+
+.designs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Card shell */
+.dc {
+  border-radius: 18px;
+  border: 2px solid #151525;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  background: #0c0c1c;
+  position: relative;
+}
+.dc:hover { border-color: #2a2a4a; transform: translateY(-2px); }
+.dc.sel {
+  border-color: #D4FF3A !important;
+  box-shadow: 0 0 0 1px #D4FF3A40, 0 12px 40px rgba(212,255,58,0.12);
+}
+.dc.sel::after {
+  content: '✓';
+  position: absolute; top: 12px; right: 12px;
+  width: 22px; height: 22px;
+  background: #D4FF3A;
+  color: #07070f;
+  font-size: 12px; font-weight: 900;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 20;
+  line-height: 22px; text-align: center;
+}
+
+.card-label {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #151525;
+  background: #0e0e1e;
+}
+.card-label .num { font-size: 9px; font-weight: 800; color: #D4FF3A; letter-spacing: 1.8px; text-transform: uppercase; margin-bottom: 2px; }
+.card-label h3 { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 3px; }
+.card-label p { font-size: 11px; color: #555570; line-height: 1.4; }
+
+.phone { background: #07070f; padding: 18px 14px; }
+
+/* Shared tokens */
+.volt { color: #D4FF3A; }
+.amber { color: #FFB547; }
+.muted { color: #555570; }
+.soft { color: #A3A3B3; }
+.bsd { font-family: 'Arial Black', 'Impact', sans-serif; font-weight: 900; letter-spacing: -0.3px; }
+
+.sec-hdr {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 11px;
+}
+.sec-hdr .ttl { font-size: 15px; font-weight: 800; color: #fff; }
+.sec-hdr .bdg {
+  font-size: 9px; font-weight: 800; color: #D4FF3A;
+  background: rgba(212,255,58,0.1);
+  padding: 2px 8px; border-radius: 999px; letter-spacing: 1px;
+}
+.sec-hdr .sea { font-size: 11px; color: #555570; margin-left: auto; }
+
+/* ── PILL SHORTCUTS (used by all designs) ─────────── */
+.pills {
+  display: flex; gap: 7px; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 12px 7px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  font-size: 12px; font-weight: 600; color: #ccc;
+  white-space: nowrap;
+}
+.pill .pi { font-size: 13px; line-height: 1; }
+.pill.hot { border-color: rgba(212,255,58,0.25); background: rgba(212,255,58,0.07); color: #D4FF3A; }
+.pill.pink { border-color: rgba(244,114,182,0.25); background: rgba(244,114,182,0.07); color: #F472B6; }
+.pill.amber-p { border-color: rgba(255,181,71,0.25); background: rgba(255,181,71,0.07); color: #FFB547; }
+.pill.blue { border-color: rgba(99,179,237,0.25); background: rgba(99,179,237,0.07); color: #63B3ED; }
+.pill .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: #ef4444; flex-shrink: 0; }
+
+/* ─────────────────────────────────────────────────── */
+
+/* ════════════════════════════════════════════════════
+   DESIGN 1 — SOCIAL STANDINGS
+   Friends leaderboard card + pills + coins
+   ════════════════════════════════════════════════════ */
+
+.d1-board {
+  background: #0c0c1e;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.d1-board-top {
+  padding: 12px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.d1-board-top .grp { display: flex; align-items: center; gap: 8px; }
+.d1-board-top .grp .ico { font-size: 16px; }
+.d1-board-top .grp .ttl { font-size: 14px; font-weight: 700; color: #fff; }
+.d1-board-top .live-dot { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #22c55e; font-weight: 600; }
+.d1-board-top .live-dot::before { content: ''; display: block; width: 5px; height: 5px; border-radius: 50%; background: #22c55e; }
+
+.d1-rows { padding: 4px 0; }
+.d1-row { display: flex; align-items: center; gap: 9px; padding: 7px 14px; }
+.d1-row.you { background: rgba(212,255,58,0.04); }
+.d1-row .rnk { font-size: 13px; font-weight: 900; color: #555570; width: 22px; flex-shrink: 0; font-family: 'Arial Black', sans-serif; }
+.d1-row.you .rnk { color: #D4FF3A; }
+.d1-row .av {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+  background: rgba(255,255,255,0.07); color: #A3A3B3;
+}
+.d1-row.you .av { background: rgba(212,255,58,0.18); color: #D4FF3A; border: 1.5px solid rgba(212,255,58,0.35); }
+.d1-row .nm { flex: 1; font-size: 12px; color: #ccc; font-weight: 500; }
+.d1-row.you .nm { color: #fff; font-weight: 700; }
+.d1-row .xp-pill {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 999px;
+  background: rgba(255,255,255,0.05); color: #555570;
+}
+.d1-row.you .xp-pill { background: rgba(212,255,58,0.1); color: #D4FF3A; }
+.d1-row .mv { font-size: 11px; font-weight: 700; width: 18px; text-align: center; flex-shrink: 0; }
+
+.d1-sep { display: flex; align-items: center; gap: 8px; padding: 3px 14px; }
+.d1-sep .ln { flex: 1; height: 1px; background: rgba(212,255,58,0.15); }
+.d1-sep .tx { font-size: 8px; font-weight: 800; color: #D4FF3A; letter-spacing: 1px; }
+
+.coins-pill-card {
+  background: #0c0c1e;
+  border: 1px solid rgba(255,181,71,0.15);
+  border-radius: 999px;
+  padding: 11px 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.coins-pill-card .ico { font-size: 18px; }
+.coins-pill-card .val { font-size: 18px; font-weight: 900; color: #FFB547; font-family: 'Arial Black', sans-serif; letter-spacing: -0.5px; flex: 1; }
+.coins-pill-card .sub { font-size: 10px; color: #555570; }
+.coins-pill-card .cta {
+  font-size: 11px; font-weight: 700; color: #FFB547;
+  background: rgba(255,181,71,0.12);
+  border: 1px solid rgba(255,181,71,0.2);
+  padding: 5px 14px; border-radius: 999px;
+}
+
+/* ════════════════════════════════════════════════════
+   DESIGN 2 — COMMUNITY PULSE
+   Friends activity feed + scrollable pills + coins
+   ════════════════════════════════════════════════════ */
+
+.d2-friends-card {
+  background: #0c0c1e;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.d2-friends-header {
+  padding: 11px 14px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.d2-friends-header .ico { font-size: 15px; }
+.d2-friends-header .ttl { font-size: 13px; font-weight: 700; color: #fff; flex: 1; }
+.d2-friends-header .count { font-size: 11px; color: #555570; }
+.d2-friends-header .add-btn {
+  font-size: 10px; font-weight: 700; color: #D4FF3A;
+  background: rgba(212,255,58,0.1);
+  padding: 4px 10px; border-radius: 999px;
+  border: 1px solid rgba(212,255,58,0.2);
+}
+
+.d2-activity-list { padding: 6px 0; }
+.d2-act-row { display: flex; align-items: center; gap: 10px; padding: 7px 14px; }
+.d2-act-row .av {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; flex-shrink: 0;
+}
+.d2-act-row .body { flex: 1; }
+.d2-act-row .body .nm { font-size: 12px; font-weight: 700; color: #fff; }
+.d2-act-row .body .action { font-size: 11px; color: #555570; margin-top: 1px; }
+.d2-act-row .right { text-align: right; }
+.d2-act-row .right .xp { font-size: 11px; font-weight: 700; color: #D4FF3A; }
+.d2-act-row .right .time { font-size: 10px; color: #555570; margin-top: 1px; }
+.d2-act-row .tag {
+  font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 999px; white-space: nowrap;
+}
+
+.d2-coins-card {
+  background: #0c0c1e;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.d2-coins-card .icon-wrap {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(255,181,71,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.d2-coins-card .info { flex: 1; }
+.d2-coins-card .info .val { font-size: 20px; font-weight: 900; color: #FFB547; font-family: 'Arial Black', sans-serif; }
+.d2-coins-card .info .sub { font-size: 10px; color: #555570; margin-top: 2px; }
+.d2-coins-card .redeem-arrow {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,181,71,0.1);
+  border: 1px solid rgba(255,181,71,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: #FFB547;
+}
+
+/* ════════════════════════════════════════════════════
+   DESIGN 3 — RIVALS + BOARD SPLIT
+   Two compact cards side-by-side + pill row + coins bar
+   ════════════════════════════════════════════════════ */
+
+.d3-split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+
+.d3-mini-card {
+  background: #0c0c1e;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 12px 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.d3-mini-card .hdr { display: flex; align-items: center; gap: 6px; }
+.d3-mini-card .hdr .ico { font-size: 15px; }
+.d3-mini-card .hdr .ttl { font-size: 12px; font-weight: 700; color: #fff; flex: 1; }
+.d3-mini-card .hdr .cnt { font-size: 10px; font-weight: 700; color: #555570; }
+
+.d3-rival-list { display: flex; flex-direction: column; gap: 5px; }
+.d3-rival-item { display: flex; align-items: center; gap: 6px; }
+.d3-rival-item .av {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; flex-shrink: 0;
+  background: rgba(255,255,255,0.07); color: #A3A3B3;
+}
+.d3-rival-item .nm { font-size: 11px; color: #ccc; flex: 1; font-weight: 500; }
+.d3-rival-item .status {
+  font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 999px;
+}
+.d3-rival-item .status.winning { background: rgba(212,255,58,0.1); color: #D4FF3A; }
+.d3-rival-item .status.losing { background: rgba(244,114,182,0.1); color: #F472B6; }
+
+.d3-board-list { display: flex; flex-direction: column; gap: 5px; }
+.d3-board-item { display: flex; align-items: center; gap: 6px; }
+.d3-board-item .rk { font-size: 11px; font-weight: 900; color: #555570; width: 18px; flex-shrink: 0; font-family: 'Arial Black', sans-serif; }
+.d3-board-item.you .rk { color: #D4FF3A; }
+.d3-board-item .av {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; flex-shrink: 0;
+  background: rgba(255,255,255,0.07); color: #A3A3B3;
+}
+.d3-board-item.you .av { background: rgba(212,255,58,0.18); color: #D4FF3A; }
+.d3-board-item .nm { font-size: 11px; color: #ccc; flex: 1; }
+.d3-board-item.you .nm { color: #D4FF3A; font-weight: 700; }
+.d3-board-item .xp-t { font-size: 10px; color: #555570; }
+
+.d3-pill-scroll { display: flex; gap: 7px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
+.d3-pill-scroll::-webkit-scrollbar { display: none; }
+
+.d3-coins-strip {
+  background: linear-gradient(135deg, rgba(255,181,71,0.07), rgba(212,255,58,0.03));
+  border: 1px solid rgba(255,181,71,0.18);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.d3-coins-strip .left { flex: 1; }
+.d3-coins-strip .left .val { font-size: 22px; font-weight: 900; color: #FFB547; font-family: 'Arial Black', sans-serif; }
+.d3-coins-strip .left .sub { font-size: 10px; color: #555570; margin-top: 2px; }
+.d3-coins-strip .right-group { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.d3-coins-strip .right-group .bp-tag {
+  font-size: 9px; font-weight: 700; color: #D4FF3A;
+  background: rgba(212,255,58,0.1);
+  padding: 2px 9px; border-radius: 999px;
+  border: 1px solid rgba(212,255,58,0.2);
+}
+.d3-coins-strip .right-group .prog { width: 80px; height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+.d3-coins-strip .right-group .prog .fill { height: 100%; background: linear-gradient(90deg, #FFB547, #D4FF3A); }
+
+/* ════════════════════════════════════════════════════
+   DESIGN 4 — LEADERBOARD HEAT
+   Rank-gap focused card + horizontal pill chips + coins
+   ════════════════════════════════════════════════════ */
+
+.d4-heat-card {
+  background: #0c0c1e;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.d4-heat-header {
+  padding: 11px 14px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.d4-heat-header .ttl { font-size: 14px; font-weight: 700; color: #fff; flex: 1; }
+.d4-heat-header .switch {
+  display: flex; background: rgba(255,255,255,0.05); border-radius: 999px; padding: 2px; gap: 2px;
+}
+.d4-heat-header .sw-btn {
+  font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; color: #555570;
+}
+.d4-heat-header .sw-btn.active { background: rgba(212,255,58,0.15); color: #D4FF3A; }
+
+.d4-heat-rows { padding: 4px 0; }
+.d4-heat-row { display: flex; align-items: center; gap: 9px; padding: 7px 14px; }
+.d4-heat-row.you { background: rgba(212,255,58,0.04); }
+.d4-heat-row .rnk { font-size: 12px; font-weight: 900; color: #555570; width: 20px; flex-shrink: 0; font-family: 'Arial Black', sans-serif; }
+.d4-heat-row.you .rnk { color: #D4FF3A; }
+.d4-heat-row .av {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+  background: rgba(255,255,255,0.07); color: #A3A3B3;
+}
+.d4-heat-row.you .av { background: rgba(212,255,58,0.18); color: #D4FF3A; }
+.d4-heat-row .nm { flex: 1; font-size: 12px; color: #ccc; }
+.d4-heat-row.you .nm { color: #fff; font-weight: 700; }
+.d4-heat-row .bar-wrap { display: flex; align-items: center; gap: 5px; }
+.d4-heat-row .mini-bar { width: 44px; height: 3px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+.d4-heat-row .mini-bar .fill { height: 100%; border-radius: 2px; }
+.d4-heat-row .xp-num { font-size: 10px; color: #555570; font-weight: 600; min-width: 42px; text-align: right; }
+.d4-heat-row.you .xp-num { color: #D4FF3A; }
+.d4-heat-sep { display: flex; align-items: center; gap: 8px; padding: 3px 14px; }
+.d4-heat-sep .ln { flex: 1; height: 1px; background: rgba(212,255,58,0.15); }
+.d4-heat-sep .tx { font-size: 8px; font-weight: 800; color: #D4FF3A; letter-spacing: 1px; }
+
+.d4-chip-row { display: flex; gap: 7px; margin-bottom: 14px; flex-wrap: wrap; }
+.d4-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.04);
+  font-size: 12px; font-weight: 600; color: #bbb;
+  transition: all 0.15s;
+}
+.d4-chip .ci { font-size: 14px; line-height: 1; }
+.d4-chip .ct { font-size: 9px; font-weight: 700; color: #555570; margin-left: 2px; }
+.d4-chip.live { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.06); color: #f87171; }
+.d4-chip.live .ci-dot { width: 5px; height: 5px; border-radius: 50%; background: #ef4444; flex-shrink: 0; }
+
+.d4-coins-row {
+  background: #0c0c1e;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 999px;
+  padding: 12px 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.d4-coins-row .ico { font-size: 20px; }
+.d4-coins-row .val { font-size: 18px; font-weight: 900; color: #FFB547; font-family: 'Arial Black', sans-serif; flex: 1; }
+.d4-coins-row .sub { font-size: 10px; color: #555570; }
+.d4-coins-row .redeem-pill {
+  font-size: 11px; font-weight: 700;
+  color: #FFB547;
+  background: rgba(255,181,71,0.12);
+  border: 1px solid rgba(255,181,71,0.25);
+  padding: 5px 14px; border-radius: 999px;
+}
+
+/* ════════════════════════════════════════════════════
+   DESIGN 5 — ARENA CARD (condensed full section)
+   Everything in one glassy card with tab toggle
+   Pills below + sleek wallet strip
+   ════════════════════════════════════════════════════ */
+
+.d5-arena-card {
+  background: linear-gradient(145deg, #0e0e20, #0c0c18);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  position: relative;
+}
+.d5-top-glow {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,255,58,0.3), transparent);
+}
+.d5-arena-top {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px 8px;
+}
+.d5-arena-top .tab-group {
+  display: flex; background: rgba(255,255,255,0.05); border-radius: 999px; padding: 3px; gap: 2px;
+}
+.d5-arena-top .tab {
+  font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 999px; color: #555570;
+}
+.d5-arena-top .tab.active { background: rgba(212,255,58,0.15); color: #D4FF3A; }
+.d5-arena-top .add-pill {
+  margin-left: auto;
+  font-size: 10px; font-weight: 700; color: #A3A3B3;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 4px 10px; border-radius: 999px;
+}
+
+.d5-board-rows { padding: 2px 0 6px; }
+.d5-board-row { display: flex; align-items: center; gap: 9px; padding: 7px 14px; }
+.d5-board-row.you { background: rgba(212,255,58,0.04); }
+.d5-board-row .rnk { font-size: 13px; font-weight: 900; color: #555570; width: 22px; flex-shrink: 0; font-family: 'Arial Black', sans-serif; }
+.d5-board-row.you .rnk { color: #D4FF3A; }
+.d5-board-row .av {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.d5-board-row.you .av { background: rgba(212,255,58,0.18); color: #D4FF3A; }
+.d5-board-row .nm { flex: 1; font-size: 12px; color: #ccc; }
+.d5-board-row.you .nm { color: #fff; font-weight: 700; }
+.d5-board-row .xp-tag {
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 999px;
+  background: rgba(255,255,255,0.05); color: #555570;
+}
+.d5-board-row.you .xp-tag { background: rgba(212,255,58,0.1); color: #D4FF3A; }
+.d5-board-row .mv { font-size: 11px; width: 16px; text-align: center; flex-shrink: 0; }
+
+.d5-sep { display: flex; align-items: center; gap: 8px; padding: 2px 14px; }
+.d5-sep .ln { flex: 1; height: 1px; background: rgba(212,255,58,0.12); }
+.d5-sep .tx { font-size: 8px; font-weight: 800; color: #D4FF3A; letter-spacing: 1px; }
+
+.d5-pill-row { display: flex; gap: 7px; margin-bottom: 14px; flex-wrap: wrap; }
+
+.d5-wallet {
+  background: #0c0c1e;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 13px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.d5-wallet .lft { flex: 1; display: flex; align-items: center; gap: 10px; }
+.d5-wallet .lft .ico-wrap {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(255,181,71,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+}
+.d5-wallet .lft .vals .amount { font-size: 19px; font-weight: 900; color: #FFB547; font-family: 'Arial Black', sans-serif; }
+.d5-wallet .lft .vals .sub { font-size: 10px; color: #555570; margin-top: 1px; }
+.d5-wallet .rgt { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+.d5-wallet .rgt .bp { font-size: 9px; font-weight: 700; color: #D4FF3A; background: rgba(212,255,58,0.1); padding: 2px 9px; border-radius: 999px; }
+.d5-wallet .rgt .cta { font-size: 11px; font-weight: 700; color: #FFB547; }
+
+/* ─── FOOTER SELECTION BAR ───────────────────────── */
+#sel-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #0c0c1e;
+  border-top: 1px solid #151525;
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 10px;
+  z-index: 100;
+}
+#sel-bar .cnt { font-size: 13px; font-weight: 600; color: #A3A3B3; flex: 1; }
+#sel-bar .done {
+  background: #D4FF3A; color: #07070f;
+  font-size: 13px; font-weight: 800;
+  padding: 9px 22px; border-radius: 999px;
+  border: none; cursor: pointer;
+}
+#sel-bar .clr { font-size: 12px; color: #555570; background: none; border: none; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h1>League Section — Redesigned v2</h1>
+<p class="page-sub">No tier/XP duplicate. No Log Activity. Social + competitive focus. Stylish rounded aesthetic.<br>Click to select your favorites (multi-select OK), then reply in terminal.</p>
+
+<div class="designs-grid">
+
+  <!-- ══════════════════════════════════════════════════
+       DESIGN 1 — SOCIAL STANDINGS
+       ══════════════════════════════════════════════════ -->
+  <div class="dc" data-choice="1" onclick="toggleSel(this)">
+    <div class="card-label">
+      <div class="num">Design 1</div>
+      <h3>Social Standings</h3>
+      <p>Friends leaderboard with rank movement. Pill shortcuts row. Coin pill at bottom.</p>
+    </div>
+    <div class="phone">
+
+      <div class="sec-hdr">
+        <span class="ttl">League</span>
+        <span class="bdg">SEASON 1</span>
+        <span class="sea">See all →</span>
+      </div>
+
+      <div class="d1-board">
+        <div class="d1-board-top">
+          <div class="grp"><span class="ico">🏅</span><span class="ttl">Standings</span></div>
+          <div class="live-dot">Live</div>
+        </div>
+        <div class="d1-rows">
+          <div class="d1-row">
+            <span class="rnk">#1</span>
+            <div class="av">R</div>
+            <span class="nm">Raj</span>
+            <span class="xp-pill">1480 XP</span>
+            <span class="mv" style="color:#22c55e">▲</span>
+          </div>
+          <div class="d1-sep"><div class="ln"></div><div class="tx">PROMOTE ZONE</div><div class="ln"></div></div>
+          <div class="d1-row you">
+            <span class="rnk">#2</span>
+            <div class="av">Y</div>
+            <span class="nm">You</span>
+            <span class="xp-pill">1240 XP</span>
+            <span class="mv" style="color:#D4FF3A">●</span>
+          </div>
+          <div class="d1-row">
+            <span class="rnk">#3</span>
+            <div class="av">A</div>
+            <span class="nm">Alex</span>
+            <span class="xp-pill">980 XP</span>
+            <span class="mv" style="color:#ef4444">▼</span>
+          </div>
+          <div class="d1-row">
+            <span class="rnk">#4</span>
+            <div class="av">M</div>
+            <span class="nm">Mike</span>
+            <span class="xp-pill">820 XP</span>
+            <span class="mv" style="color:#555570">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pills -->
+      <div class="pills">
+        <div class="pill hot"><span class="pi">🏆</span> Challenges</div>
+        <div class="pill pink"><span class="pi">🤼</span> Rivals</div>
+        <div class="pill blue"><span class="pi">👥</span> Friends</div>
+        <div class="pill"><span class="pi">📊</span> Leaderboard</div>
+        <div class="pill amber-p"><span class="pi">🎭</span> Battle Pass</div>
+      </div>
+
+      <!-- Coins pill card -->
+      <div class="coins-pill-card">
+        <span class="ico">🪙</span>
+        <div>
+          <div class="val">300 ¢</div>
+          <div class="sub">≈ ₹3 in rewards</div>
+        </div>
+        <div class="cta">Redeem →</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       DESIGN 2 — COMMUNITY PULSE
+       ══════════════════════════════════════════════════ -->
+  <div class="dc" data-choice="2" onclick="toggleSel(this)">
+    <div class="card-label">
+      <div class="num">Design 2</div>
+      <h3>Community Pulse</h3>
+      <p>Friends' recent activity feed instead of standings. Scrollable pill shortcuts. Clean coin card.</p>
+    </div>
+    <div class="phone">
+
+      <div class="sec-hdr">
+        <span class="ttl">Friends</span>
+        <span class="bdg">4 ACTIVE</span>
+        <span class="sea">League →</span>
+      </div>
+
+      <div class="d2-friends-card">
+        <div class="d2-friends-header">
+          <span class="ico">👥</span>
+          <span class="ttl">What's happening</span>
+          <div class="add-btn">+ Add</div>
+        </div>
+        <div class="d2-activity-list">
+          <div class="d2-act-row">
+            <div class="av" style="background:rgba(244,114,182,0.15);color:#F472B6">R</div>
+            <div class="body">
+              <div class="nm">Raj</div>
+              <div class="action">Completed 10K challenge</div>
+            </div>
+            <div class="right">
+              <div class="xp">+120 XP</div>
+              <div class="time">2m ago</div>
+            </div>
+          </div>
+          <div class="d2-act-row">
+            <div class="av" style="background:rgba(99,179,237,0.15);color:#63B3ED">A</div>
+            <div class="body">
+              <div class="nm">Alex</div>
+              <div class="action">Beat you in Rivals! 😤</div>
+            </div>
+            <div class="right">
+              <div class="xp" style="color:#ef4444">−30 XP</div>
+              <div class="time">1h ago</div>
+            </div>
+          </div>
+          <div class="d2-act-row">
+            <div class="av" style="background:rgba(212,255,58,0.15);color:#D4FF3A">M</div>
+            <div class="body">
+              <div class="nm">Maya</div>
+              <div class="action">Reached Gold league 🏅</div>
+            </div>
+            <div class="right">
+              <div class="xp">+200 XP</div>
+              <div class="time">3h ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable pills -->
+      <div class="pills">
+        <div class="pill hot"><span class="pi">🏆</span> Challenges</div>
+        <div class="pill pink"><span class="pi">🤼</span> Rivals</div>
+        <div class="pill blue"><span class="pi">👥</span> Friends</div>
+        <div class="pill"><span class="pi">📊</span> Leaderboard</div>
+        <div class="pill amber-p"><span class="pi">🎭</span> Battle Pass</div>
+        <div class="pill"><span class="pi">💰</span> Redeem</div>
+      </div>
+
+      <!-- Coin card -->
+      <div class="d2-coins-card">
+        <div class="icon-wrap">🪙</div>
+        <div class="info">
+          <div class="val">300 ¢</div>
+          <div class="sub">≈ ₹3 · Tap to redeem</div>
+        </div>
+        <div class="redeem-arrow">→</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       DESIGN 3 — RIVALS + BOARD SPLIT
+       ══════════════════════════════════════════════════ -->
+  <div class="dc" data-choice="3" onclick="toggleSel(this)">
+    <div class="card-label">
+      <div class="num">Design 3</div>
+      <h3>Rivals + Board Split</h3>
+      <p>Two compact side-by-side cards: active rivals and league standings. Pill row + gradient coins strip.</p>
+    </div>
+    <div class="phone">
+
+      <div class="sec-hdr" style="margin-bottom:10px">
+        <span class="ttl">Compete</span>
+        <span class="bdg">SEASON 1</span>
+        <span class="sea">See all →</span>
+      </div>
+
+      <div class="d3-split">
+        <!-- Rivals mini card -->
+        <div class="d3-mini-card">
+          <div class="hdr">
+            <span class="ico">🤼</span>
+            <span class="ttl">Rivals</span>
+            <span class="cnt" style="color:#F472B6">2</span>
+          </div>
+          <div class="d3-rival-list">
+            <div class="d3-rival-item">
+              <div class="av" style="background:rgba(244,114,182,0.15);color:#F472B6">A</div>
+              <span class="nm">Alex</span>
+              <span class="status winning">↑ Win</span>
+            </div>
+            <div class="d3-rival-item">
+              <div class="av" style="background:rgba(99,179,237,0.15);color:#63B3ED">K</div>
+              <span class="nm">Karan</span>
+              <span class="status losing">↓ Lose</span>
+            </div>
+            <div class="d3-rival-item" style="margin-top:2px">
+              <div style="font-size:10px;color:#D4FF3A;font-weight:700;padding-left:2px">+ Challenge →</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Board mini card -->
+        <div class="d3-mini-card">
+          <div class="hdr">
+            <span class="ico">📊</span>
+            <span class="ttl">Standings</span>
+          </div>
+          <div class="d3-board-list">
+            <div class="d3-board-item">
+              <span class="rk">#1</span>
+              <div class="av" style="background:rgba(255,181,71,0.15);color:#FFB547">R</div>
+              <span class="nm">Raj</span>
+            </div>
+            <div class="d3-board-item you">
+              <span class="rk">#2</span>
+              <div class="av">Y</div>
+              <span class="nm">You</span>
+            </div>
+            <div class="d3-board-item">
+              <span class="rk">#3</span>
+              <div class="av">A</div>
+              <span class="nm">Alex</span>
+            </div>
+            <div class="d3-board-item" style="margin-top:2px">
+              <span style="font-size:10px;color:#D4FF3A;font-weight:700;padding-left:20px">Full board →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pill row -->
+      <div class="d3-pill-scroll">
+        <div class="pill hot"><span class="pi">🏆</span> Challenges</div>
+        <div class="pill pink"><span class="pi">🤼</span> Rivals</div>
+        <div class="pill blue"><span class="pi">👥</span> Friends</div>
+        <div class="pill"><span class="pi">📊</span> Leaderboard</div>
+        <div class="pill amber-p"><span class="pi">🎭</span> Battle Pass</div>
+        <div class="pill"><span class="pi">💰</span> Redeem</div>
+      </div>
+
+      <!-- Coins strip -->
+      <div class="d3-coins-strip">
+        <div class="left">
+          <div class="val">300 ¢</div>
+          <div class="sub">≈ ₹3 in rewards</div>
+        </div>
+        <div class="right-group">
+          <div class="bp-tag">Battle Pass S1</div>
+          <div class="prog"><div class="fill" style="width:15%"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       DESIGN 4 — LEADERBOARD HEAT
+       ══════════════════════════════════════════════════ -->
+  <div class="dc" data-choice="4" onclick="toggleSel(this)">
+    <div class="card-label">
+      <div class="num">Design 4</div>
+      <h3>Leaderboard Heat</h3>
+      <p>Board with Friends/All toggle + XP bar per row. Rich pill chips with live badge. Pill-shaped coins row.</p>
+    </div>
+    <div class="phone">
+
+      <div class="sec-hdr">
+        <span class="ttl">League</span>
+        <span class="bdg">SEASON 1</span>
+        <span class="sea">Full board →</span>
+      </div>
+
+      <div class="d4-heat-card">
+        <div class="d4-heat-header">
+          <span class="ttl">Standings</span>
+          <div class="switch">
+            <div class="sw-btn active">Friends</div>
+            <div class="sw-btn">All</div>
+          </div>
+        </div>
+        <div class="d4-heat-rows">
+          <div class="d4-heat-row">
+            <span class="rnk">#1</span>
+            <div class="av" style="background:rgba(255,181,71,0.15);color:#FFB547">R</div>
+            <span class="nm">Raj</span>
+            <div class="bar-wrap">
+              <div class="mini-bar"><div class="fill" style="width:100%;background:#FFB547"></div></div>
+              <span class="xp-num">1480</span>
+            </div>
+          </div>
+          <div class="d4-heat-sep"><div class="ln"></div><div class="tx">PROMOTE ZONE</div><div class="ln"></div></div>
+          <div class="d4-heat-row you">
+            <span class="rnk">#2</span>
+            <div class="av">Y</div>
+            <span class="nm">You</span>
+            <div class="bar-wrap">
+              <div class="mini-bar"><div class="fill" style="width:84%;background:#D4FF3A"></div></div>
+              <span class="xp-num">1240</span>
+            </div>
+          </div>
+          <div class="d4-heat-row">
+            <span class="rnk">#3</span>
+            <div class="av" style="background:rgba(99,179,237,0.15);color:#63B3ED">A</div>
+            <span class="nm">Alex</span>
+            <div class="bar-wrap">
+              <div class="mini-bar"><div class="fill" style="width:66%;background:#63B3ED"></div></div>
+              <span class="xp-num">980</span>
+            </div>
+          </div>
+          <div class="d4-heat-row">
+            <span class="rnk">#4</span>
+            <div class="av">M</div>
+            <span class="nm">Mike</span>
+            <div class="bar-wrap">
+              <div class="mini-bar"><div class="fill" style="width:55%;background:#4B5563"></div></div>
+              <span class="xp-num">820</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rich chips -->
+      <div class="d4-chip-row">
+        <div class="d4-chip live"><span class="ci-dot"></span><span class="ci">🏆</span> Challenges <span class="ct">3</span></div>
+        <div class="d4-chip"><span class="ci">🤼</span> Rivals <span class="ct">2</span></div>
+        <div class="d4-chip"><span class="ci">👥</span> Friends <span class="ct">8</span></div>
+        <div class="d4-chip"><span class="ci">🎭</span> Battle Pass</div>
+        <div class="d4-chip"><span class="ci">💰</span> Redeem</div>
+      </div>
+
+      <!-- Pill coins -->
+      <div class="d4-coins-row">
+        <span class="ico">🪙</span>
+        <div>
+          <div class="val">300 ¢</div>
+          <div class="sub">≈ ₹3 in rewards</div>
+        </div>
+        <div class="redeem-pill">Redeem →</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       DESIGN 5 — ARENA CARD
+       ══════════════════════════════════════════════════ -->
+  <div class="dc" data-choice="5" onclick="toggleSel(this)">
+    <div class="card-label">
+      <div class="num">Design 5</div>
+      <h3>Arena Card</h3>
+      <p>Single premium card with Friends / All tab. Pill shortcuts below. Minimal wallet strip.</p>
+    </div>
+    <div class="phone">
+
+      <div class="sec-hdr">
+        <span class="ttl">Arena</span>
+        <span class="bdg">SEASON 1</span>
+        <span class="sea">Explore →</span>
+      </div>
+
+      <div class="d5-arena-card">
+        <div class="d5-top-glow"></div>
+        <div class="d5-arena-top">
+          <div class="tab-group">
+            <div class="tab active">Friends</div>
+            <div class="tab">League</div>
+          </div>
+          <div class="add-pill">+ Invite</div>
+        </div>
+        <div class="d5-board-rows">
+          <div class="d5-board-row">
+            <span class="rnk">#1</span>
+            <div class="av" style="background:rgba(255,181,71,0.18);color:#FFB547">R</div>
+            <span class="nm">Raj</span>
+            <span class="xp-tag">1480 XP</span>
+            <span class="mv" style="color:#22c55e">↑</span>
+          </div>
+          <div class="d5-sep"><div class="ln"></div><div class="tx">PROMOTE ZONE</div><div class="ln"></div></div>
+          <div class="d5-board-row you">
+            <span class="rnk">#2</span>
+            <div class="av">Y</div>
+            <span class="nm">You</span>
+            <span class="xp-tag">1240 XP</span>
+            <span class="mv" style="color:#D4FF3A">●</span>
+          </div>
+          <div class="d5-board-row">
+            <span class="rnk">#3</span>
+            <div class="av" style="background:rgba(99,179,237,0.15);color:#63B3ED">A</div>
+            <span class="nm">Alex</span>
+            <span class="xp-tag">980 XP</span>
+            <span class="mv" style="color:#ef4444">↓</span>
+          </div>
+          <div class="d5-board-row">
+            <span class="rnk">#4</span>
+            <div class="av">M</div>
+            <span class="nm">Mike</span>
+            <span class="xp-tag">820 XP</span>
+            <span class="mv" style="color:#555570">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pills -->
+      <div class="d5-pill-row">
+        <div class="pill hot"><span class="pi">🏆</span> Challenges</div>
+        <div class="pill pink"><span class="pi">🤼</span> Rivals</div>
+        <div class="pill blue"><span class="pi">👥</span> Friends</div>
+        <div class="pill"><span class="pi">📊</span> Leaderboard</div>
+        <div class="pill amber-p"><span class="pi">🎭</span> Battle Pass</div>
+        <div class="pill"><span class="pi">💰</span> Redeem</div>
+      </div>
+
+      <!-- Wallet -->
+      <div class="d5-wallet">
+        <div class="lft">
+          <div class="ico-wrap">🪙</div>
+          <div class="vals">
+            <div class="amount">300 ¢</div>
+            <div class="sub">≈ ₹3 in rewards</div>
+          </div>
+        </div>
+        <div class="rgt">
+          <div class="bp">Battle Pass S1</div>
+          <div class="cta" style="font-size:11px;color:#FFB547">Redeem →</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer bar -->
+<div id="sel-bar">
+  <span class="cnt" id="cnt-txt">Select your favorites</span>
+  <button class="clr" onclick="clearAll()">Clear</button>
+  <button class="done" onclick="submit()">Done →</button>
+</div>
+
+<script>
+const sel = new Set();
+
+function toggleSel(el) {
+  const c = el.dataset.choice;
+  if (sel.has(c)) { sel.delete(c); el.classList.remove('sel'); }
+  else { sel.add(c); el.classList.add('sel'); }
+  updateBar();
+  record(c, el.querySelector('h3')?.textContent || c, sel.has(c) ? 'select' : 'deselect');
+}
+function updateBar() {
+  const n = sel.size;
+  document.getElementById('cnt-txt').textContent =
+    n === 0 ? 'Select your favorites' : n === 1 ? '1 design selected' : `${n} designs selected`;
+}
+function clearAll() {
+  sel.clear();
+  document.querySelectorAll('.dc').forEach(e => e.classList.remove('sel'));
+  updateBar();
+}
+function submit() {
+  if (!sel.size) return;
+  record('submit', [...sel].join(','), 'submit');
+  document.getElementById('cnt-txt').textContent = '✓ Recorded — tell me in terminal';
+}
+function record(choice, text, type) {
+  fetch('/__events', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({type, choice, text, timestamp: Date.now()})
+  }).catch(() => {});
+}
+</script>
+
+</body>
+</html>

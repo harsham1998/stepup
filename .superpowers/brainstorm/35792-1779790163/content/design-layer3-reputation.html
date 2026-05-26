@@ -1,0 +1,118 @@
+<h2>Layer 3 — Fitness Reputation</h2>
+<p class="subtitle">0–900 credit-score-style composite · 5 sub-scores · nightly recalculation</p>
+
+<div class="section">
+  <div class="label">SCORE FORMULA (0–900)</div>
+  <div style="background:#1a1a1a;border-radius:12px;padding:16px;margin-top:10px">
+    <div style="display:flex;flex-direction:column;gap:10px">
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:120px;color:#d4ff3a;font-size:12px;font-weight:700">Consistency</div>
+        <div style="flex:1;background:#0a0a0a;border-radius:6px;height:8px;overflow:hidden">
+          <div style="width:30%;height:100%;background:#d4ff3a;border-radius:6px"></div>
+        </div>
+        <div style="color:#888;font-size:11px;width:40px;text-align:right">30%</div>
+        <div style="color:#666;font-size:11px;width:180px">(full_days + partial×0.5) / 30 × 100</div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:120px;color:#d4ff3a;font-size:12px;font-weight:700">Challenge wins</div>
+        <div style="flex:1;background:#0a0a0a;border-radius:6px;height:8px;overflow:hidden">
+          <div style="width:25%;height:100%;background:#d4ff3a;border-radius:6px"></div>
+        </div>
+        <div style="color:#888;font-size:11px;width:40px;text-align:right">25%</div>
+        <div style="color:#666;font-size:11px;width:180px">top-50% finishes / total joined × 100</div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:120px;color:#ffc94a;font-size:12px;font-weight:700">Streak depth</div>
+        <div style="flex:1;background:#0a0a0a;border-radius:6px;height:8px;overflow:hidden">
+          <div style="width:20%;height:100%;background:#ffc94a;border-radius:6px"></div>
+        </div>
+        <div style="color:#888;font-size:11px;width:40px;text-align:right">20%</div>
+        <div style="color:#666;font-size:11px;width:180px">min((streak×2 + best_streak) / 90×100, 100)</div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:120px;color:#ffc94a;font-size:12px;font-weight:700">Activity mix</div>
+        <div style="flex:1;background:#0a0a0a;border-radius:6px;height:8px;overflow:hidden">
+          <div style="width:15%;height:100%;background:#ffc94a;border-radius:6px"></div>
+        </div>
+        <div style="color:#888;font-size:11px;width:40px;text-align:right">15%</div>
+        <div style="color:#666;font-size:11px;width:180px">distinct activity types (steps/gym/cycling/outdoor) / 4 × 100</div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:120px;color:#888;font-size:12px;font-weight:700">Social</div>
+        <div style="flex:1;background:#0a0a0a;border-radius:6px;height:8px;overflow:hidden">
+          <div style="width:10%;height:100%;background:#888;border-radius:6px"></div>
+        </div>
+        <div style="color:#888;font-size:11px;width:40px;text-align:right">10%</div>
+        <div style="color:#666;font-size:11px;width:180px">min((posts + likes_received/10) / 20 × 100, 100)</div>
+      </div>
+
+      <div style="border-top:1px solid #2a2a2a;padding-top:12px;margin-top:4px">
+        <div style="color:#888;font-size:12px">Final score:</div>
+        <div style="color:#d4ff3a;font-size:14px;font-family:monospace;margin-top:4px">
+          (C×0.30 + CW×0.25 + SD×0.20 + AM×0.15 + S×0.10) × 9
+        </div>
+        <div style="color:#555;font-size:11px;margin-top:4px">Each sub-score is 0–100 · multiplied by 9 → gives final 0–900 range</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">ADDITIONAL FIELDS RETURNED BY API</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">
+    <div style="background:#1a1a1a;border-radius:10px;padding:12px">
+      <div style="color:#d4ff3a;font-size:11px;font-weight:700">National Percentile</div>
+      <div style="color:#aaa;font-size:12px;margin-top:4px">Rank among all users<br><code style="color:#666;font-size:10px">rank / total_users × 100</code></div>
+    </div>
+    <div style="background:#1a1a1a;border-radius:10px;padding:12px">
+      <div style="color:#d4ff3a;font-size:11px;font-weight:700">Monthly Delta</div>
+      <div style="color:#aaa;font-size:12px;margin-top:4px">Score vs last month<br><code style="color:#666;font-size:10px">score_snapshot in DB</code></div>
+    </div>
+    <div style="background:#1a1a1a;border-radius:10px;padding:12px">
+      <div style="color:#d4ff3a;font-size:11px;font-weight:700">Stat Highlights</div>
+      <div style="color:#aaa;font-size:12px;margin-top:4px">best_streak, total_challenges,<br>top_50pct_finishes</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">DB CHANGES</div>
+  <div style="background:#1a1a1a;border-radius:10px;padding:14px;margin-top:10px;font-family:monospace;font-size:12px;color:#aaa;line-height:2">
+    <span style="color:#ffc94a">ADD COLUMN</span> users.reputation_score INT DEFAULT 0<br>
+    <span style="color:#ffc94a">ADD COLUMN</span> users.reputation_updated_at TIMESTAMPTZ<br>
+    <span style="color:#ffc94a">ADD COLUMN</span> users.reputation_snapshot_prev INT DEFAULT 0<br>
+    <span style="color:#ffc94a">ADD COLUMN</span> users.best_streak_days INT DEFAULT 0<br>
+    <br>
+    <span style="color:#888">-- Nightly cron recalculates all users and writes to reputation_score</span><br>
+    <span style="color:#888">-- reputation_snapshot_prev saved on 1st of each month for delta display</span>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">API + FLUTTER</div>
+  <div style="background:#1a1a1a;border-radius:10px;padding:14px;margin-top:10px;font-size:12px;color:#aaa;line-height:2;font-family:monospace">
+    <span style="color:#d4ff3a">GET</span>  /reputation  — <span style="color:#ffc94a">new module</span> · returns score, breakdown, percentile, delta, highlights<br>
+    <span style="color:#888">POST cron job recalculates nightly via calculateReputation(userId)</span><br>
+    <br>
+    <span style="color:#d4ff3a">Flutter:</span> wire reputation_screen.dart → reputationProvider → GET /reputation<br>
+    <span style="color:#888">All 5 sub-score bars animate from real values, not hardcoded</span>
+  </div>
+</div>
+
+<div style="margin-top:20px;text-align:center">
+  <div class="options" style="max-width:400px;margin:0 auto">
+    <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content"><h3>Approve Layer 3</h3><p>Move to Layer 4 — Seasons</p></div>
+    </div>
+    <div class="option" data-choice="change" onclick="toggleSelect(this)">
+      <div class="letter">✎</div>
+      <div class="content"><h3>Request changes</h3><p>Tell me what to adjust in the terminal</p></div>
+    </div>
+  </div>
+</div>

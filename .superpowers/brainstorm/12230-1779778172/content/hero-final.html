@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design 4 — Final</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:ital,wght@0,700;0,900;1,900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  :root {
+    --volt:       #D4FF3A;
+    --volt-dim:   rgba(212,255,58,0.10);
+    --volt-line:  rgba(212,255,58,0.22);
+    --amber:      #FFB547;
+    --amber-dim:  rgba(255,181,71,0.10);
+    --amber-line: rgba(255,181,71,0.28);
+    --bg:         #050510;
+    --surface:    #0D0D1A;
+    --surf2:      #13131F;
+    --ink2:       #A3A3B3;
+    --ink3:       #4B5563;
+    --border:     rgba(255,255,255,0.07);
+    --plat:       #94A3B8;
+    --cyan:       #67E8F9;
+    --red:        #F87171;
+    --orange:     #FB923C;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #07071a;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    padding: 40px 20px 60px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  h1 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 22px; text-align: center;
+    color: var(--volt); margin-bottom: 4px;
+  }
+  .sub { color: var(--ink2); font-size: 12px; text-align: center; margin-bottom: 32px; }
+
+  /* ── card ── */
+  .card {
+    width: 100%; max-width: 400px;
+    background: var(--surface);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  /* ══════════════════════════
+     PANELS
+     ══════════════════════════ */
+  .panels { display: flex; align-items: stretch; }
+  .panels::after { content: none; }
+
+  .panel {
+    flex: 1; display: flex; flex-direction: column;
+    padding: 18px 18px 16px;
+  }
+
+  .vdiv {
+    width: 1px; flex-shrink: 0; margin: 12px 0;
+    background: linear-gradient(180deg, transparent, var(--volt-line), transparent);
+  }
+
+  .eyebrow {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 9px; font-weight: 700; letter-spacing: 1.2px;
+    color: var(--ink3); text-transform: uppercase; margin-bottom: 10px;
+  }
+  .edot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+  .ev { background: var(--volt); }
+  .ea { background: var(--amber); }
+
+  /* LEFT */
+  .xp-inline { display: flex; align-items: baseline; gap: 6px; }
+  .xp-num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 52px; line-height: .85;
+    color: var(--volt); letter-spacing: -1.5px;
+    text-shadow: 0 0 28px rgba(212,255,58,.2);
+  }
+  .xp-unit {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 18px; color: rgba(212,255,58,.45);
+  }
+  .spacer { flex: 1; min-height: 16px; }
+  .streak-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 11px; border-radius: 99px; align-self: flex-start;
+    background: var(--volt-dim); border: 1px solid var(--volt-line);
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 11px; color: var(--volt);
+  }
+
+  /* RIGHT */
+  .tier-name {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-style: italic; font-size: 34px; line-height: .9;
+    background: linear-gradient(130deg, #FFE082, var(--amber) 55%, #CC7700);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .season-chip {
+    display: inline-flex; align-items: center;
+    padding: 3px 8px; border-radius: 6px; align-self: flex-start;
+    background: var(--amber-dim); border: 1px solid var(--amber-line);
+    font-size: 9px; font-weight: 700; color: var(--amber); letter-spacing: .5px;
+    margin-top: 7px;
+  }
+  .rank { display: flex; align-items: baseline; margin-top: auto; padding-top: 12px; }
+  .rank-num {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 22px; color: #fff; line-height: 1;
+  }
+
+  /* ══════════════════════════
+     PROGRESS FOOTER
+     ══════════════════════════ */
+  .prog-foot {
+    padding: 12px 18px 16px;
+    border-top: 1px solid var(--border);
+    position: relative;
+  }
+
+  /* tap-tooltip — hidden by default, shown on tap */
+  @keyframes tooltip-in {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(4px) scale(.9); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0)   scale(1);  }
+  }
+  @keyframes tooltip-out {
+    0%   { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1);  }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(.9); }
+  }
+  .tap-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);   /* floats above the bar */
+    left: 63%;                  /* lines up with bar head */
+    transform: translateX(-50%);
+    background: var(--surface);
+    border: 1px solid var(--volt-line);
+    border-radius: 10px;
+    padding: 5px 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    display: flex; align-items: center; gap: 6px;
+    box-shadow: 0 4px 20px rgba(212,255,58,.12);
+  }
+  .tap-tooltip .tt-val {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 13px; color: var(--volt);
+  }
+  .tap-tooltip .tt-lbl { font-size: 10px; color: var(--ink2); }
+  .tap-tooltip .tt-lbl strong { color: var(--plat); }
+  /* tiny caret */
+  .tap-tooltip::after {
+    content: '';
+    position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--volt-line);
+  }
+  .tap-tooltip.show { animation: tooltip-in .2s ease forwards; }
+  .tap-tooltip.hide { animation: tooltip-out .25s ease forwards; }
+  .tap-tooltip:not(.show):not(.hide) { opacity: 0; }
+
+  /* progress track — clickable */
+  .prog-track {
+    height: 7px;
+    background: rgba(255,255,255,.06);
+    border-radius: 99px; overflow: visible;
+    position: relative;
+    cursor: pointer;
+  }
+  .prog-fill {
+    height: 100%; width: 0%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--amber), var(--volt));
+    position: relative;
+    transition: width 1.4s cubic-bezier(.22,.68,0,1.2);
+  }
+  .prog-fill::after {
+    content: '';
+    position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--volt);
+    box-shadow: 0 0 10px 4px rgba(212,255,58,.45);
+    opacity: 0; transition: opacity .3s .4s;
+  }
+  .prog-fill.active::after { opacity: 1; }
+  .prog-fill::before { content: none; }
+
+  /* milestone ticks */
+  .milestones { display: flex; margin-top: 10px; }
+  .ms { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .ms-tick {
+    width: 1.5px; height: 6px; border-radius: 1px; background: var(--ink3);
+    transition: background .6s, box-shadow .6s;
+  }
+  .ms-tick.reached { background: var(--volt); box-shadow: 0 0 6px rgba(212,255,58,.5); }
+  .ms-tick.current { background: var(--amber); box-shadow: 0 0 8px rgba(255,181,71,.6); }
+  .ms-label {
+    font-size: 8px; font-weight: 700; letter-spacing: .5px;
+    color: var(--ink3); text-transform: uppercase; transition: color .6s;
+  }
+  .ms-label.reached { color: rgba(212,255,58,.6); }
+  .ms-label.current { color: var(--amber); }
+  .ms-label.next    { color: var(--plat); }
+
+  /* pulse ring on current tick */
+  @keyframes ring-pulse {
+    0%   { transform: scale(1);   opacity: .8; }
+    60%  { transform: scale(2.6); opacity: 0;  }
+    100% { transform: scale(2.6); opacity: 0;  }
+  }
+  .ms-ring {
+    position: absolute;
+    width: 1.5px; height: 6px; border-radius: 50%;
+    background: var(--amber);
+    animation: ring-pulse 1.2s ease-out 1.8s 3;
+    pointer-events: none;
+  }
+
+  /* ══════════════════════════
+     STATS — COLOUR-CODED TILES
+     ══════════════════════════ */
+  .stats {
+    display: flex; gap: 6px;
+    padding: 12px 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .tile {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 9px 4px 8px; border-radius: 10px; gap: 4px;
+  }
+  .tile .ico { font-size: 15px; line-height: 1; }
+  .tile .val {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900; font-size: 17px; line-height: 1;
+  }
+  .tile .lbl {
+    font-size: 7.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  }
+
+  .t-steps { background: rgba(212,255,58,.07); }
+  .t-steps .val { color: var(--volt); }
+  .t-steps .lbl { color: rgba(212,255,58,.45); }
+
+  .t-km { background: rgba(103,232,249,.07); }
+  .t-km .val { color: var(--cyan); }
+  .t-km .lbl { color: rgba(103,232,249,.45); }
+
+  .t-kcal { background: rgba(251,146,60,.07); }
+  .t-kcal .val { color: var(--orange); }
+  .t-kcal .lbl { color: rgba(251,146,60,.45); }
+
+  .t-min { background: rgba(163,163,179,.06); }
+  .t-min .val { color: #fff; }
+  .t-min .lbl { color: var(--ink2); }
+
+  .t-bpm { background: rgba(248,113,113,.07); }
+  .t-bpm .val { color: var(--red); }
+  .t-bpm .lbl { color: rgba(248,113,113,.45); }
+</style>
+</head>
+<body>
+
+<h1>DESIGN 4 — FINAL</h1>
+<p class="sub">Tap the progress bar to reveal XP left</p>
+
+<div class="card">
+
+  <!-- panels -->
+  <div class="panels">
+    <div class="panel">
+      <div class="eyebrow"><div class="edot ev"></div>SEASON 3 XP</div>
+      <div class="xp-inline">
+        <div class="xp-num">2,840</div>
+        <div class="xp-unit">XP</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="streak-chip">🔥 <span>7 Day Streak</span></div>
+    </div>
+
+    <div class="vdiv"></div>
+
+    <div class="panel">
+      <div class="eyebrow"><div class="edot ea"></div>CURRENT TIER</div>
+      <div class="tier-name">GOLD</div>
+      <div class="season-chip">SEASON 3</div>
+      <div class="rank"><div class="rank-num">#12</div></div>
+    </div>
+  </div>
+
+  <!-- progress footer — no labels, just bar + milestones -->
+  <div class="prog-foot" id="progFoot">
+
+    <!-- tap tooltip (hidden until bar is tapped) -->
+    <div class="tap-tooltip" id="tooltip">
+      <span class="tt-val">160 XP</span>
+      <span class="tt-lbl">to reach <strong>PLATINUM</strong></span>
+    </div>
+
+    <div class="prog-track" id="track">
+      <div class="prog-fill" id="fill"></div>
+    </div>
+
+    <div class="milestones">
+      <div class="ms">
+        <div class="ms-tick reached"></div>
+        <div class="ms-label reached">BRONZE</div>
+      </div>
+      <div class="ms">
+        <div class="ms-tick reached"></div>
+        <div class="ms-label reached">SILVER</div>
+      </div>
+      <div class="ms">
+        <div class="ms-tick current">
+          <div class="ms-ring"></div>
+        </div>
+        <div class="ms-label current">GOLD</div>
+      </div>
+      <div class="ms">
+        <div class="ms-tick"></div>
+        <div class="ms-label next">PLATINUM</div>
+      </div>
+      <div class="ms">
+        <div class="ms-tick"></div>
+        <div class="ms-label">DIAMOND</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- colour-coded tiles -->
+  <div class="stats">
+    <div class="tile t-steps"><div class="ico">👟</div><div class="val">287</div><div class="lbl">STEPS</div></div>
+    <div class="tile t-km">   <div class="ico">⚡</div><div class="val">0.2</div><div class="lbl">KM</div></div>
+    <div class="tile t-kcal"> <div class="ico">🔥</div><div class="val">138</div><div class="lbl">KCAL</div></div>
+    <div class="tile t-min">  <div class="ico">⏱</div><div class="val">0</div>  <div class="lbl">MIN</div></div>
+    <div class="tile t-bpm">  <div class="ico">❤️</div><div class="val">71</div> <div class="lbl">BPM</div></div>
+  </div>
+
+</div>
+
+<script>
+// ── Fill animation on load ──────────────────────────────
+const fill = document.getElementById('fill');
+setTimeout(() => {
+  fill.style.width = '63%';
+  fill.classList.add('active');
+}, 300);
+
+// ── Tap-to-reveal tooltip ───────────────────────────────
+const track   = document.getElementById('track');
+const tooltip = document.getElementById('tooltip');
+let hideTimer = null;
+
+function showTooltip() {
+  clearTimeout(hideTimer);
+  tooltip.classList.remove('hide');
+  tooltip.classList.add('show');
+  hideTimer = setTimeout(() => {
+    tooltip.classList.remove('show');
+    tooltip.classList.add('hide');
+  }, 2200);
+}
+
+track.addEventListener('click',      showTooltip);
+track.addEventListener('touchstart', showTooltip, { passive: true });
+</script>
+</body>
+</html>

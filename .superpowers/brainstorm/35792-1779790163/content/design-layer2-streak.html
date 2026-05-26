@@ -1,0 +1,167 @@
+<h2>Layer 2 — Streak v2</h2>
+<p class="subtitle">Calendar view, new break rules, 2× monthly restore</p>
+
+<div class="section">
+  <div class="label">ACTIVITY CLASSIFICATION (per day)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">
+    <div style="background:#d4ff3a18;border:1px solid #d4ff3a44;border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">🟢</div>
+      <div style="color:#d4ff3a;font-weight:700;font-size:13px;margin-top:6px">FULL</div>
+      <div style="color:#aaa;font-size:12px;margin-top:4px">≥ 10,000 steps<br>(100% of goal)</div>
+      <div style="color:#666;font-size:11px;margin-top:4px">Streak maintained</div>
+    </div>
+    <div style="background:#ffc94a18;border:1px solid #ffc94a44;border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">🟡</div>
+      <div style="color:#ffc94a;font-weight:700;font-size:13px;margin-top:6px">PARTIAL</div>
+      <div style="color:#aaa;font-size:12px;margin-top:4px">5,000–9,999 steps<br>(50–99% of goal)</div>
+      <div style="color:#666;font-size:11px;margin-top:4px">3 in a row = break</div>
+    </div>
+    <div style="background:#ff444418;border:1px solid #ff444444;border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:22px">🔴</div>
+      <div style="color:#ff6666;font-weight:700;font-size:13px;margin-top:6px">NONE</div>
+      <div style="color:#aaa;font-size:12px;margin-top:4px">&lt; 5,000 steps<br>(&lt; 50% of goal)</div>
+      <div style="color:#666;font-size:11px;margin-top:4px">2 in a row = break</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">STREAK BREAK RULES</div>
+  <div style="margin-top:10px;background:#1a1a1a;border-radius:10px;padding:14px">
+    <div style="display:flex;gap:16px;flex-direction:column">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="background:#ff444433;border-radius:8px;padding:6px 10px;font-size:13px;color:#ff6666;white-space:nowrap">Rule 1</div>
+        <div style="color:#ccc;font-size:13px;line-height:1.6">
+          <strong style="color:white">2 consecutive NONE days</strong> → streak breaks immediately<br>
+          <span style="color:#666">e.g. Mon: 2,000 steps · Tue: 0 steps → break on Tuesday</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="background:#ffc94a22;border-radius:8px;padding:6px 10px;font-size:13px;color:#ffc94a;white-space:nowrap">Rule 2</div>
+        <div style="color:#ccc;font-size:13px;line-height:1.6">
+          <strong style="color:white">3 consecutive PARTIAL days</strong> → streak breaks<br>
+          <span style="color:#666">e.g. Mon: 6K · Tue: 7K · Wed: 5K → break on Wednesday</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="background:#d4ff3a22;border-radius:8px;padding:6px 10px;font-size:13px;color:#d4ff3a;white-space:nowrap">Safe</div>
+        <div style="color:#ccc;font-size:13px;line-height:1.6">
+          <strong style="color:white">Any FULL day resets partial counter</strong><br>
+          <span style="color:#666">Mon: Partial · Tue: Full · Wed: Partial · Thu: Partial — safe (counter reset on Tue)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">CALENDAR MOCKUP — last 35 days</div>
+  <div style="background:#1a1a1a;border-radius:12px;padding:16px;margin-top:10px">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:8px">
+      <div style="color:#555;font-size:10px;text-align:center">MON</div>
+      <div style="color:#555;font-size:10px;text-align:center">TUE</div>
+      <div style="color:#555;font-size:10px;text-align:center">WED</div>
+      <div style="color:#555;font-size:10px;text-align:center">THU</div>
+      <div style="color:#555;font-size:10px;text-align:center">FRI</div>
+      <div style="color:#555;font-size:10px;text-align:center">SAT</div>
+      <div style="color:#555;font-size:10px;text-align:center">SUN</div>
+    </div>
+    <!-- Row 1 — 5 weeks of data -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px">
+      <!-- Week 1 -->
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#ffc94a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">~</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#ff4444;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700">✗</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <!-- Week 2 -->
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#ffc94a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">~</div>
+      <div style="background:#ffc94a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">~</div>
+      <div style="background:#ffc94a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">~</div>
+      <div style="background:#ff4444;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:700;position:relative">
+        💔
+        <div style="position:absolute;top:-18px;left:50%;transform:translateX(-50%);background:#ff4444;color:#fff;font-size:9px;padding:2px 5px;border-radius:3px;white-space:nowrap">BREAK</div>
+      </div>
+      <!-- Week 3 -->
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <!-- Week 4 -->
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#ffc94a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">~</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <!-- Week 5 — recent -->
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#ffc94a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">~</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">✓</div>
+      <div style="background:#d4ff3a;border-radius:6px;height:32px;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:9px;color:#000;font-weight:700">TODAY</div>
+      <div style="background:#222;border-radius:6px;height:32px;border:1px dashed #333"></div>
+      <div style="background:#222;border-radius:6px;height:32px;border:1px dashed #333"></div>
+      <div style="background:#222;border-radius:6px;height:32px;border:1px dashed #333"></div>
+    </div>
+    <div style="display:flex;gap:16px;margin-top:12px;font-size:11px;color:#666">
+      <span><span style="color:#d4ff3a">✓ Full</span> — ≥10K steps</span>
+      <span><span style="color:#ffc94a">~ Partial</span> — 5–9.9K</span>
+      <span><span style="color:#ff4444">✗ None</span> — &lt;5K</span>
+      <span>💔 Streak break</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">MONTHLY RESTORE (2× total)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+    <div style="background:#1a1a1a;border:1px solid #d4ff3a33;border-radius:10px;padding:14px">
+      <div style="color:#d4ff3a;font-weight:700;font-size:13px">🛡 Shield</div>
+      <div style="color:#aaa;font-size:12px;margin-top:6px;line-height:1.6">
+        Pro subscribers only<br>
+        Auto-protects 1 NONE day (treated as Partial)<br>
+        1× per month · free for Pro
+      </div>
+    </div>
+    <div style="background:#1a1a1a;border:1px solid #ffc94a33;border-radius:10px;padding:14px">
+      <div style="color:#ffc94a;font-weight:700;font-size:13px">🔥 Revive</div>
+      <div style="color:#aaa;font-size:12px;margin-top:6px;line-height:1.6">
+        Anyone · costs 100 coins<br>
+        Restores streak after a break<br>
+        1× per month · window: 2 days after break
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">NEW API ENDPOINTS</div>
+  <div style="background:#1a1a1a;border-radius:10px;padding:14px;margin-top:10px;font-size:12px;color:#aaa;line-height:2;font-family:monospace">
+    <span style="color:#d4ff3a">GET</span>  /streaks/status    — existing (keep, add partial_days_count)<br>
+    <span style="color:#d4ff3a">GET</span>  /streaks/calendar  — <span style="color:#ffc94a">new</span> · last 60 days with daily status + streak_count<br>
+    <span style="color:#d4ff3a">POST</span> /streaks/shield    — existing (keep)<br>
+    <span style="color:#d4ff3a">POST</span> /streaks/revive    — existing (keep)
+  </div>
+</div>
+
+<div style="margin-top:20px;text-align:center">
+  <div class="options" style="max-width:400px;margin:0 auto">
+    <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content"><h3>Approve Layer 2</h3><p>Move to Layer 3 — Fitness Reputation</p></div>
+    </div>
+    <div class="option" data-choice="change" onclick="toggleSelect(this)">
+      <div class="letter">✎</div>
+      <div class="content"><h3>Request changes</h3><p>Tell me what to adjust in the terminal</p></div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,124 @@
+<h2>Layer 4 — Seasons</h2>
+<p class="subtitle">Admin-declared periods · XP reset · tier soft-decay · end-of-season rewards page</p>
+
+<div class="section">
+  <div class="label">DB SCHEMA — seasons table (new)</div>
+  <div style="background:#1a1a1a;border-radius:10px;padding:14px;margin-top:10px;font-family:monospace;font-size:12px;color:#aaa;line-height:2">
+    <span style="color:#ffc94a">CREATE TABLE</span> seasons (<br>
+    &nbsp;&nbsp;id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),<br>
+    &nbsp;&nbsp;name          TEXT NOT NULL,          <span style="color:#555">-- "Season 1: Foundation"</span><br>
+    &nbsp;&nbsp;start_date    DATE NOT NULL,<br>
+    &nbsp;&nbsp;end_date      DATE NOT NULL,<br>
+    &nbsp;&nbsp;status        TEXT NOT NULL DEFAULT <span style="color:#d4ff3a">'upcoming'</span>, <span style="color:#555">-- upcoming | active | ended</span><br>
+    &nbsp;&nbsp;tier_decay_pct INT NOT NULL DEFAULT <span style="color:#d4ff3a">50</span>,  <span style="color:#555">-- % of XP carried to next season</span><br>
+    &nbsp;&nbsp;created_at    TIMESTAMPTZ DEFAULT NOW()<br>
+    );<br>
+    <br>
+    <span style="color:#888">-- Seed row (2-month season starting today):</span><br>
+    <span style="color:#ffc94a">INSERT INTO</span> seasons (name, start_date, end_date, status)<br>
+    &nbsp;&nbsp;VALUES (<span style="color:#d4ff3a">'Season 1: Foundation'</span>, <span style="color:#d4ff3a">'2026-05-26'</span>, <span style="color:#d4ff3a">'2026-07-25'</span>, <span style="color:#d4ff3a">'active'</span>);
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">SEASON END LOGIC (runs when admin marks season 'ended')</div>
+  <div style="background:#1a1a1a;border-radius:12px;padding:16px;margin-top:10px">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#d4ff3a;color:#000;font-weight:800;font-size:12px;padding:4px 10px;border-radius:20px;white-space:nowrap">Step 1</div>
+        <div style="color:#ccc;font-size:13px;line-height:1.6">
+          <strong>Snapshot each user's final tier</strong> into <code style="color:#ffc94a">user_season_results</code> table<br>
+          <span style="color:#666">Records: user_id, season_id, final_league_slug, final_xp, rank_in_tier</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#d4ff3a;color:#000;font-weight:800;font-size:12px;padding:4px 10px;border-radius:20px;white-space:nowrap">Step 2</div>
+        <div style="color:#ccc;font-size:13px;line-height:1.6">
+          <strong>Tier soft-decay</strong> — carry forward 50% of XP<br>
+          <span style="color:#666">Elite (10K XP) → keeps 5K → lands in Diamond · Diamond (6K) → 3K → Platinum</span><br>
+          <span style="color:#555;font-size:11px">users.xp = floor(users.xp × 0.5) · user_leagues.xp updated · tier slug recalculated</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#d4ff3a;color:#000;font-weight:800;font-size:12px;padding:4px 10px;border-radius:20px;white-space:nowrap">Step 3</div>
+        <div style="color:#ccc;font-size:13px;line-height:1.6">
+          <strong>user_levels.xp stays</strong> — lifetime XP for levels & reputation is never reset<br>
+          <span style="color:#555;font-size:11px">Only league XP (users.xp) decays — levels and reputation use cumulative xp</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#ffc94a;color:#000;font-weight:800;font-size:12px;padding:4px 10px;border-radius:20px;white-space:nowrap">Step 4</div>
+        <div style="color:#ccc;font-size:13px;line-height:1.6">
+          <strong>Award season rewards</strong> — coins based on final tier<br>
+          <span style="color:#aaa;font-size:12px">Elite: 2000 coins · Diamond: 1000 · Platinum: 500 · Gold: 250 · Silver: 100 · Bronze: 25</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="background:#ffc94a;color:#000;font-weight:800;font-size:12px;padding:4px 10px;border-radius:20px;white-space:nowrap">Step 5</div>
+        <div style="color:#ccc;font-size:13px;line-height:1.6">
+          <strong>Mark season 'ended', activate next season</strong> (if one exists in upcoming state)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">NEW DB TABLES</div>
+  <div style="background:#1a1a1a;border-radius:10px;padding:14px;margin-top:10px;font-family:monospace;font-size:12px;color:#aaa;line-height:2">
+    <span style="color:#ffc94a">CREATE TABLE</span> user_season_results (<br>
+    &nbsp;&nbsp;id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),<br>
+    &nbsp;&nbsp;user_id          UUID REFERENCES users(id),<br>
+    &nbsp;&nbsp;season_id        UUID REFERENCES seasons(id),<br>
+    &nbsp;&nbsp;final_league_slug TEXT NOT NULL,<br>
+    &nbsp;&nbsp;final_xp         INT NOT NULL,<br>
+    &nbsp;&nbsp;rank_in_tier     INT,<br>
+    &nbsp;&nbsp;coins_awarded    INT DEFAULT 0,<br>
+    &nbsp;&nbsp;created_at       TIMESTAMPTZ DEFAULT NOW(),<br>
+    &nbsp;&nbsp;UNIQUE(user_id, season_id)<br>
+    );
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">API ENDPOINTS</div>
+  <div style="background:#1a1a1a;border-radius:10px;padding:14px;margin-top:10px;font-family:monospace;font-size:12px;color:#aaa;line-height:2">
+    <span style="color:#d4ff3a">GET</span>  /seasons/current          — active season info (name, start, end, days left)<br>
+    <span style="color:#d4ff3a">GET</span>  /seasons/:id/my-result    — user's result for a past season<br>
+    <span style="color:#d4ff3a">POST</span> /seasons/:id/end          — admin only · triggers end-of-season logic<br>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">FLUTTER — SEASON REWARDS SCREEN (hardcoded shell)</div>
+  <div style="background:#1a1a1a;border-radius:12px;padding:16px;margin-top:10px">
+    <div style="background:#0a0a0a;border-radius:10px;padding:16px;max-width:280px;margin:0 auto;border:1px solid #d4ff3a33">
+      <div style="text-align:center">
+        <div style="color:#d4ff3a;font-size:10px;letter-spacing:2px;font-weight:800">SEASON 1: FOUNDATION</div>
+        <div style="color:#fff;font-size:28px;font-weight:700;margin:8px 0">ENDED</div>
+        <div style="color:#888;font-size:12px">Your final rank</div>
+        <div style="color:#ffc94a;font-size:36px;font-weight:800;margin:8px 0">GOLD</div>
+        <div style="background:#ffc94a18;border:1px solid #ffc94a44;border-radius:8px;padding:10px;margin:12px 0">
+          <div style="color:#888;font-size:11px">Season reward</div>
+          <div style="color:#ffc94a;font-size:22px;font-weight:700">250 🪙 Coins</div>
+        </div>
+        <div style="color:#555;font-size:11px">New season starts soon</div>
+        <div style="background:#d4ff3a;color:#000;font-weight:700;font-size:13px;padding:10px;border-radius:8px;margin-top:12px">Continue →</div>
+      </div>
+    </div>
+    <div style="color:#555;font-size:11px;text-align:center;margin-top:10px">Hardcoded shell — will be wired to /seasons/:id/my-result later</div>
+  </div>
+</div>
+
+<div style="margin-top:20px;text-align:center">
+  <div class="options" style="max-width:400px;margin:0 auto">
+    <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content"><h3>Approve Layer 4</h3><p>Write the full design doc and start planning</p></div>
+    </div>
+    <div class="option" data-choice="change" onclick="toggleSelect(this)">
+      <div class="letter">✎</div>
+      <div class="content"><h3>Request changes</h3><p>Tell me what to adjust in the terminal</p></div>
+    </div>
+  </div>
+</div>

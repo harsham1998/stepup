@@ -1,0 +1,8 @@
+{"type":"server-started","port":53661,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:53661","screen_dir":"/Users/harsha/StepUp/.superpowers/brainstorm/35792-1779790163/content","state_dir":"/Users/harsha/StepUp/.superpowers/brainstorm/35792-1779790163/state"}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/35792-1779790163/content/approaches.html"}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/35792-1779790163/content/design-layer1-xp.html"}
+{"source":"user-event","type":"click","text":"✓\n      Approve Layer 1Move to Layer 2 — Streak design","choice":"approve","id":null,"timestamp":1779791097368}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/35792-1779790163/content/design-layer2-streak.html"}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/35792-1779790163/content/design-layer3-reputation.html"}
+{"type":"screen-added","file":"/Users/harsha/StepUp/.superpowers/brainstorm/35792-1779790163/content/design-layer4-seasons.html"}
+{"type":"server-stopped","reason":"idle timeout"}

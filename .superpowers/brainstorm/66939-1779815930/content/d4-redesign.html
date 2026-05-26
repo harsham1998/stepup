@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design 4 — Friends Pulse Redesign</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #060610;
+  --surface: #0d0d1e;
+  --surface2: #11112a;
+  --border: rgba(255,255,255,0.07);
+  --volt: #D4FF3A;
+  --amber: #FFB547;
+  --pink: #F472B6;
+  --blue: #60A5FA;
+  --purple: #A78BFA;
+  --green: #34D399;
+  --red: #F87171;
+  --muted: #3d3d5c;
+  --soft: #8888aa;
+  --text: #e0e0f0;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--text);
+  padding: 28px 20px 90px;
+}
+
+h1 { font-size: 18px; font-weight: 800; color: var(--volt); margin-bottom: 4px; }
+.sub { font-size: 12px; color: var(--muted); margin-bottom: 28px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.dc {
+  border-radius: 20px;
+  border: 2px solid #12122a;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #0b0b1c;
+  position: relative;
+}
+.dc:hover { border-color: #222240; transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.5); }
+.dc.sel { border-color: var(--volt) !important; box-shadow: 0 0 0 1px rgba(212,255,58,0.25), 0 16px 48px rgba(212,255,58,0.08); }
+.dc.sel .chk { display: flex; }
+.chk {
+  display: none; position: absolute; top: 12px; right: 12px; z-index: 20;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--volt); color: #060610;
+  font-size: 12px; font-weight: 900;
+  align-items: center; justify-content: center;
+}
+
+.lbl {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid #12122a;
+  background: #0d0d1e;
+}
+.lbl .n { font-size: 9px; font-weight: 800; color: var(--volt); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
+.lbl h3 { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.lbl p { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+.phone { padding: 20px 16px; background: var(--bg); }
+
+/* Section header */
+.sh { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.sh .t { font-size: 16px; font-weight: 800; color: #fff; }
+.sh .b { font-size: 9px; font-weight: 800; color: var(--volt); background: rgba(212,255,58,0.1); padding: 2px 9px; border-radius: 999px; letter-spacing: 1.2px; }
+.sh .sa { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SHARED — Friends Feed card (same in all variants)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.feed-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.feed-card-hdr {
+  padding: 11px 14px;
+  display: flex; align-items: center; gap: 9px;
+  border-bottom: 1px solid var(--border);
+}
+.feed-card-hdr .ico { font-size: 16px; }
+.feed-card-hdr .title { font-size: 14px; font-weight: 700; color: #fff; flex: 1; }
+.feed-card-hdr .live {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 10px; font-weight: 700; color: var(--green);
+}
+.feed-card-hdr .live-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 6px var(--green);
+}
+.feed-card-hdr .board { font-size: 11px; color: var(--muted); }
+
+.feed-items { padding: 4px 0; }
+
+.fi {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 14px;
+  position: relative;
+}
+.fi + .fi { border-top: 1px solid rgba(255,255,255,0.04); }
+
+.fi .av {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; flex-shrink: 0;
+}
+.fi .body { flex: 1; min-width: 0; }
+.fi .body .nm { font-size: 13px; font-weight: 700; color: #fff; }
+.fi .body .act { font-size: 11px; color: var(--soft); margin-top: 2px; line-height: 1.35; }
+.fi .right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.fi .xp {
+  font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px;
+}
+.fi .xp.up { background: rgba(52,211,153,0.12); color: var(--green); }
+.fi .xp.dn { background: rgba(248,113,113,0.1); color: var(--red); }
+.fi .xp.nu { background: rgba(167,139,250,0.12); color: var(--purple); }
+.fi .t { font-size: 10px; color: var(--muted); }
+
+/* My position row inside card */
+.my-pos-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  background: rgba(212,255,58,0.03);
+}
+.my-pos-row .av-me {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(212,255,58,0.18); color: var(--volt);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900;
+  border: 1.5px solid rgba(212,255,58,0.35);
+  flex-shrink: 0;
+}
+.my-pos-row .meta { flex: 1; }
+.my-pos-row .meta .nm { font-size: 12px; font-weight: 700; color: var(--volt); }
+.my-pos-row .meta .hint { font-size: 10px; color: var(--muted); margin-top: 1px; }
+.my-pos-row .rank {
+  font-size: 15px; font-weight: 900; color: var(--volt);
+  background: rgba(212,255,58,0.1);
+  border: 1px solid rgba(212,255,58,0.2);
+  padding: 5px 14px; border-radius: 999px;
+  letter-spacing: -0.3px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   VARIANT A — Scrollable pill row
+   + Split coins card (coins | progress)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.pills-scroll {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding-bottom: 4px;
+  margin-bottom: 14px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.pills-scroll::-webkit-scrollbar { display: none; }
+
+.pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  white-space: nowrap; flex-shrink: 0;
+  border: 1px solid;
+}
+.pill.def { border-color: var(--border); background: rgba(255,255,255,0.04); color: #aaa; }
+.pill.v { border-color: rgba(212,255,58,0.25); background: rgba(212,255,58,0.07); color: var(--volt); }
+.pill.pk { border-color: rgba(244,114,182,0.25); background: rgba(244,114,182,0.07); color: var(--pink); }
+.pill.bl { border-color: rgba(96,165,250,0.25); background: rgba(96,165,250,0.07); color: var(--blue); }
+.pill.am { border-color: rgba(255,181,71,0.25); background: rgba(255,181,71,0.07); color: var(--amber); }
+.pill.pu { border-color: rgba(167,139,250,0.25); background: rgba(167,139,250,0.07); color: var(--purple); }
+.pill .pe { font-size: 13px; line-height: 1; }
+.pill .badge {
+  font-size: 9px; font-weight: 800; padding: 1px 6px;
+  border-radius: 999px; margin-left: 2px;
+}
+.pill .badge.r { background: rgba(239,68,68,0.2); color: #f87171; }
+.pill .badge.g { background: rgba(52,211,153,0.15); color: var(--green); }
+
+/* Variant A coins: split card */
+.coins-split {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  display: flex;
+  overflow: hidden;
+}
+.coins-split .left {
+  flex: 1; padding: 14px 16px;
+  display: flex; align-items: center; gap: 11px;
+  border-right: 1px solid var(--border);
+}
+.coins-split .left .cico { font-size: 24px; }
+.coins-split .left .cval { font-size: 22px; font-weight: 900; color: var(--amber); letter-spacing: -0.5px; }
+.coins-split .left .csub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.coins-split .right {
+  padding: 14px 16px;
+  display: flex; flex-direction: column; justify-content: center; gap: 8px;
+  min-width: 110px;
+}
+.coins-split .right .bp-lbl { font-size: 9px; font-weight: 800; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.coins-split .right .bp-tier {
+  font-size: 11px; font-weight: 800; color: var(--volt);
+}
+.coins-split .right .bp-track { height: 3px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+.coins-split .right .bp-fill { height: 100%; background: linear-gradient(90deg, rgba(212,255,58,0.5), var(--volt)); border-radius: 999px; }
+.coins-split .right .redeem {
+  font-size: 11px; font-weight: 700; color: var(--amber);
+  background: rgba(255,181,71,0.1); border: 1px solid rgba(255,181,71,0.2);
+  padding: 6px 12px; border-radius: 999px; text-align: center; cursor: pointer;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   VARIANT B — Icon circle grid shortcuts
+   + Gradient wallet card
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.icon-shortcuts {
+  display: flex; gap: 6px;
+  margin-bottom: 14px;
+}
+.ic-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;
+  position: relative;
+}
+.ic-btn .circle {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  border: 1px solid;
+  position: relative;
+}
+.ic-btn .label { font-size: 10px; font-weight: 600; color: var(--soft); text-align: center; }
+.ic-btn .dot {
+  position: absolute; top: 2px; right: 2px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; font-weight: 900;
+}
+.ic-btn.ch .circle { border-color: rgba(212,255,58,0.25); background: rgba(212,255,58,0.07); }
+.ic-btn.ch .dot { background: #ef4444; color: #fff; font-size: 7px; box-shadow: 0 0 0 2px var(--bg); }
+.ic-btn.rv .circle { border-color: rgba(244,114,182,0.25); background: rgba(244,114,182,0.07); }
+.ic-btn.fr .circle { border-color: rgba(96,165,250,0.25); background: rgba(96,165,250,0.07); }
+.ic-btn.lb .circle { border-color: var(--border); background: rgba(255,255,255,0.04); }
+.ic-btn.bp .circle { border-color: rgba(167,139,250,0.25); background: rgba(167,139,250,0.07); }
+.ic-btn.rd .circle { border-color: rgba(255,181,71,0.25); background: rgba(255,181,71,0.07); }
+
+/* Variant B: gradient wallet card */
+.wallet-card {
+  background: linear-gradient(135deg, #141428 0%, #0f0f22 60%, #0c0c1a 100%);
+  border: 1px solid rgba(255,181,71,0.18);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+.wallet-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,181,71,0.4), transparent);
+}
+.wallet-glow {
+  position: absolute; top: -20px; right: -20px;
+  width: 100px; height: 100px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,181,71,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wallet-top {
+  padding: 14px 16px 12px;
+  display: flex; align-items: center; gap: 12px;
+  position: relative;
+}
+.wallet-top .ico-wrap {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: rgba(255,181,71,0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.wallet-top .wallet-info { flex: 1; }
+.wallet-top .wallet-info .val { font-size: 24px; font-weight: 900; color: var(--amber); letter-spacing: -0.8px; }
+.wallet-top .wallet-info .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.wallet-top .redeem-btn {
+  font-size: 12px; font-weight: 700; color: #060610;
+  background: var(--amber);
+  padding: 8px 18px; border-radius: 999px;
+  flex-shrink: 0;
+}
+.wallet-bottom {
+  padding: 0 16px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.wallet-bottom .lbl { font-size: 9px; font-weight: 800; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0; }
+.wallet-bottom .track { flex: 1; height: 3px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
+.wallet-bottom .fill { height: 100%; background: linear-gradient(90deg, rgba(255,181,71,0.5), rgba(212,255,58,0.8)); border-radius: 999px; }
+.wallet-bottom .tier { font-size: 10px; font-weight: 800; color: var(--volt); flex-shrink: 0; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   VARIANT C — Scrollable pills (2 rows)
+   + Compact inline coins strip
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.pills-two-rows { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.pill-row { display: flex; gap: 7px; }
+.pill-row .pill { flex: 1; justify-content: center; }
+.pill-row .pill .pe { font-size: 15px; }
+
+/* Variant C: two-part coins strip */
+.coins-strip {
+  display: flex; align-items: stretch; gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.coins-strip .c-left {
+  flex: 1; padding: 13px 16px;
+  display: flex; align-items: center; gap: 10px;
+  border-right: 1px solid var(--border);
+}
+.coins-strip .c-left .ci { font-size: 22px; }
+.coins-strip .c-left .cv { font-size: 20px; font-weight: 900; color: var(--amber); }
+.coins-strip .c-left .cs { font-size: 10px; color: var(--muted); margin-top: 1px; }
+.coins-strip .c-right {
+  display: flex; align-items: center;
+  padding: 0 16px;
+}
+.coins-strip .c-right .btn {
+  font-size: 12px; font-weight: 700; color: var(--amber);
+  background: rgba(255,181,71,0.1);
+  border: 1px solid rgba(255,181,71,0.22);
+  padding: 8px 18px; border-radius: 999px; white-space: nowrap;
+}
+
+/* ─── footer ─── */
+#bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #0d0d1e; border-top: 1px solid #12122a;
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 10px;
+  z-index: 100;
+}
+#bar .cnt { font-size: 13px; font-weight: 600; color: var(--soft); flex: 1; }
+#bar .done { background: var(--volt); color: #060610; font-size: 13px; font-weight: 800; padding: 9px 24px; border-radius: 999px; border: none; cursor: pointer; }
+#bar .clr { font-size: 12px; color: var(--muted); background: none; border: none; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h1>Design 4 — Friends Pulse: Redesigned</h1>
+<p class="sub">Same feed, fixed pills alignment, 3 treatments for the shortcuts + coins section. Pick your favorite.</p>
+
+<div class="grid">
+
+  <!-- ══════════════════════════════════
+       VARIANT A
+       Scrollable single-row pills
+       Split coin card (balance | BP)
+       ══════════════════════════════════ -->
+  <div class="dc" data-choice="A" onclick="S(this)">
+    <div class="chk">✓</div>
+    <div class="lbl">
+      <div class="n">Variant A</div>
+      <h3>Scrollable Pills · Split Coin Card</h3>
+      <p>Pills in a single scrollable row (no wrapping). Coins card split into balance left and Battle Pass progress right.</p>
+    </div>
+    <div class="phone">
+
+      <div class="sh">
+        <span class="t">Friends</span>
+        <span class="b">4 ACTIVE</span>
+        <span class="sa">Leaderboard →</span>
+      </div>
+
+      <!-- Feed card -->
+      <div class="feed-card">
+        <div class="feed-card-hdr">
+          <span class="ico">👥</span>
+          <span class="title">What's happening</span>
+          <div class="live"><div class="live-dot"></div>Live</div>
+          <span class="board" style="margin-left:8px">Board →</span>
+        </div>
+        <div class="feed-items">
+          <div class="fi">
+            <div class="av" style="background:rgba(255,181,71,0.18);color:#FFB547">R</div>
+            <div class="body">
+              <div class="nm">Raj</div>
+              <div class="act">Overtook you in the league 📈</div>
+            </div>
+            <div class="right">
+              <div class="xp dn">−rank</div>
+              <div class="t">12m ago</div>
+            </div>
+          </div>
+          <div class="fi">
+            <div class="av" style="background:rgba(96,165,250,0.18);color:#60A5FA">A</div>
+            <div class="body">
+              <div class="nm">Alex</div>
+              <div class="act">Lost a Rivals battle to you</div>
+            </div>
+            <div class="right">
+              <div class="xp up">+80 XP</div>
+              <div class="t">2h ago</div>
+            </div>
+          </div>
+          <div class="fi">
+            <div class="av" style="background:rgba(244,114,182,0.18);color:#F472B6">M</div>
+            <div class="body">
+              <div class="nm">Maya</div>
+              <div class="act">Hit 30-day streak 🔥</div>
+            </div>
+            <div class="right">
+              <div class="xp nu">+150 XP</div>
+              <div class="t">5h ago</div>
+            </div>
+          </div>
+        </div>
+        <div class="my-pos-row">
+          <div class="av-me">Y</div>
+          <div class="meta">
+            <div class="nm">You · 1,240 XP</div>
+            <div class="hint">240 XP behind Raj</div>
+          </div>
+          <div class="rank">#2</div>
+        </div>
+      </div>
+
+      <!-- Scrollable pills -->
+      <div class="pills-scroll">
+        <div class="pill v"><span class="pe">🏆</span>Challenges<span class="badge r">3</span></div>
+        <div class="pill pk"><span class="pe">🤼</span>Rivals</div>
+        <div class="pill bl"><span class="pe">👥</span>Friends</div>
+        <div class="pill def"><span class="pe">📊</span>Leaderboard</div>
+        <div class="pill pu"><span class="pe">🎭</span>Battle Pass</div>
+        <div class="pill am"><span class="pe">💰</span>Redeem</div>
+      </div>
+
+      <!-- Split coin card -->
+      <div class="coins-split">
+        <div class="left">
+          <span class="cico">🪙</span>
+          <div>
+            <div class="cval">300 ¢</div>
+            <div class="csub">≈ ₹3 in rewards</div>
+          </div>
+        </div>
+        <div class="right">
+          <div class="bp-lbl">Battle Pass</div>
+          <div class="bp-tier">Season 1 · Tier 1</div>
+          <div class="bp-track"><div class="bp-fill" style="width:15%"></div></div>
+          <div class="redeem">Redeem →</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════
+       VARIANT B
+       Icon circle shortcuts
+       Gradient wallet card
+       ══════════════════════════════════ -->
+  <div class="dc" data-choice="B" onclick="S(this)">
+    <div class="chk">✓</div>
+    <div class="lbl">
+      <div class="n">Variant B</div>
+      <h3>Icon Circles · Gradient Wallet</h3>
+      <p>Shortcuts as 6 labeled circular icons in a row. Coins as a premium wallet card with gradient, balance, progress bar and a solid Redeem button.</p>
+    </div>
+    <div class="phone">
+
+      <div class="sh">
+        <span class="t">Friends</span>
+        <span class="b">4 ACTIVE</span>
+        <span class="sa">Leaderboard →</span>
+      </div>
+
+      <!-- Feed card (same) -->
+      <div class="feed-card">
+        <div class="feed-card-hdr">
+          <span class="ico">👥</span>
+          <span class="title">What's happening</span>
+          <div class="live"><div class="live-dot"></div>Live</div>
+          <span class="board" style="margin-left:8px">Board →</span>
+        </div>
+        <div class="feed-items">
+          <div class="fi">
+            <div class="av" style="background:rgba(255,181,71,0.18);color:#FFB547">R</div>
+            <div class="body"><div class="nm">Raj</div><div class="act">Overtook you in the league 📈</div></div>
+            <div class="right"><div class="xp dn">−rank</div><div class="t">12m ago</div></div>
+          </div>
+          <div class="fi">
+            <div class="av" style="background:rgba(96,165,250,0.18);color:#60A5FA">A</div>
+            <div class="body"><div class="nm">Alex</div><div class="act">Lost a Rivals battle to you</div></div>
+            <div class="right"><div class="xp up">+80 XP</div><div class="t">2h ago</div></div>
+          </div>
+          <div class="fi">
+            <div class="av" style="background:rgba(244,114,182,0.18);color:#F472B6">M</div>
+            <div class="body"><div class="nm">Maya</div><div class="act">Hit 30-day streak 🔥</div></div>
+            <div class="right"><div class="xp nu">+150 XP</div><div class="t">5h ago</div></div>
+          </div>
+        </div>
+        <div class="my-pos-row">
+          <div class="av-me">Y</div>
+          <div class="meta">
+            <div class="nm">You · 1,240 XP</div>
+            <div class="hint">240 XP behind Raj</div>
+          </div>
+          <div class="rank">#2</div>
+        </div>
+      </div>
+
+      <!-- Icon circle shortcuts -->
+      <div class="icon-shortcuts">
+        <div class="ic-btn ch">
+          <div class="circle">🏆<span class="dot" style="background:#ef4444;color:#fff;box-shadow:0 0 0 2px var(--bg)">3</span></div>
+          <span class="label">Challenges</span>
+        </div>
+        <div class="ic-btn rv">
+          <div class="circle">🤼</div>
+          <span class="label">Rivals</span>
+        </div>
+        <div class="ic-btn fr">
+          <div class="circle">👥</div>
+          <span class="label">Friends</span>
+        </div>
+        <div class="ic-btn lb">
+          <div class="circle">📊</div>
+          <span class="label">Board</span>
+        </div>
+        <div class="ic-btn bp">
+          <div class="circle">🎭</div>
+          <span class="label">Pass</span>
+        </div>
+        <div class="ic-btn rd">
+          <div class="circle">💰</div>
+          <span class="label">Redeem</span>
+        </div>
+      </div>
+
+      <!-- Gradient wallet card -->
+      <div class="wallet-card">
+        <div class="wallet-glow"></div>
+        <div class="wallet-top">
+          <div class="ico-wrap">🪙</div>
+          <div class="wallet-info">
+            <div class="val">300 ¢</div>
+            <div class="sub">≈ ₹3 in rewards</div>
+          </div>
+          <div class="redeem-btn">Redeem</div>
+        </div>
+        <div class="wallet-bottom">
+          <span class="lbl">Battle Pass</span>
+          <div class="track"><div class="fill" style="width:15%"></div></div>
+          <span class="tier">S1 · T1</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════
+       VARIANT C
+       2-row pills (3+3)
+       Simple inline coins strip
+       ══════════════════════════════════ -->
+  <div class="dc" data-choice="C" onclick="S(this)">
+    <div class="chk">✓</div>
+    <div class="lbl">
+      <div class="n">Variant C</div>
+      <h3>2-Row Pills · Inline Coins</h3>
+      <p>6 pills in two balanced rows of 3 — each full width and centered. Coins as a minimal two-part strip with balance + Redeem.</p>
+    </div>
+    <div class="phone">
+
+      <div class="sh">
+        <span class="t">Friends</span>
+        <span class="b">4 ACTIVE</span>
+        <span class="sa">Leaderboard →</span>
+      </div>
+
+      <!-- Feed card (same) -->
+      <div class="feed-card">
+        <div class="feed-card-hdr">
+          <span class="ico">👥</span>
+          <span class="title">What's happening</span>
+          <div class="live"><div class="live-dot"></div>Live</div>
+          <span class="board" style="margin-left:8px">Board →</span>
+        </div>
+        <div class="feed-items">
+          <div class="fi">
+            <div class="av" style="background:rgba(255,181,71,0.18);color:#FFB547">R</div>
+            <div class="body"><div class="nm">Raj</div><div class="act">Overtook you in the league 📈</div></div>
+            <div class="right"><div class="xp dn">−rank</div><div class="t">12m ago</div></div>
+          </div>
+          <div class="fi">
+            <div class="av" style="background:rgba(96,165,250,0.18);color:#60A5FA">A</div>
+            <div class="body"><div class="nm">Alex</div><div class="act">Lost a Rivals battle to you</div></div>
+            <div class="right"><div class="xp up">+80 XP</div><div class="t">2h ago</div></div>
+          </div>
+          <div class="fi">
+            <div class="av" style="background:rgba(244,114,182,0.18);color:#F472B6">M</div>
+            <div class="body"><div class="nm">Maya</div><div class="act">Hit 30-day streak 🔥</div></div>
+            <div class="right"><div class="xp nu">+150 XP</div><div class="t">5h ago</div></div>
+          </div>
+        </div>
+        <div class="my-pos-row">
+          <div class="av-me">Y</div>
+          <div class="meta">
+            <div class="nm">You · 1,240 XP</div>
+            <div class="hint">240 XP behind Raj</div>
+          </div>
+          <div class="rank">#2</div>
+        </div>
+      </div>
+
+      <!-- 2-row pills -->
+      <div class="pills-two-rows">
+        <div class="pill-row">
+          <div class="pill v" style="justify-content:center"><span class="pe">🏆</span>Challenges<span class="badge r">3</span></div>
+          <div class="pill pk" style="justify-content:center"><span class="pe">🤼</span>Rivals</div>
+          <div class="pill bl" style="justify-content:center"><span class="pe">👥</span>Friends</div>
+        </div>
+        <div class="pill-row">
+          <div class="pill def" style="justify-content:center"><span class="pe">📊</span>Leaderboard</div>
+          <div class="pill pu" style="justify-content:center"><span class="pe">🎭</span>Battle Pass</div>
+          <div class="pill am" style="justify-content:center"><span class="pe">💰</span>Redeem</div>
+        </div>
+      </div>
+
+      <!-- Inline coins strip -->
+      <div class="coins-strip">
+        <div class="c-left">
+          <span class="ci">🪙</span>
+          <div>
+            <div class="cv">300 ¢</div>
+            <div class="cs">≈ ₹3 in rewards</div>
+          </div>
+        </div>
+        <div class="c-right">
+          <div class="btn">Redeem →</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div id="bar">
+  <span class="cnt" id="ct">Pick the variant that works best</span>
+  <button class="clr" onclick="clr()">Clear</button>
+  <button class="done" onclick="done()">Done →</button>
+</div>
+
+<script>
+const sel = new Set();
+function S(el) {
+  const c = el.dataset.choice;
+  if (sel.has(c)) { sel.delete(c); el.classList.remove('sel'); }
+  else { sel.add(c); el.classList.add('sel'); }
+  const n = sel.size;
+  document.getElementById('ct').textContent = n === 0 ? 'Pick the variant that works best' : n === 1 ? '1 selected' : `${n} selected`;
+  fetch('/__events', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({type: sel.has(c)?'select':'deselect', choice:c, text:el.querySelector('h3')?.textContent||c, timestamp:Date.now()}) }).catch(()=>{});
+}
+function clr() { sel.clear(); document.querySelectorAll('.dc').forEach(e => e.classList.remove('sel')); document.getElementById('ct').textContent = 'Pick the variant that works best'; }
+function done() {
+  if (!sel.size) return;
+  fetch('/__events', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({type:'submit', choice:[...sel].join(','), text:[...sel].join(','), timestamp:Date.now()}) }).catch(()=>{});
+  document.getElementById('ct').textContent = '✓ Recorded — reply in terminal';
+}
+</script>
+</body>
+</html>
