@@ -31,8 +31,10 @@ function getChallengeXp(
     (new Date(challenge.end_time).getTime() - new Date(challenge.start_time).getTime()) / 86_400_000,
   );
   if (isFree) return durationDays <= 1 ? 50 : 150;
+  // Edge case: sole participant is automatically "top 10%"
+  if (totalParticipants <= 1) return 400;
   // Paid: top 10% gets 400, top 50% gets 200, rest get 50 participation XP
-  const topPercent = rankFromTop / Math.max(totalParticipants, 1);
+  const topPercent = rankFromTop / totalParticipants;
   if (topPercent <= 0.10) return 400;
   if (topPercent <= 0.50) return 200;
   return 50;
@@ -110,11 +112,14 @@ export async function processPayout(challengeId: string) {
     }
   }
 
-  // Award 50 XP participation to everyone not already in a prize tier
+  // Award participation XP to everyone not already in a prize tier
   const winnersSet = new Set(walletInserts.map(w => w.user_id));
   for (const participant of ranked) {
     if (!winnersSet.has(participant.userId)) {
-      awardXp(participant.userId, 50).catch(() => {});
+      // For free challenges: same duration-based XP as winners
+      // For paid challenges: 50 XP participation (outside top-50%)
+      const participationXp = getChallengeXp(challenge, ranked.length + 1, ranked.length);
+      awardXp(participant.userId, participationXp).catch(() => {});
     }
   }
 
