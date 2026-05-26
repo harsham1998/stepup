@@ -156,3 +156,125 @@ async function debitWalletForChallenge(
   });
   if (error && error.code !== '23505') throw new Error(error.message);
 }
+
+export async function getChallengeProgress(userId: string, challengeId: string) {
+  const db = getSupabase();
+
+  const { data: participation } = await db
+    .from('challenge_participants')
+    .select('joined_at')
+    .eq('challenge_id', challengeId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (!participation) return { joined: false };
+
+  const challenge = await getChallenge(challengeId);
+  const activityType = (challenge as any).activity_type as string;
+
+  const startDate = challenge.start_time.slice(0, 10);
+  const endDate = challenge.end_time.slice(0, 10);
+  const now = new Date();
+  const todayDate = now.toISOString().slice(0, 10);
+  const clampedEndDate = endDate < todayDate ? endDate : todayDate;
+
+  const totalDays = Math.max(
+    1,
+    Math.round(
+      (new Date(challenge.end_time).getTime() - new Date(challenge.start_time).getTime()) /
+        86_400_000,
+    ),
+  );
+  const daysPassed = Math.min(
+    totalDays,
+    Math.max(
+      0,
+      Math.round((now.getTime() - new Date(challenge.start_time).getTime()) / 86_400_000),
+    ),
+  );
+  const dailyGoal = Math.round(challenge.step_goal / totalDays);
+
+  let current = 0;
+  let dailyCheckins: boolean[] = [];
+
+  const isStepBased = ['steps', 'walking', 'running'].includes(activityType);
+
+  if (isStepBased) {
+    const { data: stepRows } = await db
+      .from('user_daily_steps')
+      .select('date, total_steps')
+      .eq('user_id', userId)
+      .gte('date', startDate)
+      .lte('date', clampedEndDate)
+      .order('date', { ascending: true });
+
+    const stepMap: Record<string, number> = {};
+    for (const row of stepRows ?? []) stepMap[row.date] = row.total_steps;
+    current = Object.values(stepMap).reduce((s, v) => s + v, 0);
+
+    const cursor = new Date(challenge.start_time);
+    cursor.setHours(0, 0, 0, 0);
+    while (cursor.toISOString().slice(0, 10) <= clampedEndDate) {
+      const d = cursor.toISOString().slice(0, 10);
+      dailyCheckins.push((stepMap[d] ?? 0) >= dailyGoal);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  } else {
+    const activityFilter: Record<string, string> = {
+      gym: 'gym',
+      cycling: 'cycle',
+      outdoor: 'sport',
+    };
+    const dbType = activityFilter[activityType] ?? activityType;
+
+    const { data: actRows } = await db
+      .from('activities')
+      .select('date')
+      .eq('user_id', userId)
+      .eq('activity_type', dbType)
+      .gte('date', startDate)
+      .lte('date', clampedEndDate)
+      .order('date', { ascending: true });
+
+    const daysWithActivity = new Set((actRows ?? []).map((r: any) => r.date as string));
+    current = daysWithActivity.size;
+
+    const cursor = new Date(challenge.start_time);
+    cursor.setHours(0, 0, 0, 0);
+    while (cursor.toISOString().slice(0, 10) <= clampedEndDate) {
+      const d = cursor.toISOString().slice(0, 10);
+      dailyCheckins.push(daysWithActivity.has(d));
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  }
+
+  const completedToday = dailyCheckins.length > 0 && dailyCheckins[dailyCheckins.length - 1];
+
+  let rank: number | null = null;
+  const totalParticipants = (challenge as any).participant_count as number ?? 0;
+  try {
+    const redis = getRedis();
+    const card = await redis.zcard(`leaderboard:challenge:${challengeId}`);
+    if (card > 0) {
+      const rankFromBottom = await redis.zrank(`leaderboard:challenge:${challengeId}`, userId);
+      if (rankFromBottom !== null) rank = card - rankFromBottom;
+    }
+  } catch { /* Redis optional */ }
+
+  return {
+    joined: true,
+    current,
+    goal: challenge.step_goal,
+    percent: Math.min(1, current / Math.max(1, challenge.step_goal)),
+    totalDays,
+    daysPassed,
+    daysLeft: Math.max(0, totalDays - daysPassed),
+    dailyGoal,
+    completedToday,
+    dailyCheckins,
+    rank,
+    totalParticipants,
+    activityType,
+    prizePool: challenge.prize_pool,
+  };
+}
