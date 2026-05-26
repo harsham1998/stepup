@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/streak_provider.dart';
+import '../providers/streak_calendar_provider.dart';
+import '../../../shared/models/streak_calendar_day.dart';
 import '../../../core/theme.dart';
 
 class StreakScreen extends ConsumerWidget {
@@ -10,16 +12,18 @@ class StreakScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final streakAsync = ref.watch(streakStatusProvider);
+    final calendarAsync = ref.watch(streakCalendarProvider);
     return Scaffold(
       backgroundColor: AppTheme.bg,
       body: SafeArea(
         child: streakAsync.when(
           loading: () => const Center(
               child: CircularProgressIndicator(color: AppTheme.voltLime)),
-          error: (e, _) => const _StreakBody(streakDays: 12, shieldAvailable: true),
+          error: (e, _) => _StreakBody(streakDays: 12, shieldAvailable: true, calendarAsync: const AsyncValue.loading()),
           data: (streak) => _StreakBody(
             streakDays: streak.streakDays,
             shieldAvailable: streak.shieldAvailable,
+            calendarAsync: calendarAsync,
           ),
         ),
       ),
@@ -30,11 +34,16 @@ class StreakScreen extends ConsumerWidget {
 class _StreakBody extends StatelessWidget {
   final int streakDays;
   final bool shieldAvailable;
-  const _StreakBody({required this.streakDays, required this.shieldAvailable});
+  final AsyncValue<List<StreakCalendarDay>> calendarAsync;
+  const _StreakBody({
+    required this.streakDays,
+    required this.shieldAvailable,
+    required this.calendarAsync,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       child: Column(children: [
         // Header
@@ -81,6 +90,18 @@ class _StreakBody extends StatelessWidget {
               style: AppTheme.label(12, color: AppTheme.ink2),
             ),
           ]),
+        ),
+        const SizedBox(height: 16),
+        Text('ACTIVITY CALENDAR',
+            style: AppTheme.label(10, color: AppTheme.ink2)
+                .copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 10),
+        calendarAsync.when(
+          loading: () => const SizedBox(
+              height: 80,
+              child: Center(child: CircularProgressIndicator(color: AppTheme.voltLime, strokeWidth: 2))),
+          error: (_, __) => const SizedBox.shrink(),
+          data: (days) => _StreakCalendar(days: days),
         ),
         const SizedBox(height: 14),
 
@@ -195,7 +216,7 @@ class _StreakBody extends StatelessWidget {
           ]),
         ),
 
-        const Spacer(),
+        const SizedBox(height: 16),
 
         // CTA button
         GestureDetector(
@@ -222,6 +243,58 @@ class _StreakBody extends StatelessWidget {
           ),
         ),
       ]),
+    );
+  }
+}
+
+class _StreakCalendar extends StatelessWidget {
+  final List<StreakCalendarDay> days;
+  const _StreakCalendar({required this.days});
+
+  Color _colorFor(String status) {
+    switch (status) {
+      case 'full':
+        return AppTheme.voltLime;
+      case 'partial':
+        return AppTheme.amber;
+      default:
+        return Colors.red.shade700;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final recent = days.length > 35 ? days.sublist(days.length - 35) : days;
+    return Wrap(
+      spacing: 4,
+      runSpacing: 4,
+      children: recent.map((day) {
+        final hasActivity = day.status != 'none' && day.steps > 0;
+        return Tooltip(
+          message: '${day.date}\n${day.steps} steps',
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: hasActivity
+                  ? _colorFor(day.status).withValues(alpha: 0.85)
+                  : Colors.white.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: day.streakCount > 0 && day.status == 'full'
+                ? Center(
+                    child: Text(
+                      '${day.streakCount}',
+                      style: const TextStyle(
+                          color: AppTheme.bg,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800),
+                    ),
+                  )
+                : null,
+          ),
+        );
+      }).toList(),
     );
   }
 }
