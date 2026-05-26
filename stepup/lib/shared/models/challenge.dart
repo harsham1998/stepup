@@ -268,7 +268,7 @@ class MissionProgress {
       );
 }
 
-class LeaderboardEntry {
+class ChallengeParticipant {
   final int rank;
   final String userId;
   final String displayName;
@@ -276,7 +276,7 @@ class LeaderboardEntry {
   final int current;
   final int xpEarned;
 
-  const LeaderboardEntry({
+  const ChallengeParticipant({
     required this.rank,
     required this.userId,
     required this.displayName,
@@ -285,7 +285,7 @@ class LeaderboardEntry {
     required this.xpEarned,
   });
 
-  factory LeaderboardEntry.fromJson(Map<String, dynamic> j) => LeaderboardEntry(
+  factory ChallengeParticipant.fromJson(Map<String, dynamic> j) => ChallengeParticipant(
         rank: (j['rank'] as num).toInt(),
         userId: j['user_id'] as String,
         displayName: (j['display_name'] as String?) ?? 'Athlete',
@@ -299,7 +299,7 @@ class ChallengeLeaderboard {
   final int? yourRank;
   final int total;
   final String updatedAt;
-  final List<LeaderboardEntry> participants;
+  final List<ChallengeParticipant> participants;
 
   const ChallengeLeaderboard({
     this.yourRank,
@@ -313,7 +313,7 @@ class ChallengeLeaderboard {
         total: (j['total'] as num).toInt(),
         updatedAt: j['updated_at'] as String,
         participants: (j['participants'] as List)
-            .map((e) => LeaderboardEntry.fromJson(e as Map<String, dynamic>))
+            .map((e) => ChallengeParticipant.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
 }
