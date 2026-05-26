@@ -28,6 +28,8 @@ class _ChallengeDetailScreenState
           _joining = false;
           _joined = true;
         });
+        ref.invalidate(myChallengesProvider);
+        ref.invalidate(challengeProgressProvider(widget.id));
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Joined! Good luck 🏆')),
         );
