@@ -25,11 +25,52 @@ export interface ChallengeRow {
   status: 'upcoming' | 'active' | 'ended' | 'paid_out';
   prize_distribution: PrizeDistribution;
   sponsor_name?: string;
+  mode: 'individual' | 'duo' | 'group' | 'team';
 }
 
 export interface PrizeDistribution {
   platform_fee_percent: number;
   tiers: Array<{ top_percent: number; share_percent: number }>;
+}
+
+export interface ChallengeMissionRow {
+  id: string;
+  challenge_id: string;
+  mission_id: string;
+  bonus_xp: number;
+  // joined from missions table:
+  title: string;
+  description: string;
+  type: 'daily' | 'weekly' | 'seasonal';
+  target: number;
+  unit: string;
+  xp_reward: number;
+}
+
+export interface PrizeTier {
+  top_percent: number;
+  label: string;
+  coins: number;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+  current: number;
+  xp_earned: number;
+}
+
+export interface MissionProgress {
+  mission_id: string;
+  title: string;
+  target: number;
+  current: number;
+  unit: string;
+  completed: boolean;
+  xp_earned: number;
+  total_xp: number;
 }
 
 export interface WalletTransaction {
