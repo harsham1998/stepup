@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme.dart';
 import '../../../shared/models/friend_activity.dart';
@@ -11,7 +12,6 @@ class FriendsPulseSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final feedAsync = ref.watch(socialActivityFeedProvider);
-    final standingsAsync = ref.watch(friendsLeagueStandingsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,13 +39,10 @@ class FriendsPulseSection extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              standingsAsync.when(
-                data: (s) => Text(
-                  '#${s.myRank} among friends',
-                  style: GoogleFonts.inter(fontSize: 11, color: AppTheme.voltLime),
-                ),
-                loading: () => const SizedBox.shrink(),
-                error: (_, _) => const SizedBox.shrink(),
+              GestureDetector(
+                onTap: () => context.push('/friends'),
+                child: Text('Manage →',
+                    style: GoogleFonts.inter(fontSize: 11, color: AppTheme.voltLime)),
               ),
             ],
           ),
@@ -53,7 +50,7 @@ class FriendsPulseSection extends ConsumerWidget {
         const SizedBox(height: 10),
         feedAsync.when(
           data: (activities) => activities.isEmpty
-              ? _EmptyFeed()
+              ? _NoFriendsPrompt()
               : SizedBox(
                   height: 82,
                   child: ListView.separated(
@@ -74,7 +71,7 @@ class FriendsPulseSection extends ConsumerWidget {
               itemBuilder: (_, _) => _SkeletonCard(),
             ),
           ),
-          error: (_, _) => _EmptyFeed(),
+          error: (err, st) => _NoFriendsPrompt(),
         ),
       ],
     );
@@ -217,6 +214,30 @@ class _EmptyFeed extends StatelessWidget {
         child: Text(
           'Add friends to see their activity',
           style: GoogleFonts.inter(fontSize: 12, color: AppTheme.ink2),
+        ),
+      ),
+    );
+  }
+}
+
+class _NoFriendsPrompt extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/friends'),
+      child: Container(
+        height: 70,
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.border),
+        ),
+        child: Center(
+          child: Text(
+            '👥 Add friends to see their pulse here →',
+            style: GoogleFonts.inter(fontSize: 12, color: AppTheme.ink2),
+          ),
         ),
       ),
     );
