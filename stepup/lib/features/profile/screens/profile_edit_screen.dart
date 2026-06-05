@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/profile_provider.dart';
 import '../../../core/theme.dart';
+import '../../../core/api_client.dart';
 
 class ProfileEditScreen extends ConsumerWidget {
   const ProfileEditScreen({super.key});
@@ -51,6 +53,10 @@ class _ProfileEditFormState extends ConsumerState<_ProfileEditForm> {
   late final TextEditingController _dobCtrl;
   late final TextEditingController _heightCtrl;
   late final TextEditingController _weightCtrl;
+  late final TextEditingController _usernameCtrl;
+  Timer? _usernameDebounce;
+  String _usernameStatus = 'idle'; // idle | checking | available | taken | invalid
+  String? _usernameInitial;
 
   // Selection state
   String _language = 'english';
@@ -94,6 +100,10 @@ class _ProfileEditFormState extends ConsumerState<_ProfileEditForm> {
       text: p['weight_kg'] != null ? '${p['weight_kg']}' : '',
     );
 
+    _usernameInitial = p['username'] as String? ?? '';
+    _usernameCtrl = TextEditingController(text: _usernameInitial ?? '');
+    _usernameCtrl.addListener(_onUsernameChanged);
+
     _language          = p['language'] as String? ?? 'english';
     _sex               = p['sex'] as String?;
     _units             = p['units'] as String? ?? 'metric';
@@ -118,14 +128,58 @@ class _ProfileEditFormState extends ConsumerState<_ProfileEditForm> {
     _dobCtrl.dispose();
     _heightCtrl.dispose();
     _weightCtrl.dispose();
+    _usernameCtrl.removeListener(_onUsernameChanged);
+    _usernameCtrl.dispose();
+    _usernameDebounce?.cancel();
     super.dispose();
   }
 
+  void _onUsernameChanged() {
+    final raw = _usernameCtrl.text;
+    final lower = raw.toLowerCase();
+    if (raw != lower) {
+      _usernameCtrl.value = _usernameCtrl.value.copyWith(
+        text: lower,
+        selection: TextSelection.collapsed(offset: lower.length),
+      );
+      return;
+    }
+    if (lower.isEmpty || lower == _usernameInitial) {
+      _usernameDebounce?.cancel();
+      setState(() => _usernameStatus = 'idle');
+      return;
+    }
+    final validFormat = RegExp(r'^[a-z0-9_]{3,20}$').hasMatch(lower);
+    if (!validFormat) {
+      _usernameDebounce?.cancel();
+      setState(() => _usernameStatus = 'invalid');
+      return;
+    }
+    setState(() => _usernameStatus = 'checking');
+    _usernameDebounce?.cancel();
+    _usernameDebounce = Timer(const Duration(milliseconds: 500), () async {
+      try {
+        final result = await ApiClient.instance.get('/friends/check-username', {'q': lower}) as Map<String, dynamic>;
+        if (!mounted) return;
+        setState(() => _usernameStatus = (result['available'] as bool) ? 'available' : 'taken');
+      } catch (_) {
+        if (mounted) setState(() => _usernameStatus = 'idle');
+      }
+    });
+  }
+
   Future<void> _save() async {
+    if (_usernameStatus == 'taken' || _usernameStatus == 'invalid') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fix your username before saving')),
+      );
+      return;
+    }
     setState(() => _saving = true);
     try {
       final body = <String, dynamic>{
         'name': _nameCtrl.text.trim().isEmpty ? 'User' : _nameCtrl.text.trim(),
+        if (_usernameCtrl.text.trim().isNotEmpty) 'username': _usernameCtrl.text.trim(),
         if (_bioCtrl.text.trim().isNotEmpty) 'bio': _bioCtrl.text.trim(),
         'city': _cityCtrl.text.trim(),
         'language': _language,
@@ -261,6 +315,11 @@ class _ProfileEditFormState extends ConsumerState<_ProfileEditForm> {
                       label: 'Display Name',
                       ctrl: _nameCtrl,
                       hint: 'Your name',
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _UsernameField(ctrl: _usernameCtrl, status: _usernameStatus),
                     ),
                     _gap(),
                     _bioField(),
@@ -1289,4 +1348,88 @@ class _SaveButton extends StatelessWidget {
               : Text('Save Changes →', style: AppTheme.bigNum(17, color: AppTheme.bg)),
         ),
       );
+}
+
+class _UsernameField extends StatelessWidget {
+  final TextEditingController ctrl;
+  final String status;
+  const _UsernameField({required this.ctrl, required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    Color borderColor = AppTheme.border;
+    Widget? trailing;
+
+    switch (status) {
+      case 'checking':
+        trailing = const SizedBox(
+          width: 14, height: 14,
+          child: CircularProgressIndicator(strokeWidth: 1.5, color: AppTheme.voltLime),
+        );
+      case 'available':
+        borderColor = AppTheme.voltLime;
+        trailing = const Icon(Icons.check_circle_rounded, color: AppTheme.voltLime, size: 18);
+      case 'taken':
+        borderColor = Color(0xFFFF4D4D);
+        trailing = const Icon(Icons.cancel_rounded, color: Color(0xFFFF4D4D), size: 18);
+      case 'invalid':
+        borderColor = Color(0xFFFF4D4D);
+      default:
+        break;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('USERNAME', style: AppTheme.label(10, color: AppTheme.ink3)
+            .copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 6),
+        Container(
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 14),
+              child: Text('@', style: AppTheme.label(14, color: AppTheme.ink2)),
+            ),
+            Expanded(
+              child: TextField(
+                controller: ctrl,
+                style: AppTheme.label(14, color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'your_username',
+                  hintStyle: AppTheme.label(14, color: AppTheme.ink3),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+                  suffixIcon: trailing != null ? Padding(padding: const EdgeInsets.only(right: 12), child: trailing) : null,
+                  suffixIconConstraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                ),
+              ),
+            ),
+          ]),
+        ),
+        if (status == 'invalid')
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 2),
+            child: Text('3–20 chars · letters, numbers, underscores only',
+                style: AppTheme.label(11, color: Color(0xFFFF4D4D))),
+          ),
+        if (status == 'taken')
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 2),
+            child: Text('Username taken — try adding numbers or underscores',
+                style: AppTheme.label(11, color: Color(0xFFFF4D4D))),
+          ),
+        if (status == 'available')
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 2),
+            child: Text('Username available',
+                style: AppTheme.label(11, color: AppTheme.voltLime)),
+          ),
+      ],
+    );
+  }
 }
