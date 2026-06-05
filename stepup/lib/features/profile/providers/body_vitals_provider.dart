@@ -2,6 +2,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api_client.dart';
 import '../../../shared/models/body_vitals.dart';
+import '../../league/providers/league_provider.dart';
+import '../../profile/providers/xp_level_provider.dart';
 
 // Summary (latest, earliest, goal, streak, logged_today)
 final bodyVitalsSummaryProvider = FutureProvider<BodyVitalsSummary>((ref) async {
@@ -62,6 +64,10 @@ class VitalsLogNotifier extends Notifier<VitalsLogState> {
       // Refresh summary and history so the screen shows updated data
       ref.invalidate(bodyVitalsSummaryProvider);
       ref.invalidate(bodyVitalsHistoryProvider);
+      if (awarded) {
+        ref.invalidate(leagueStatusProvider);
+        ref.invalidate(xpLevelProvider);
+      }
 
       state = state.copyWith(isLoading: false, xpAwarded: awarded);
     } catch (e) {

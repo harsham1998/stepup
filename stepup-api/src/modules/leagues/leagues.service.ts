@@ -6,55 +6,54 @@ const TIERS = ['bronze','silver','gold','platinum','diamond','elite'];
 export async function getMyLeague(userId: string) {
   const db = getSupabase();
 
-  // Ensure user_leagues row exists
-  const { data: existing } = await db
-    .from('user_leagues')
-    .select('*')
-    .eq('user_id', userId)
-    .maybeSingle();
+  // users.xp is the single source of truth for XP
+  const [userRes, existingLeague, allLeaguesRes, subRes] = await Promise.all([
+    db.from('users').select('xp').eq('id', userId).single(),
+    db.from('user_leagues').select('*').eq('user_id', userId).maybeSingle(),
+    db.from('leagues').select('*').order('sort_order'),
+    db.from('user_subscriptions').select('plan_slug')
+      .eq('user_id', userId).eq('status', 'active').maybeSingle(),
+  ]);
 
-  const userLeague = existing ?? await createUserLeague(userId, db);
+  const xp = (userRes.data?.xp as number) ?? 0;
+  const allLeagues = allLeaguesRes.data ?? [];
+  const isPro = subRes.data?.plan_slug === 'pro';
 
-  // Get all tier definitions
-  const { data: allLeagues } = await db
-    .from('leagues')
-    .select('*')
-    .order('sort_order');
+  // Derive correct tier from authoritative XP
+  const correctSlug = xpToLeagueSlug(xp);
 
-  // Get user's current tier definition
-  const currentTier = (allLeagues ?? []).find(l => l.slug === userLeague.league_slug)!;
+  // Upsert user_leagues so standings queries stay accurate
+  let userLeague = existingLeague.data;
+  if (!userLeague || userLeague.league_slug !== correctSlug || userLeague.xp !== xp) {
+    await db.from('user_leagues').upsert(
+      { user_id: userId, league_slug: correctSlug, xp, season: userLeague?.season ?? 1, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' },
+    );
+    userLeague = { ...userLeague, league_slug: correctSlug, xp, season: userLeague?.season ?? 1 };
+  }
+
+  const currentTier = allLeagues.find(l => l.slug === correctSlug)!;
   const xpForNext = currentTier.xp_max ?? (currentTier.xp_min + 1000);
 
-  // Count total users in this tier for rank display
   const { count: totalInTier } = await db
     .from('user_leagues')
     .select('*', { count: 'exact', head: true })
-    .eq('league_slug', userLeague.league_slug);
-
-  // Get user profile for subscription check
-  const { data: sub } = await db
-    .from('user_subscriptions')
-    .select('plan_slug')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .maybeSingle();
-
-  const isPro = sub?.plan_slug === 'pro';
+    .eq('league_slug', correctSlug);
 
   return {
-    league_slug: userLeague.league_slug,
+    league_slug: correctSlug,
     label: currentTier.label,
     color_hex: currentTier.color_hex,
-    xp: userLeague.xp,
+    xp,
     xp_min: currentTier.xp_min,
     xp_for_next: xpForNext,
-    rank_in_tier: userLeague.rank_in_tier ?? 1,
+    rank_in_tier: userLeague?.rank_in_tier ?? 1,
     total_in_tier: totalInTier ?? 1,
-    season: userLeague.season,
-    tier_ladder: (allLeagues ?? []).map(l => ({
+    season: userLeague?.season ?? 1,
+    tier_ladder: allLeagues.map(l => ({
       ...l,
       locked: l.paid_only && !isPro,
-      is_current: l.slug === userLeague.league_slug,
+      is_current: l.slug === correctSlug,
     })),
   };
 }

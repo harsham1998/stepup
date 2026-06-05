@@ -33,11 +33,26 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _requestHealthPermissions();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(leagueStatusProvider);
+      ref.invalidate(xpLevelProvider);
+    }
   }
 
   Future<void> _requestHealthPermissions() async {
@@ -470,6 +485,32 @@ class _XpHeroCardState extends State<_XpHeroCard> {
   bool _tooltipVisible = false;
   Timer? _tooltipTimer;
 
+  // XP gain animation state
+  int _prevXp = 0;
+  int _animDelta = 0;
+  int _animGen = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _prevXp = widget.league.xp;
+  }
+
+  @override
+  void didUpdateWidget(_XpHeroCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newXp = widget.league.xp;
+    if (newXp > _prevXp) {
+      setState(() {
+        _animDelta = newXp - _prevXp;
+        _animGen++;
+        // _prevXp updated in animation onEnd
+      });
+    } else if (newXp != _prevXp) {
+      setState(() => _prevXp = newXp);
+    }
+  }
+
   @override
   void dispose() {
     _tooltipTimer?.cancel();
@@ -493,7 +534,11 @@ class _XpHeroCardState extends State<_XpHeroCard> {
         : null;
     final xpToNext = l.xpForNext - l.xp;
     final tierColor = _hexColor(l.colorHex);
-    final progress = l.xpProgress.clamp(0.0, 1.0);
+    final totalTiers = l.tierLadder.length;
+    final withinTier = l.xpProgress.clamp(0.0, 1.0);
+    final progress = totalTiers > 0 && currentIdx >= 0
+        ? ((currentIdx + withinTier) / totalTiers).clamp(0.0, 1.0)
+        : withinTier;
 
     return Container(
       decoration: BoxDecoration(
@@ -521,22 +566,101 @@ class _XpHeroCardState extends State<_XpHeroCard> {
                         _Eyebrow(dotColor: AppTheme.voltLime,
                             label: 'SEASON ${l.season} XP'),
                         const SizedBox(height: 10),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
+                        Stack(
+                          clipBehavior: Clip.none,
                           children: [
-                            Text(_fmtNum(l.xp),
-                              style: GoogleFonts.bigShouldersDisplay(
-                                fontSize: 52, fontWeight: FontWeight.w900,
-                                color: AppTheme.voltLime,
-                                letterSpacing: -1.5, height: 0.85,
-                              )),
-                            const SizedBox(width: 6),
-                            Text('XP',
-                              style: GoogleFonts.bigShouldersDisplay(
-                                fontSize: 18, fontWeight: FontWeight.w900,
-                                color: AppTheme.voltLime.withValues(alpha: 0.45),
-                              )),
+                            // XP counter (ticks from prev to new on XP gain)
+                            TweenAnimationBuilder<double>(
+                              key: ValueKey('xp_$_animGen'),
+                              tween: Tween(
+                                begin: _prevXp.toDouble(),
+                                end: widget.league.xp.toDouble(),
+                              ),
+                              duration: _animGen > 0
+                                  ? const Duration(milliseconds: 700)
+                                  : Duration.zero,
+                              curve: Curves.easeInOut,
+                              builder: (ctx, val, _) => Row(
+                                crossAxisAlignment: CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: [
+                                  Text(_fmtNum(val.round()),
+                                    style: GoogleFonts.bigShouldersDisplay(
+                                      fontSize: 52, fontWeight: FontWeight.w900,
+                                      color: AppTheme.voltLime,
+                                      letterSpacing: -1.5, height: 0.85,
+                                    )),
+                                  const SizedBox(width: 6),
+                                  Text('XP',
+                                    style: GoogleFonts.bigShouldersDisplay(
+                                      fontSize: 18, fontWeight: FontWeight.w900,
+                                      color: AppTheme.voltLime.withValues(alpha: 0.45),
+                                    )),
+                                ],
+                              ),
+                            ),
+                            // Float-up "+N XP" badge
+                            Positioned(
+                              top: 0, left: 0, right: 0,
+                              child: IgnorePointer(
+                                child: TweenAnimationBuilder<double>(
+                                  key: ValueKey('badge_$_animGen'),
+                                  tween: _animGen > 0
+                                      ? Tween(begin: 0.0, end: 1.0)
+                                      : Tween(begin: 0.0, end: 0.0),
+                                  duration: _animGen > 0
+                                      ? const Duration(milliseconds: 1100)
+                                      : Duration.zero,
+                                  onEnd: () {
+                                    if (_animGen > 0 && mounted) {
+                                      setState(() => _prevXp = widget.league.xp);
+                                    }
+                                  },
+                                  builder: (ctx, t, _) {
+                                    final opacity = t < 0.15
+                                        ? t / 0.15
+                                        : t < 0.60
+                                            ? 1.0
+                                            : 1.0 - (t - 0.60) / 0.40;
+                                    final dy = t < 0.15
+                                        ? 8.0 - (12.0 * (t / 0.15))
+                                        : -4.0 - (32.0 * ((t - 0.15) / 0.85));
+                                    return Transform.translate(
+                                      offset: Offset(0, dy),
+                                      child: Opacity(
+                                        opacity: opacity.clamp(0.0, 1.0),
+                                        child: Center(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              gradient: const LinearGradient(colors: [
+                                                Color(0xFFF59E0B),
+                                                Color(0xFFEF4444),
+                                              ]),
+                                              borderRadius: BorderRadius.circular(99),
+                                              boxShadow: [BoxShadow(
+                                                color: const Color(0xFFF59E0B)
+                                                    .withValues(alpha: 0.5),
+                                                blurRadius: 8,
+                                              )],
+                                            ),
+                                            child: Text('+$_animDelta XP',
+                                              style: GoogleFonts.bigShouldersDisplay(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w900,
+                                                color: Colors.white,
+                                                letterSpacing: 0.2,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                         const Spacer(),
