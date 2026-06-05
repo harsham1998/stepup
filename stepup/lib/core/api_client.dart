@@ -79,4 +79,16 @@ class ApiClient {
       throw _ApiError(serverMsg ?? e.message ?? 'Request failed', statusCode);
     }
   }
+
+  Future<dynamic> delete(String path) async {
+    try {
+      final r = await _dio.delete(path);
+      return r.data;
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      final serverMsg = data is Map ? (data['error'] as String?) : null;
+      final statusCode = e.response?.statusCode;
+      throw _ApiError(serverMsg ?? e.message ?? 'Request failed', statusCode);
+    }
+  }
 }
