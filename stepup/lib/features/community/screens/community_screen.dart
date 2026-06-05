@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/community_provider.dart';
 import '../../../shared/models/community_post.dart';
 import '../../../core/theme.dart';
+import '../../friends/widgets/friends_community_banner.dart';
 
 class CommunityScreen extends ConsumerWidget {
   const CommunityScreen({super.key});
@@ -57,6 +58,8 @@ class CommunityScreen extends ConsumerWidget {
               ],
             ),
           ),
+
+          const FriendsCommunityBanner(),
 
           Expanded(
             child: feedAsync.when(
