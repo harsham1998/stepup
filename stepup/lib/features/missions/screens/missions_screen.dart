@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/health_missions_provider.dart';
+import '../../profile/providers/xp_level_provider.dart';
+import '../../league/providers/league_provider.dart';
+import '../../wallet/providers/wallet_provider.dart';
 import '../../../core/api_client.dart';
 import '../../../core/theme.dart';
 
@@ -146,6 +149,9 @@ class _MissionCard extends ConsumerWidget {
         Future.microtask(() async {
           try {
             await ApiClient.instance.post('/missions/health/complete', {'missionId': mission.id});
+            ref.invalidate(xpLevelProvider);
+            ref.invalidate(leagueStatusProvider);
+            ref.invalidate(walletBalanceProvider);
           } catch (_) {}
         });
       }

@@ -123,6 +123,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ref.invalidate(walletBalanceProvider);
             ref.invalidate(communityFeedProvider);
             ref.invalidate(streakStatusProvider);
+            ref.invalidate(xpLevelProvider);
+            ref.invalidate(profileSummaryProvider);
             // Wait briefly for at least the health summary to start fetching
             await Future.delayed(const Duration(milliseconds: 400));
           },

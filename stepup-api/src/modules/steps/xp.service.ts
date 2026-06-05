@@ -73,6 +73,9 @@ export async function awardXp(userId: string, amount: number) {
     throw new Error(`Failed to sync users.xp: ${updateError.message}`);
   }
 
+  // Keep user_leagues.xp in sync so the home hero card shows current XP (fire-and-forget)
+  void db.from('user_leagues').update({ xp: newXp }).eq('user_id', userId);
+
   logger.info({ userId, xp: newXp, level: currentLevel }, 'XP awarded');
 
   // Badges are awarded by streak evaluation (streaks.service.ts), not by XP awards
