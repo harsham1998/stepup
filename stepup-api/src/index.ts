@@ -5,6 +5,11 @@ import { createQueue, createWorker } from './lib/queue';
 import { recalculateLeagues } from './modules/steps/xp.service';
 import { recalculateAllReputation } from './modules/reputation/reputation.service';
 
+// Prevent unhandled rejections from crashing the process (e.g. BullMQ/Redis errors)
+process.on('unhandledRejection', (reason) => {
+  logger.warn({ reason }, 'Unhandled promise rejection — continuing');
+});
+
 const PORT = Number(process.env.PORT ?? 3000);
 const app = createApp();
 
