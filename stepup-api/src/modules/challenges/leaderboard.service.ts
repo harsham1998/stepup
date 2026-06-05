@@ -5,6 +5,7 @@ import { LeaderboardEntry } from '../../types';
 export async function getLeaderboard(
   challengeId: string,
   requestingUserId: string,
+  friendIds?: string[],
 ): Promise<{
   your_rank: number | null;
   total: number;
@@ -21,12 +22,17 @@ export async function getLeaderboard(
   if (pErr) throw new Error(pErr.message);
 
   const allParticipants = participants ?? [];
-  const total = allParticipants.length;
+
+  const filteredParticipants = friendIds
+    ? allParticipants.filter((p: any) => p.user_id === requestingUserId || friendIds.includes(p.user_id))
+    : allParticipants;
+
+  const total = filteredParticipants.length;
   if (total === 0) {
     return { your_rank: null, total: 0, updated_at: new Date().toISOString(), participants: [] };
   }
 
-  const userIds = allParticipants.map((p: any) => p.user_id as string);
+  const userIds = filteredParticipants.map((p: any) => p.user_id as string);
 
   // --- 2. Get scores from Redis if available, else fall back to DB ---
   let scores: Record<string, number> = {};
@@ -63,7 +69,7 @@ export async function getLeaderboard(
   for (const row of xpRows ?? []) xpMap[row.user_id] = row.xp_earned;
 
   // --- 4. Build sorted entries ---
-  const entries: LeaderboardEntry[] = allParticipants
+  const entries: LeaderboardEntry[] = filteredParticipants
     .map((p: any) => ({
       rank: 0,
       user_id: p.user_id as string,
