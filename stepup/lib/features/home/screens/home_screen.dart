@@ -24,6 +24,7 @@ import '../../../core/theme.dart';
 import '../widgets/friends_pulse_section.dart';
 import '../widgets/home_shortcuts.dart';
 import '../widgets/home_coins_banner.dart';
+import '../widgets/body_vitals_home_widget.dart';
 import '../../social/providers/social_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -221,6 +222,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     color: AppTheme.voltLime, strokeWidth: 2),
                 ),
               ),
+            const SizedBox(height: 24),
+
+            // ── Body Vitals ───────────────────────────────────────────
+            const BodyVitalsHomeWidget(),
             const SizedBox(height: 24),
 
             // ── Daily Missions ────────────────────────────────────────
