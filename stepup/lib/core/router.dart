@@ -41,6 +41,7 @@ import '../features/devices/screens/devices_screen.dart';
 import '../features/seasons/screens/season_rewards_screen.dart';
 import '../features/water/screens/water_screen.dart';
 import '../features/profile/screens/body_vitals_screen.dart';
+import '../features/friends/screens/friends_hub_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -99,6 +100,7 @@ final router = GoRouter(
         GoRoute(path: '/water',          builder: (_, __) => const WaterScreen()),
         GoRoute(path: '/rivals',         builder: (_, __) => const RivalsScreen()),
         GoRoute(path: '/rivals/battle/:id', builder: (_, s) => BattleDetailScreen(battleId: s.pathParameters['id']!)),
+        GoRoute(path: '/friends', builder: (_, __) => const FriendsHubScreen()),
         GoRoute(
           path: '/community',
           builder: (_, __) => const CommunityScreen(),
