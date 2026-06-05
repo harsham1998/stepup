@@ -37,6 +37,7 @@ const profileSchema = z.object({
 // Used by the profile edit screen — all fields optional, partial update
 const updateProfileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
+  username: z.string().regex(/^[a-z0-9_]{3,20}$/).optional().nullable(),
   bio: z.string().max(200).optional(),
   city: z.string().max(100).optional(),
   language: z.enum(['english', 'hindi', 'telugu', 'tamil', 'kannada']).optional(),
