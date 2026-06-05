@@ -1,5 +1,6 @@
 import { getSupabase } from '../../lib/supabase';
 import { getRedis } from '../../lib/redis';
+import { logger } from '../../lib/logger';
 import { ChallengeRow, ChallengeMissionRow, MissionProgress } from '../../types';
 
 const _VALID_ACTIVITY_TYPES = new Set(['steps', 'walking', 'running', 'gym', 'outdoor', 'cycling']);
@@ -363,4 +364,40 @@ export async function getChallengeProgress(userId: string, challengeId: string) 
     prizePool: challenge.prize_pool,
     mission_progress: missionProgress,
   };
+}
+
+// Finds all active challenges past their end_time, marks them ended, and queues payout.
+// Called by the challenge-ender cron in index.ts every 10 minutes.
+export async function endExpiredChallenges() {
+  const { schedulePayoutJob, processPayout } = await import('./payout.job');
+  const db = getSupabase();
+  const now = new Date().toISOString();
+
+  const { data: expired, error } = await db
+    .from('challenges')
+    .select('id, title')
+    .eq('status', 'active')
+    .lt('end_time', now);
+
+  if (error) { logger.error({ err: error }, 'endExpiredChallenges: query failed'); return; }
+  if (!expired || expired.length === 0) return;
+
+  for (const c of expired) {
+    const { error: updateErr } = await db
+      .from('challenges').update({ status: 'ended' }).eq('id', c.id);
+    if (updateErr) {
+      logger.error({ challengeId: c.id, err: updateErr }, 'Failed to mark challenge ended');
+      continue;
+    }
+    try {
+      await schedulePayoutJob(c.id, new Date());
+      logger.info({ challengeId: c.id, title: c.title }, 'Challenge ended and payout queued');
+    } catch (queueErr) {
+      // BullMQ unavailable — run payout synchronously as fallback
+      logger.warn({ challengeId: c.id, err: queueErr }, 'Queue unavailable, running payout synchronously');
+      await processPayout(c.id).catch(err =>
+        logger.error({ challengeId: c.id, err }, 'Synchronous payout failed')
+      );
+    }
+  }
 }

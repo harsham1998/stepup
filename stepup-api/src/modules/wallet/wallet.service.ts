@@ -4,18 +4,20 @@ import { getRedis } from '../../lib/redis';
 import { v4 as uuid } from 'uuid';
 
 export async function getBalance(userId: string) {
-  const { data, error } = await getSupabase()
-    .from('wallet_transactions')
-    .select('type, amount, status')
-    .eq('user_id', userId)
-    .neq('status', 'rejected');
-  if (error) throw new Error(error.message);
+  const db = getSupabase();
+  const [txnRes, userRes] = await Promise.all([
+    db.from('wallet_transactions').select('type, amount, status')
+      .eq('user_id', userId).neq('status', 'rejected'),
+    db.from('users').select('coin_balance').eq('id', userId).maybeSingle(),
+  ]);
+  if (txnRes.error) throw new Error(txnRes.error.message);
 
-  const balance_paise = (data ?? []).reduce((sum: number, t: { type: string; amount: number }) =>
+  const balance_paise = (txnRes.data ?? []).reduce((sum: number, t: { type: string; amount: number }) =>
     t.type === 'credit' ? sum + t.amount : sum - t.amount, 0);
   return {
     balance_paise,
     balance_inr: (balance_paise / 100).toFixed(2),
+    coin_balance: userRes.data?.coin_balance ?? 0,
   };
 }
 

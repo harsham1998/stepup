@@ -59,13 +59,37 @@ export async function processPayout(challengeId: string) {
 
   logger.info({ challengeId }, 'Processing payout');
 
-  const lbKey = `leaderboard:challenge:${challengeId}`;
-  const redisRanks = await redis.zrevrange(lbKey, 0, -1, 'WITHSCORES');
-
+  // Build ranked list: try Redis first, fall back to user_daily_steps from DB
   const ranked: Array<{ userId: string; steps: number }> = [];
-  for (let i = 0; i < redisRanks.length; i += 2) {
-    // Fix 6: parseInt with radix
-    ranked.push({ userId: redisRanks[i], steps: parseInt(redisRanks[i + 1], 10) });
+  const lbKey = `leaderboard:challenge:${challengeId}`;
+
+  try {
+    const redisRanks = await redis.zrevrange(lbKey, 0, -1, 'WITHSCORES');
+    for (let i = 0; i < redisRanks.length; i += 2) {
+      ranked.push({ userId: redisRanks[i], steps: parseInt(redisRanks[i + 1], 10) });
+    }
+  } catch (_) { /* Redis unavailable — fall through to DB */ }
+
+  if (ranked.length === 0) {
+    logger.info({ challengeId }, 'Redis leaderboard empty — falling back to user_daily_steps');
+    const startDate = challenge.start_time.slice(0, 10);
+    const endDate = challenge.end_time.slice(0, 10);
+    const { data: parts } = await db.from('challenge_participants')
+      .select('user_id').eq('challenge_id', challengeId);
+    const userIds = (parts ?? []).map((p: any) => p.user_id as string);
+    const { data: stepRows } = await db.from('user_daily_steps')
+      .select('user_id, total_steps')
+      .in('user_id', userIds)
+      .gte('date', startDate)
+      .lte('date', endDate);
+    const totals: Record<string, number> = {};
+    for (const row of stepRows ?? []) {
+      totals[row.user_id] = (totals[row.user_id] ?? 0) + row.total_steps;
+    }
+    for (const uid of userIds) {
+      ranked.push({ userId: uid, steps: totals[uid] ?? 0 });
+    }
+    ranked.sort((a, b) => b.steps - a.steps);
   }
 
   const dist: PrizeDistribution = challenge.prize_distribution;
