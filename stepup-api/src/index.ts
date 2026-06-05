@@ -12,12 +12,19 @@ app.listen(PORT, () => {
   logger.info({ port: PORT }, 'StepUp API started');
 });
 
-// Every Monday at midnight IST (UTC+5:30 -> Sunday 18:30 UTC)
-const leagueQueue = createQueue('league-recalc');
-createWorker('league-recalc', async () => { await recalculateLeagues(); });
-leagueQueue.add('recalc', {}, { repeat: { pattern: '30 18 * * 0' } });
+// Background jobs require Redis — skip gracefully if not configured
+if (process.env.UPSTASH_REDIS_URL && !process.env.UPSTASH_REDIS_URL.includes('your-upstash')) {
+  try {
+    const leagueQueue = createQueue('league-recalc');
+    createWorker('league-recalc', async () => { await recalculateLeagues(); });
+    leagueQueue.add('recalc', {}, { repeat: { pattern: '30 18 * * 0' } }).catch(() => {});
 
-// Nightly reputation recalc at 2am IST (8:30pm UTC)
-const reputationQueue = createQueue('reputation-recalc');
-createWorker('reputation-recalc', async () => { await recalculateAllReputation(); });
-reputationQueue.add('recalc', {}, { repeat: { pattern: '30 20 * * *' } });
+    const reputationQueue = createQueue('reputation-recalc');
+    createWorker('reputation-recalc', async () => { await recalculateAllReputation(); });
+    reputationQueue.add('recalc', {}, { repeat: { pattern: '30 20 * * *' } }).catch(() => {});
+  } catch (err) {
+    logger.warn({ err }, 'Background job setup failed — queues disabled');
+  }
+} else {
+  logger.warn('UPSTASH_REDIS_URL not configured — background jobs disabled');
+}
