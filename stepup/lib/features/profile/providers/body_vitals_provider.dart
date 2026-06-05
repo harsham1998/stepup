@@ -37,9 +37,9 @@ class VitalsLogState {
       );
 }
 
-class VitalsLogNotifier extends StateNotifier<VitalsLogState> {
-  final Ref _ref;
-  VitalsLogNotifier(this._ref) : super(const VitalsLogState());
+class VitalsLogNotifier extends Notifier<VitalsLogState> {
+  @override
+  VitalsLogState build() => const VitalsLogState();
 
   Future<void> log({
     double? weightKg,
@@ -60,8 +60,8 @@ class VitalsLogNotifier extends StateNotifier<VitalsLogState> {
       final awarded = result['xp_awarded'] as bool? ?? false;
 
       // Refresh summary and history so the screen shows updated data
-      _ref.invalidate(bodyVitalsSummaryProvider);
-      _ref.invalidate(bodyVitalsHistoryProvider);
+      ref.invalidate(bodyVitalsSummaryProvider);
+      ref.invalidate(bodyVitalsHistoryProvider);
 
       state = state.copyWith(isLoading: false, xpAwarded: awarded);
     } catch (e) {
@@ -71,6 +71,4 @@ class VitalsLogNotifier extends StateNotifier<VitalsLogState> {
 }
 
 final vitalsLogProvider =
-    StateNotifierProvider<VitalsLogNotifier, VitalsLogState>(
-  (ref) => VitalsLogNotifier(ref),
-);
+    NotifierProvider<VitalsLogNotifier, VitalsLogState>(VitalsLogNotifier.new);

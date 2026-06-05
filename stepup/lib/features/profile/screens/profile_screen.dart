@@ -8,6 +8,7 @@ import '../../subscriptions/providers/subscription_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/xp_level_provider.dart';
 import '../providers/reputation_provider.dart';
+import '../providers/body_vitals_provider.dart';
 import '../../../shared/models/xp_level.dart';
 import '../../../shared/models/reputation.dart';
 import '../../../core/theme.dart';
@@ -90,6 +91,12 @@ class _ProfileBody extends ConsumerWidget {
 
     final realLevel = xpAsync.whenOrNull(data: (x) => x.level);
     final repScore = repAsync.whenOrNull(data: (r) => r.score);
+    final vitalsAsync = ref.watch(bodyVitalsSummaryProvider);
+    final latestWeight = vitalsAsync.whenOrNull(
+      data: (v) => v.latest?.weightKg != null
+          ? '${v.latest!.weightKg!.toStringAsFixed(1)} kg'
+          : null,
+    );
 
     // Streak ring: cap at 30-day cycle
     final streakProgress = (streakDays % 30) / 30.0;
@@ -187,6 +194,14 @@ class _ProfileBody extends ConsumerWidget {
                   label: 'Achievements',
                   value: '$achievementsEarned earned',
                   onTap: () => context.push('/profile/achievements'),
+                ),
+                _MenuRow(
+                  icon: Icons.monitor_weight_outlined,
+                  iconBg: const Color(0xFF0F1A0F),
+                  iconColor: AppTheme.voltLime,
+                  label: 'Body Vitals',
+                  value: latestWeight ?? 'Track →',
+                  onTap: () => context.push('/profile/body-vitals'),
                   isLast: true,
                 ),
               ]),

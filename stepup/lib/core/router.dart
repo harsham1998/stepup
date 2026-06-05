@@ -40,6 +40,7 @@ import '../features/notifications/screens/notifications_screen.dart';
 import '../features/devices/screens/devices_screen.dart';
 import '../features/seasons/screens/season_rewards_screen.dart';
 import '../features/water/screens/water_screen.dart';
+import '../features/profile/screens/body_vitals_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -91,6 +92,7 @@ final router = GoRouter(
         GoRoute(path: '/profile/xp',     builder: (_, __) => const XpLevelScreen()),
         GoRoute(path: '/profile/achievements', builder: (_, __) => const AchievementsScreen()),
         GoRoute(path: '/profile/devices', builder: (_, __) => const DevicesScreen()),
+        GoRoute(path: '/profile/body-vitals', builder: (_, __) => const BodyVitalsScreen()),
 
         // Other
         GoRoute(path: '/missions',       builder: (_, __) => const MissionsScreen()),
