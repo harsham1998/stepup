@@ -10,6 +10,9 @@ class AppTheme {
   static const ink2      = Color(0xFFA3A3B3);
   static const ink3      = Color(0xFF4B5563);
   static const border    = Color(0x14FFFFFF);
+  static const border2   = Color(0x1EFFFFFF);
+  static const surface3  = Color(0xFF18182A);
+  static const red       = Color(0xFFEF4444);
 
   // Legacy aliases kept so existing screens don't break
   static const primary   = voltLime;
