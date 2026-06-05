@@ -6,6 +6,7 @@ import '../providers/challenges_provider.dart';
 import '../../../shared/models/challenge.dart';
 import '../../../core/api_client.dart';
 import '../../../core/theme.dart';
+import '../../friends/providers/friends_provider.dart' show challengeFriendsLeaderboardProvider, friendsListProvider;
 
 class ChallengeDetailScreen extends ConsumerStatefulWidget {
   final String id;
@@ -247,7 +248,6 @@ class _AfterState extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progressAsync = ref.watch(challengeProgressProvider(challengeId));
-    final leaderboardAsync = ref.watch(challengeLeaderboardProvider(challengeId));
 
     return Column(children: [
       _TopBar(
@@ -302,15 +302,7 @@ class _AfterState extends ConsumerWidget {
                   const SizedBox(height: 12),
                 ],
 
-                leaderboardAsync.when(
-                  loading: () => const SizedBox(
-                    height: 40,
-                    child: Center(child: CircularProgressIndicator(
-                        color: AppTheme.voltLime, strokeWidth: 1.5)),
-                  ),
-                  error: (e2, st) => const SizedBox.shrink(),
-                  data: (lb) => _LiveLeaderboard(lb: lb),
-                ),
+                _LeaderboardSection(challengeId: challengeId),
                 const SizedBox(height: 8),
 
                 GestureDetector(
@@ -947,5 +939,100 @@ class _LbRow extends StatelessWidget {
         ),
       ]),
     );
+  }
+}
+
+class _LeaderboardSection extends ConsumerStatefulWidget {
+  final String challengeId;
+  const _LeaderboardSection({required this.challengeId});
+
+  @override
+  ConsumerState<_LeaderboardSection> createState() => _LeaderboardSectionState();
+}
+
+class _LeaderboardSectionState extends ConsumerState<_LeaderboardSection> {
+  bool _friendsFilter = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final friendsAsync = ref.watch(friendsListProvider);
+    final hasFriends = friendsAsync.whenOrNull(data: (list) => list.isNotEmpty) ?? false;
+
+    final leaderboardAsync = _friendsFilter
+        ? ref.watch(challengeFriendsLeaderboardProvider(widget.challengeId))
+        : ref.watch(challengeLeaderboardProvider(widget.challengeId));
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      if (hasFriends)
+        Container(
+          height: 32,
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(children: [
+            Expanded(child: GestureDetector(
+              onTap: () => setState(() => _friendsFilter = false),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: !_friendsFilter ? AppTheme.voltLime : Colors.transparent,
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Center(
+                  child: Text('Everyone', style: AppTheme.label(11,
+                      color: !_friendsFilter ? Colors.black : AppTheme.ink2)
+                      .copyWith(fontWeight: !_friendsFilter ? FontWeight.w700 : FontWeight.normal)),
+                ),
+              ),
+            )),
+            Expanded(child: GestureDetector(
+              onTap: () => setState(() => _friendsFilter = true),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _friendsFilter ? AppTheme.voltLime : Colors.transparent,
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Center(
+                  child: Text('Friends 👥', style: AppTheme.label(11,
+                      color: _friendsFilter ? Colors.black : AppTheme.ink2)
+                      .copyWith(fontWeight: _friendsFilter ? FontWeight.w700 : FontWeight.normal)),
+                ),
+              ),
+            )),
+          ]),
+        ),
+      const SizedBox(height: 8),
+      leaderboardAsync.when(
+        loading: () => const SizedBox(
+          height: 40,
+          child: Center(child: CircularProgressIndicator(color: AppTheme.voltLime, strokeWidth: 1.5)),
+        ),
+        error: (err, st) => const SizedBox.shrink(),
+        data: (lb) {
+          if (_friendsFilter && lb.participants.isEmpty) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Column(children: [
+                Text('None of your friends have joined yet',
+                    style: AppTheme.label(12, color: AppTheme.ink2)),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () => context.push('/challenges/${widget.challengeId}/invite'),
+                  child: Text('Invite Friends →',
+                      style: AppTheme.label(12, color: AppTheme.voltLime)
+                          .copyWith(fontWeight: FontWeight.w700)),
+                ),
+              ]),
+            );
+          }
+          return _LiveLeaderboard(lb: lb);
+        },
+      ),
+    ]);
   }
 }
