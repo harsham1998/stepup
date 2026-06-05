@@ -9,9 +9,9 @@ final bodyVitalsSummaryProvider = FutureProvider<BodyVitalsSummary>((ref) async 
   return BodyVitalsSummary.fromJson(data);
 });
 
-// Full history for heatmap (last 42 days = 6 weeks)
+// Full history for month-calendar view (last 180 days = ~6 months)
 final bodyVitalsHistoryProvider = FutureProvider<List<BodyVitalsEntry>>((ref) async {
-  final data = await ApiClient.instance.get('/body-vitals/history', {'days': '42'}) as List<dynamic>;
+  final data = await ApiClient.instance.get('/body-vitals/history', {'days': '180'}) as List<dynamic>;
   return data
       .map((e) => BodyVitalsEntry.fromJson(e as Map<String, dynamic>))
       .toList();

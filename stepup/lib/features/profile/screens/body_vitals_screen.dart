@@ -69,28 +69,6 @@ class _BodyVitalsScreenState extends ConsumerState<BodyVitalsScreen> {
           ),
           const SizedBox(height: 14),
 
-          // ── Time range ──
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: _TimeSegment(),
-          ),
-          const SizedBox(height: 12),
-
-          // ── Swipe hint ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('← swipe', style: AppTheme.label(9, color: AppTheme.ink3)),
-                Text('Weight · BMI · Visceral · Muscle',
-                    style: AppTheme.label(8.5, color: AppTheme.ink3)),
-                Text('swipe →', style: AppTheme.label(9, color: AppTheme.ink3)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
-
           // ── PageView metric cards ──
           Expanded(
             child: PageView.builder(
@@ -235,8 +213,8 @@ class _MetricCard extends StatelessWidget {
   }
 }
 
-// ─── Heatmap ──────────────────────────────────────────────────────────────────
-class _VitalsHeatmap extends StatelessWidget {
+// ─── Heatmap (month calendar) ─────────────────────────────────────────────────
+class _VitalsHeatmap extends StatefulWidget {
   final _Metric metric;
   final List<BodyVitalsEntry> history;
   final Color accentColor;
@@ -247,7 +225,42 @@ class _VitalsHeatmap extends StatelessWidget {
     required this.accentColor, this.goalValue,
   });
 
-  double? _valueOf(BodyVitalsEntry e) => switch (metric) {
+  @override
+  State<_VitalsHeatmap> createState() => _VitalsHeatmapState();
+}
+
+class _VitalsHeatmapState extends State<_VitalsHeatmap> {
+  late int _year;
+  late int _month;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _year  = now.year;
+    _month = now.month;
+  }
+
+  void _prevMonth() => setState(() {
+    if (_month == 1) { _month = 12; _year--; }
+    else _month--;
+  });
+
+  void _nextMonth() {
+    final now = DateTime.now();
+    if (_year > now.year || (_year == now.year && _month >= now.month)) return;
+    setState(() {
+      if (_month == 12) { _month = 1; _year++; }
+      else _month++;
+    });
+  }
+
+  bool get _isCurrentMonth {
+    final now = DateTime.now();
+    return _year == now.year && _month == now.month;
+  }
+
+  double? _valueOf(BodyVitalsEntry e) => switch (widget.metric) {
     _Metric.weight   => e.weightKg,
     _Metric.bmi      => e.bmi,
     _Metric.visceral => e.visceralFatLevel?.toDouble(),
@@ -255,10 +268,9 @@ class _VitalsHeatmap extends StatelessWidget {
   };
 
   Color _cellColor(double value) {
-    final goal = goalValue;
-    if (goal == null) return accentColor.withValues(alpha: 0.7);
-    // For muscle: higher is better. For all others: lower is better when above goal.
-    final isHigherBetter = metric == _Metric.muscle;
+    final goal = widget.goalValue;
+    if (goal == null) return widget.accentColor.withValues(alpha: 0.7);
+    final isHigherBetter = widget.metric == _Metric.muscle;
     final diff = isHigherBetter ? goal - value : value - goal;
     if (diff <= 0)   return const Color(0xFFD4FF3A).withValues(alpha: 0.9);
     if (diff <= 1)   return const Color(0xFF34D399).withValues(alpha: 0.85);
@@ -268,50 +280,108 @@ class _VitalsHeatmap extends StatelessWidget {
     return const Color(0xFFEF4444).withValues(alpha: 0.75);
   }
 
+  static const _monthNames = [
+    '', 'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+
   @override
   Widget build(BuildContext context) {
     final dataMap = <String, double>{};
-    for (final e in history) {
+    for (final e in widget.history) {
       final v = _valueOf(e);
       if (v != null) dataMap[e.date] = v;
     }
 
-    // Build 6 × 7 = 42 cells aligned Mon–Sun
-    final today = DateTime.now();
-    final todayMidnight = DateTime(today.year, today.month, today.day);
-    final mondayOffset  = todayMidnight.weekday - 1;
-    final gridEnd       = todayMidnight.add(Duration(days: 6 - mondayOffset));
-    final gridStart     = gridEnd.subtract(const Duration(days: 41));
+    final now           = DateTime.now();
+    final todayMidnight = DateTime(now.year, now.month, now.day);
+    final todayStr      = '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-    final cells = List.generate(42, (i) => gridStart.add(Duration(days: i)));
-    final todayStr = todayMidnight.toIso8601String().substring(0, 10);
+    // First day of current view month (weekday: Mon=1 … Sun=7)
+    final firstOfMonth   = DateTime(_year, _month, 1);
+    final daysInMonth    = DateTime(_year, _month + 1, 0).day;
+    // Leading blank cells so day-1 lands in correct column
+    final leadingBlanks  = firstOfMonth.weekday - 1; // 0 for Monday
+    final totalCells     = leadingBlanks + daysInMonth;
+    // Round up to full rows of 7
+    final gridCells      = ((totalCells / 7).ceil()) * 7;
 
     return Column(children: [
-      // Day-of-week headers
+      // ── Month nav header ─────────────────────────────────────────
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Row(children: [
+          GestureDetector(
+            onTap: _prevMonth,
+            child: Container(
+              width: 28, height: 28,
+              decoration: BoxDecoration(
+                color: AppTheme.surface2,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: const Icon(Icons.chevron_left, color: Colors.white, size: 18),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: Text(
+                '${_monthNames[_month]} $_year',
+                style: AppTheme.label(13, color: Colors.white)
+                    .copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: _isCurrentMonth ? null : _nextMonth,
+            child: Container(
+              width: 28, height: 28,
+              decoration: BoxDecoration(
+                color: _isCurrentMonth ? AppTheme.surface2.withValues(alpha: 0.4) : AppTheme.surface2,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Icon(Icons.chevron_right,
+                  color: _isCurrentMonth ? AppTheme.ink3 : Colors.white, size: 18),
+            ),
+          ),
+        ]),
+      ),
+      const SizedBox(height: 8),
+
+      // ── Day-of-week headers ───────────────────────────────────────
       Row(
         children: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
             .map((d) => Expanded(
                   child: Center(
                     child: Text(d,
                         style: AppTheme.label(6.5, color: AppTheme.ink3)
-                            .copyWith(fontWeight: FontWeight.w600)),
+                            .copyWith(fontWeight: FontWeight.w600, letterSpacing: 0.3)),
                   ),
                 ))
             .toList(),
       ),
-      const SizedBox(height: 3),
+      const SizedBox(height: 4),
 
-      // Grid
+      // ── Calendar grid ─────────────────────────────────────────────
       Expanded(
         child: GridView.builder(
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 7, crossAxisSpacing: 3, mainAxisSpacing: 3,
           ),
-          itemCount: 42,
+          itemCount: gridCells,
           itemBuilder: (context, i) {
-            final date    = cells[i];
-            final dateStr = date.toIso8601String().substring(0, 10);
+            // Blank leading cells
+            if (i < leadingBlanks) return const SizedBox();
+
+            final dayNum = i - leadingBlanks + 1;
+            if (dayNum > daysInMonth) return const SizedBox();
+
+            final date    = DateTime(_year, _month, dayNum);
+            final mm      = _month.toString().padLeft(2, '0');
+            final dd      = dayNum.toString().padLeft(2, '0');
+            final dateStr = '$_year-$mm-$dd';
             final value   = dataMap[dateStr];
             final isToday  = dateStr == todayStr;
             final isFuture = date.isAfter(todayMidnight);
@@ -325,24 +395,41 @@ class _VitalsHeatmap extends StatelessWidget {
                         : AppTheme.surface2,
                 borderRadius: BorderRadius.circular(5),
                 border: isToday
-                    ? Border.all(color: AppTheme.voltLime, width: 1.5)
+                    ? Border.all(color: AppTheme.voltLime, width: 2)
                     : isFuture
                         ? null
                         : Border.all(color: AppTheme.border, width: 0.5),
               ),
-              child: value != null
-                  ? Center(
-                      child: Text(
-                        metric == _Metric.visceral
-                            ? value.toInt().toString()
-                            : value.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontSize: 5, fontWeight: FontWeight.w700,
-                          color: Color(0x99000000),
-                        ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '$dayNum',
+                    style: TextStyle(
+                      fontSize: 7,
+                      fontWeight: isToday ? FontWeight.w900 : FontWeight.w600,
+                      color: isFuture
+                          ? AppTheme.ink3
+                          : value != null
+                              ? const Color(0xCC000000)
+                              : isToday
+                                  ? AppTheme.voltLime
+                                  : AppTheme.ink2,
+                    ),
+                  ),
+                  if (value != null)
+                    Text(
+                      widget.metric == _Metric.visceral
+                          ? value.toInt().toString()
+                          : value.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontSize: 5.5,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0x99000000),
                       ),
-                    )
-                  : null,
+                    ),
+                ],
+              ),
             );
           },
         ),
@@ -363,7 +450,7 @@ class _HeatmapLegend extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
-      Text('Far', style: AppTheme.label(7, color: AppTheme.ink3)),
+      Text('Far from goal', style: AppTheme.label(7, color: AppTheme.ink3)),
       const SizedBox(width: 4),
       ..._swatches.map((c) => Container(
         width: 9, height: 9,
@@ -373,7 +460,7 @@ class _HeatmapLegend extends StatelessWidget {
           borderRadius: BorderRadius.circular(2),
         ),
       )),
-      Text('Goal', style: AppTheme.label(7, color: AppTheme.ink3)),
+      Text('At goal', style: AppTheme.label(7, color: AppTheme.ink3)),
     ],
   );
 }
