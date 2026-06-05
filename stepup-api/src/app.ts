@@ -27,6 +27,7 @@ import { levelsRouter } from './modules/steps/levels.router';
 import { reputationRouter } from './modules/reputation/reputation.router';
 import { seasonsRouter } from './modules/seasons/seasons.router';
 import { socialRouter } from './modules/social/social.router';
+import { bodyVitalsRouter } from './modules/body-vitals/body_vitals.router';
 
 export function createApp() {
   const app = express();
@@ -65,6 +66,7 @@ export function createApp() {
   app.use('/reputation', reputationRouter);
   app.use('/seasons', seasonsRouter);
   app.use('/social', socialRouter);
+  app.use('/body-vitals', bodyVitalsRouter);
 
   app.use(errorHandler);
   return app;
