@@ -157,6 +157,16 @@ export async function sendFriendRequest(senderId: string, receiverId: string): P
     .maybeSingle();
   if (existing) throw Object.assign(new Error('Already friends'), { statusCode: 409 });
 
+  // Also block if receiver already sent us a pending request
+  const { data: reverseReq } = await db
+    .from('friend_requests')
+    .select('id')
+    .eq('sender_id', receiverId)
+    .eq('receiver_id', senderId)
+    .eq('status', 'pending')
+    .maybeSingle();
+  if (reverseReq) throw Object.assign(new Error('This user already sent you a friend request'), { statusCode: 409 });
+
   const { data: existingReq } = await db
     .from('friend_requests')
     .select('id, status, created_at')
@@ -224,9 +234,10 @@ export async function checkUsernameAvailable(username: string, excludeUserId: st
 }
 
 export async function getFriendIds(userId: string): Promise<string[]> {
-  const { data } = await getSupabase()
+  const { data, error } = await getSupabase()
     .from('friendships')
     .select('friend_id')
     .eq('user_id', userId);
+  if (error) throw new Error(error.message);
   return (data ?? []).map((f: any) => f.friend_id as string);
 }

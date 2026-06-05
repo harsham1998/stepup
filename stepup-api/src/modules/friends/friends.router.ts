@@ -56,7 +56,9 @@ friendsRouter.get('/', async (req: Request, res: Response) => {
 friendsRouter.post('/requests', async (req: Request, res: Response) => {
   try {
     const { receiver_id } = req.body as { receiver_id?: string };
-    if (!receiver_id) return res.status(400).json({ error: 'receiver_id required' });
+    if (!receiver_id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(receiver_id)) {
+      return res.status(400).json({ error: 'receiver_id must be a valid UUID' });
+    }
     await sendFriendRequest(req.user!.id, receiver_id);
 
     const { data: sender } = await getSupabase()
