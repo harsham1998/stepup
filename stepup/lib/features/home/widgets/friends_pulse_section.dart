@@ -199,27 +199,6 @@ String _timeAgo(DateTime t) {
   return '${diff.inDays}d ago';
 }
 
-class _EmptyFeed extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 70,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.border),
-      ),
-      child: Center(
-        child: Text(
-          'Add friends to see their activity',
-          style: GoogleFonts.inter(fontSize: 12, color: AppTheme.ink2),
-        ),
-      ),
-    );
-  }
-}
-
 class _NoFriendsPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
