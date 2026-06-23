@@ -8,6 +8,36 @@ const XP_EXERCISE_BONUS = 25;
 const XP_WORKOUT_COMPLETE = 150;
 const XP_CARDIO_COMPLETE = 75;
 
+const BASE_IMG = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises';
+
+const EXERCISE_IMAGE_MAP: Record<string, string> = {
+  'Machine Chest Press':     'Cable_Chest_Press',
+  'Incline Dumbbell Press':  'Incline_Dumbbell_Press',
+  'Pec Deck Fly':            'Cable_Crossover',
+  'Rope Pushdown':           'Cable_Incline_Pushdown',
+  'Overhead Rope Extension': 'Cable_Rope_Overhead_Triceps_Extension',
+  'Lat Pulldown':            'Close-Grip_Front_Lat_Pulldown',
+  'Seated Cable Row':        'Seated_Cable_Rows',
+  'Chest Supported Row':     'Lying_T-Bar_Row',
+  'Face Pull':               'Face_Pull',
+  'Machine Curl':            'Machine_Preacher_Curls',
+  'Hammer Curl':             'Alternate_Hammer_Curl',
+  'Barbell Squat':           'Barbell_Squat',
+  'Romanian Deadlift':       'Romanian_Deadlift',
+  'Leg Press':               'Calf_Press_On_The_Leg_Press_Machine',
+  'Leg Extension':           'Leg_Extensions',
+  'Leg Curl':                'Lying_Leg_Curls',
+  'Standing Calf Raise':     'Rocking_Standing_Calf_Raise',
+  'Machine Shoulder Press':  'Arnold_Dumbbell_Press',
+  'Lateral Raise':           'Dumbbell_Lateral_Raise',
+  'Plank':                   'Plank',
+};
+
+function exerciseImageUrl(name: string): string | null {
+  const id = EXERCISE_IMAGE_MAP[name];
+  return id ? `${BASE_IMG}/${id}/0.jpg` : null;
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface PlanExercise {
@@ -18,6 +48,7 @@ export interface PlanExercise {
   reps_label: string;
   equipment: string;
   sort_order: number;
+  gif_url: string | null;
 }
 
 export interface WorkoutPlan {
@@ -130,6 +161,7 @@ export async function getWeekPlan(userId: string): Promise<WeekDay[]> {
         reps_label: e.reps_label,
         equipment: e.equipment,
         sort_order: e.sort_order,
+        gif_url: exerciseImageUrl(e.name),
       }));
 
     return {
@@ -206,6 +238,7 @@ export async function getOrCreateSession(userId: string, date: string): Promise<
       reps_label: e.reps_label,
       equipment: e.equipment,
       sort_order: e.sort_order,
+      gif_url: exerciseImageUrl(e.name),
     }));
 
   return {

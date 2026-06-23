@@ -478,22 +478,61 @@ class _ExerciseDetailSheetState extends State<ExerciseDetailSheet>
 
 // ── Muscle targeting card ─────────────────────────────────────────────────────
 
-class _MuscleCard extends StatelessWidget {
+class _MuscleCard extends StatefulWidget {
   final PlanExercise exercise;
   final Color muscleColor;
 
   const _MuscleCard({required this.exercise, required this.muscleColor});
 
   @override
+  State<_MuscleCard> createState() => _MuscleCardState();
+}
+
+class _MuscleCardState extends State<_MuscleCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animCtrl;
+  bool _showFrame1 = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.exercise.gifUrl != null) {
+      _animCtrl = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 700),
+      )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) {
+            setState(() => _showFrame1 = !_showFrame1);
+            Future.delayed(const Duration(milliseconds: 900), () {
+              if (mounted) _animCtrl.forward(from: 0);
+            });
+          }
+        });
+      Future.delayed(const Duration(milliseconds: 900), () {
+        if (mounted) _animCtrl.forward(from: 0);
+      });
+    } else {
+      _animCtrl = AnimationController(vsync: this);
+    }
+  }
+
+  @override
+  void dispose() {
+    _animCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final muscles = exercise.targetMuscles;
+    final muscles = widget.exercise.targetMuscles;
+    final gifUrl = widget.exercise.gifUrl;
     final bool isBackExercise = muscles.any(
       (m) => const {'lats', 'back', 'mid-back', 'upper-back', 'rear-delt',
                     'hamstrings', 'glutes'}.contains(m),
     );
 
     return Container(
-      height: 200,
+      height: 220,
       decoration: BoxDecoration(
         color: AppTheme.surface2,
         borderRadius: BorderRadius.circular(16),
@@ -501,15 +540,22 @@ class _MuscleCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(children: [
-        // Muscle diagram filling the card
+        // Content: real photo or anatomical diagram
         Positioned.fill(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-            child: MuscleDiagram(
-              primaryMuscles: muscles,
-              primaryColor: muscleColor,
-            ),
-          ),
+          child: gifUrl != null
+              ? _ExercisePhotoPlayer(
+                  frame0Url: gifUrl,
+                  frame1Url: gifUrl.replaceAll('/0.jpg', '/1.jpg'),
+                  showFrame1: _showFrame1,
+                  animCtrl: _animCtrl,
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: MuscleDiagram(
+                    primaryMuscles: muscles,
+                    primaryColor: widget.muscleColor,
+                  ),
+                ),
         ),
 
         // Label badge
@@ -518,11 +564,13 @@ class _MuscleCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.60),
+              color: Colors.black.withOpacity(0.65),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              isBackExercise ? 'MUSCLES · FRONT & BACK' : 'MUSCLE TARGET',
+              gifUrl != null
+                  ? 'EXERCISE DEMO'
+                  : (isBackExercise ? 'MUSCLES · FRONT & BACK' : 'MUSCLE TARGET'),
               style: AppTheme.label(9, color: Colors.white70),
             ),
           ),
@@ -533,8 +581,10 @@ class _MuscleCard extends StatelessWidget {
           bottom: 10, right: 10,
           child: GestureDetector(
             onTap: () {
-              final query = Uri.encodeComponent('${exercise.name} exercise form tutorial');
-              final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
+              final query = Uri.encodeComponent(
+                  '${widget.exercise.name} exercise form tutorial');
+              final url = Uri.parse(
+                  'https://www.youtube.com/results?search_query=$query');
               launchUrl(url, mode: LaunchMode.externalApplication);
             },
             child: Container(
@@ -544,7 +594,8 @@ class _MuscleCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.play_circle_filled_rounded, color: Colors.white, size: 16),
+                const Icon(Icons.play_circle_filled_rounded,
+                    color: Colors.white, size: 16),
                 const SizedBox(width: 4),
                 Text('Watch Form', style: AppTheme.label(11, color: Colors.white)),
               ]),
@@ -552,6 +603,50 @@ class _MuscleCard extends StatelessWidget {
           ),
         ),
       ]),
+    );
+  }
+}
+
+class _ExercisePhotoPlayer extends StatelessWidget {
+  final String frame0Url;
+  final String frame1Url;
+  final bool showFrame1;
+  final AnimationController animCtrl;
+
+  const _ExercisePhotoPlayer({
+    required this.frame0Url,
+    required this.frame1Url,
+    required this.showFrame1,
+    required this.animCtrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final activeUrl = showFrame1 ? frame1Url : frame0Url;
+    final inactiveUrl = showFrame1 ? frame0Url : frame1Url;
+
+    return AnimatedBuilder(
+      animation: animCtrl,
+      builder: (_, _child) => Stack(
+        fit: StackFit.expand,
+        children: [
+          // Base frame (always visible)
+          Image.network(
+            inactiveUrl,
+            fit: BoxFit.contain,
+            errorBuilder: (_, _err, _stack) => const SizedBox(),
+          ),
+          // Fading-in active frame
+          Opacity(
+            opacity: animCtrl.value,
+            child: Image.network(
+              activeUrl,
+              fit: BoxFit.contain,
+              errorBuilder: (_, _err, _stack) => const SizedBox(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -8,6 +8,7 @@ class PlanExercise {
   final String repsLabel;
   final String equipment;
   final int sortOrder;
+  final String? gifUrl;
 
   const PlanExercise({
     required this.id,
@@ -17,6 +18,7 @@ class PlanExercise {
     required this.repsLabel,
     required this.equipment,
     required this.sortOrder,
+    this.gifUrl,
   });
 
   factory PlanExercise.fromJson(Map<String, dynamic> j) => PlanExercise(
@@ -27,6 +29,7 @@ class PlanExercise {
         repsLabel: j['reps_label'] as String,
         equipment: j['equipment'] as String? ?? 'machine',
         sortOrder: (j['sort_order'] as num? ?? 0).toInt(),
+        gifUrl: j['gif_url'] as String?,
       );
 }
 
