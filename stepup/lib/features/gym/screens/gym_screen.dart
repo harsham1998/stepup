@@ -164,6 +164,17 @@ class _TodayWorkoutCard extends StatelessWidget {
   final WeekDay day;
   const _TodayWorkoutCard({required this.day});
 
+  // Unsplash CDN photos per plan slug — 800px wide, compressed
+  static const _bgImages = <String, String>{
+    'push_a':  'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80',
+    'pull_a':  'https://images.unsplash.com/photo-1603287681836-b174ce5074c2?w=800&q=80',
+    'legs':    'https://images.unsplash.com/photo-1434682881908-b43d0467b798?w=800&q=80',
+    'push_b':  'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=800&q=80',
+    'pull_b':  'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=800&q=80',
+    'cardio':  'https://images.unsplash.com/photo-1538805060514-97d9cc17730c?w=800&q=80',
+    'rest':    'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80',
+  };
+
   Color get _accentColor {
     final groups = day.plan?.muscleGroups ?? [];
     if (groups.contains('chest')) return AppTheme.blue;
@@ -177,109 +188,174 @@ class _TodayWorkoutCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final plan = day.plan;
     final isRest = plan?.isRest ?? true;
+    final bgUrl = plan != null ? _bgImages[plan.slug] : _bgImages['rest'];
 
     return GestureDetector(
       onTap: isRest ? null : () => context.push('/gym/session/${day.sessionDate}'),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppTheme.surface2,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: _accentColor.withOpacity(0.3)),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppTheme.surface2, _accentColor.withOpacity(0.06)],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          height: 220,
+          decoration: BoxDecoration(
+            color: AppTheme.surface2,
+            borderRadius: BorderRadius.circular(20),
           ),
-        ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Stack(fit: StackFit.expand, children: [
+
+            // Background photo
+            if (bgUrl != null)
+              Image.network(
+                bgUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(color: AppTheme.surface2),
+              ),
+
+            // Dark gradient overlay — heavier at bottom for text legibility
+            DecoratedBox(
               decoration: BoxDecoration(
-                color: _accentColor.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(6),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.15),
+                    Colors.black.withOpacity(0.55),
+                    Colors.black.withOpacity(0.85),
+                  ],
+                  stops: const [0.0, 0.5, 1.0],
+                ),
               ),
-              child: Text('TODAY', style: AppTheme.label(10, color: _accentColor)),
             ),
-            const Spacer(),
-            if (day.isCompleted)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+
+            // Accent color tint on the top-left
+            Positioned(
+              top: 0, left: 0, right: 0, bottom: 0,
+              child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppTheme.voltLime.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      _accentColor.withOpacity(0.18),
+                      Colors.transparent,
+                    ],
+                  ),
                 ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.check_circle_rounded, color: AppTheme.voltLime, size: 12),
-                  const SizedBox(width: 4),
-                  Text('+${day.xpAwarded} XP', style: AppTheme.label(11, color: AppTheme.voltLime)),
-                ]),
               ),
+            ),
+
+            // Content
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Top row — TODAY tag + completed badge
+                  Row(children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.white.withOpacity(0.25)),
+                      ),
+                      child: Text('TODAY', style: AppTheme.label(10, color: Colors.white)),
+                    ),
+                    const Spacer(),
+                    if (day.isCompleted)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppTheme.voltLime.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: AppTheme.voltLime.withOpacity(0.5)),
+                        ),
+                        child: Row(mainAxisSize: MainAxisSize.min, children: [
+                          const Icon(Icons.check_circle_rounded, color: AppTheme.voltLime, size: 12),
+                          const SizedBox(width: 4),
+                          Text('+${day.xpAwarded} XP', style: AppTheme.label(11, color: AppTheme.voltLime)),
+                        ]),
+                      ),
+                  ]),
+
+                  // Bottom section — name, tags, actions
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(
+                      isRest ? 'Rest & Recovery' : plan!.name,
+                      style: const TextStyle(
+                        fontFamily: 'BigShouldersDisplay',
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                        shadows: [Shadow(blurRadius: 12, color: Colors.black54)],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    if (!isRest && plan != null) ...[
+                      Wrap(spacing: 6, runSpacing: 6, children: [
+                        ...plan.muscleGroups.map((g) => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.white.withOpacity(0.25)),
+                          ),
+                          child: Text(g, style: AppTheme.label(11, color: Colors.white)),
+                        )),
+                      ]),
+                      const SizedBox(height: 14),
+                      Row(children: [
+                        _InfoChipLight(icon: Icons.fitness_center_rounded, label: '${plan.exercises.length} exercises'),
+                        const SizedBox(width: 10),
+                        const _InfoChipLight(icon: Icons.bolt_rounded, label: '150+ XP'),
+                        const Spacer(),
+                        if (!day.isCompleted)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: AppTheme.voltLime,
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [BoxShadow(color: AppTheme.voltLime.withOpacity(0.4), blurRadius: 12, spreadRadius: -2)],
+                            ),
+                            child: Text('START', style: AppTheme.bigNum(13, color: Colors.black)),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(color: Colors.white.withOpacity(0.3)),
+                            ),
+                            child: Text('VIEW', style: AppTheme.bigNum(13, color: Colors.white)),
+                          ),
+                      ]),
+                    ] else ...[
+                      Text('Recovery is where the gains happen.',
+                        style: AppTheme.label(13, color: Colors.white.withOpacity(0.7))),
+                    ],
+                  ]),
+                ],
+              ),
+            ),
           ]),
-          const SizedBox(height: 12),
-          Text(
-            isRest ? 'Rest Day 😴' : plan!.name,
-            style: AppTheme.bigNum(26),
-          ),
-          const SizedBox(height: 6),
-          if (!isRest && plan != null) ...[
-            Wrap(spacing: 6, runSpacing: 6, children: [
-              ...plan.muscleGroups.map((g) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-                decoration: BoxDecoration(
-                  color: _accentColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: _accentColor.withOpacity(0.25)),
-                ),
-                child: Text(g, style: AppTheme.label(11, color: _accentColor)),
-              )),
-            ]),
-            const SizedBox(height: 16),
-            Row(children: [
-              _InfoChip(icon: Icons.fitness_center_rounded, label: '${plan.exercises.length} exercises'),
-              const SizedBox(width: 10),
-              const _InfoChip(icon: Icons.bolt_rounded, label: '150+ XP'),
-              const Spacer(),
-              if (!day.isCompleted)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: AppTheme.voltLime,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Text('START', style: AppTheme.bigNum(13, color: Colors.black)),
-                )
-              else
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surface3,
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: AppTheme.border),
-                  ),
-                  child: Text('VIEW', style: AppTheme.bigNum(13, color: AppTheme.ink2)),
-                ),
-            ]),
-          ] else ...[
-            Text('Recovery is where the gains happen.', style: AppTheme.label(13, color: AppTheme.ink2)),
-          ],
-        ]),
+        ),
       ),
     );
   }
 }
 
-class _InfoChip extends StatelessWidget {
+class _InfoChipLight extends StatelessWidget {
   final IconData icon;
   final String label;
-  const _InfoChip({required this.icon, required this.label});
+  const _InfoChipLight({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
-    Icon(icon, color: AppTheme.ink2, size: 13),
+    Icon(icon, color: Colors.white70, size: 13),
     const SizedBox(width: 4),
-    Text(label, style: AppTheme.label(12, color: AppTheme.ink2)),
+    Text(label, style: AppTheme.label(12, color: Colors.white70)),
   ]);
 }
 

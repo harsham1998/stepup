@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme.dart';
 import '../models/gym_plan.dart';
 import '../models/gym_session.dart';
+import 'exercise_detail_sheet.dart';
 import 'log_set_sheet.dart';
 
 class ExerciseSessionCard extends StatelessWidget {
@@ -53,7 +54,7 @@ class ExerciseSessionCard extends StatelessWidget {
         // Header
         Padding(
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
-          child: Row(children: [
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(children: [
                 Expanded(child: Text(exercise.name, style: AppTheme.bigNum(15))),
@@ -84,6 +85,24 @@ class ExerciseSessionCard extends StatelessWidget {
                 )),
               ]),
             ])),
+            const SizedBox(width: 8),
+            // View demo button
+            GestureDetector(
+              onTap: () => ExerciseDetailSheet.show(context, exercise),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface3,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.play_circle_outline_rounded, color: AppTheme.ink2, size: 14),
+                  const SizedBox(width: 4),
+                  Text('View', style: AppTheme.label(11, color: AppTheme.ink2)),
+                ]),
+              ),
+            ),
           ]),
         ),
 
