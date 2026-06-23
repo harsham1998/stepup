@@ -30,14 +30,34 @@ class GymScreen extends ConsumerWidget {
                   Text('GYM', style: AppTheme.bigNum(30)),
                   Text('Weekly Training Plan', style: AppTheme.label(13, color: AppTheme.ink2)),
                 ]),
-                weekAsync.maybeWhen(
-                  data: (week) {
-                    final totalXp = week.fold(0, (s, d) => s + d.xpAwarded);
-                    final daysCompleted = week.where((d) => d.isCompleted).length;
-                    return _WeekXpBadge(xp: totalXp, days: daysCompleted);
-                  },
-                  orElse: () => const SizedBox.shrink(),
-                ),
+                Row(children: [
+                  // Analytics button
+                  GestureDetector(
+                    onTap: () => context.push('/gym/analytics'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surface2,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.border),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        const Icon(Icons.bar_chart_rounded, color: AppTheme.ink2, size: 16),
+                        const SizedBox(width: 5),
+                        Text('Stats', style: AppTheme.label(12, color: AppTheme.ink2)),
+                      ]),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  weekAsync.maybeWhen(
+                    data: (week) {
+                      final totalXp = week.fold(0, (s, d) => s + d.xpAwarded);
+                      final daysCompleted = week.where((d) => d.isCompleted).length;
+                      return _WeekXpBadge(xp: totalXp, days: daysCompleted);
+                    },
+                    orElse: () => const SizedBox.shrink(),
+                  ),
+                ]),
               ]),
               const SizedBox(height: 20),
 

@@ -7,6 +7,8 @@ import {
   deleteSet,
   completeSession,
   getExerciseHistory,
+  getGymStats,
+  getSessionHistory,
 } from './gym.service';
 
 export const gymRouter = Router();
@@ -69,6 +71,25 @@ gymRouter.post('/session/:sessionId/complete', async (req: Request, res: Respons
     res.json(result);
   } catch (err: unknown) {
     res.status(400).json({ error: err instanceof Error ? err.message : 'Internal error' });
+  }
+});
+
+// GET /gym/stats
+gymRouter.get('/stats', async (req: Request, res: Response) => {
+  try {
+    res.json(await getGymStats(req.user!.id));
+  } catch (err: unknown) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
+  }
+});
+
+// GET /gym/history?weeks=8
+gymRouter.get('/history', async (req: Request, res: Response) => {
+  try {
+    const weeks = Math.min(parseInt((req.query['weeks'] as string) ?? '8', 10), 52);
+    res.json(await getSessionHistory(req.user!.id, isNaN(weeks) ? 8 : weeks));
+  } catch (err: unknown) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
   }
 });
 

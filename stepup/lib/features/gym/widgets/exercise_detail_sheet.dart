@@ -1,9 +1,9 @@
 // stepup/lib/features/gym/widgets/exercise_detail_sheet.dart
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme.dart';
 import '../models/gym_plan.dart';
+import 'workout_animation.dart';
 
 // ── Exercise metadata ─────────────────────────────────────────────────────────
 
@@ -216,25 +216,7 @@ const _exerciseMeta = <String, _ExerciseMeta>{
   ),
 };
 
-// ── Lottie animation URLs per exercise category ───────────────────────────────
-
-String _lottieUrlForExercise(PlanExercise exercise) {
-  final muscles = exercise.targetMuscles;
-  if (muscles.any((m) => ['chest', 'upper-chest', 'front-delt'].contains(m))) {
-    return 'https://assets9.lottiefiles.com/packages/lf20_qn1e9aly.json';
-  }
-  if (muscles.any((m) => ['lats', 'back', 'mid-back', 'upper-back'].contains(m))) {
-    return 'https://assets5.lottiefiles.com/packages/lf20_ber7vkdd.json';
-  }
-  if (muscles.any((m) => ['quads', 'hamstrings', 'glutes'].contains(m))) {
-    return 'https://assets2.lottiefiles.com/packages/lf20_njFCTR.json';
-  }
-  if (['cardio'].contains(exercise.equipment)) {
-    return 'https://assets6.lottiefiles.com/packages/lf20_YXD37q.json';
-  }
-  // Default: general fitness
-  return 'https://assets9.lottiefiles.com/packages/lf20_qn1e9aly.json';
-}
+// ── YouTube search helper ─────────────────────────────────────────────────────
 
 // ── YouTube search helper ─────────────────────────────────────────────────────
 
@@ -315,7 +297,7 @@ class _ExerciseDetailSheetState extends State<ExerciseDetailSheet>
     final meta = _exerciseMeta[widget.exercise.name];
     final steps = meta?.steps ?? ['Perform the exercise with controlled form and full range of motion.'];
     final tip = meta?.tip;
-    final lottieUrl = _lottieUrlForExercise(widget.exercise);
+    final category = WorkoutAnimationWidget.categoryFor(widget.exercise);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.88,
@@ -368,7 +350,7 @@ class _ExerciseDetailSheetState extends State<ExerciseDetailSheet>
               ]),
               const SizedBox(height: 20),
 
-              // Lottie animation box
+              // In-app animated exercise demo + YouTube button
               Container(
                 height: 200,
                 decoration: BoxDecoration(
@@ -378,14 +360,31 @@ class _ExerciseDetailSheetState extends State<ExerciseDetailSheet>
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: Stack(fit: StackFit.expand, children: [
-                  // Lottie animation
-                  Lottie.network(
-                    lottieUrl,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Center(
-                      child: Icon(Icons.fitness_center_rounded, color: AppTheme.ink3, size: 48)),
+                  // Custom workout animation
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: WorkoutAnimationWidget(
+                      category: category,
+                      accentColor: _muscleColor(
+                        widget.exercise.targetMuscles.isNotEmpty
+                          ? widget.exercise.targetMuscles.first
+                          : 'chest',
+                      ),
+                    ),
                   ),
-                  // YouTube button overlay
+                  // Label
+                  Positioned(
+                    top: 10, left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.55),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text('LIVE DEMO', style: AppTheme.label(9, color: Colors.white70)),
+                    ),
+                  ),
+                  // YouTube button — kept as requested
                   Positioned(
                     bottom: 10, right: 10,
                     child: GestureDetector(
@@ -393,13 +392,13 @@ class _ExerciseDetailSheetState extends State<ExerciseDetailSheet>
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF0000),
+                          color: const Color(0xFFCC0000),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(mainAxisSize: MainAxisSize.min, children: [
                           const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 16),
                           const SizedBox(width: 4),
-                          Text('Watch', style: AppTheme.label(11, color: Colors.white)),
+                          Text('YouTube', style: AppTheme.label(11, color: Colors.white)),
                         ]),
                       ),
                     ),

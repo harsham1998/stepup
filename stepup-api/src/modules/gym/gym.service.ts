@@ -379,6 +379,72 @@ export async function completeSession(
   return { xp_awarded: xp };
 }
 
+// ── Analytics ─────────────────────────────────────────────────────────────────
+
+export async function getGymStats(userId: string) {
+  const db = getSupabase();
+
+  const { data: sessions } = await db
+    .from('gym_sessions')
+    .select('id, session_date, xp_awarded')
+    .eq('user_id', userId)
+    .not('completed_at', 'is', null)
+    .order('session_date', { ascending: false });
+
+  if (!sessions || sessions.length === 0) {
+    return { totalSessions: 0, totalVolumeKg: 0, totalXp: 0, streak: 0 };
+  }
+
+  const sessionIds = sessions.map((s: any) => s.id);
+  const { data: sets } = await db
+    .from('gym_set_logs')
+    .select('weight_kg, reps')
+    .in('session_id', sessionIds);
+
+  const totalVolumeKg = Math.round(
+    (sets ?? []).reduce((sum: number, s: any) => sum + (s.weight_kg ?? 0) * (s.reps ?? 0), 0)
+  );
+  const totalXp = sessions.reduce((sum: number, s: any) => sum + (s.xp_awarded ?? 0), 0);
+
+  // Consecutive-day streak ending today or yesterday
+  const today = isoDate(new Date());
+  const sortedDates = [...new Set(sessions.map((s: any) => s.session_date as string))].sort().reverse();
+  let streak = 0;
+  let expected = today;
+  for (const d of sortedDates) {
+    if (d === expected) {
+      streak++;
+      const prev = new Date(expected + 'T12:00:00Z');
+      prev.setDate(prev.getDate() - 1);
+      expected = isoDate(prev);
+    } else break;
+  }
+
+  return { totalSessions: sessions.length, totalVolumeKg, totalXp, streak };
+}
+
+export async function getSessionHistory(userId: string, weeks: number = 8) {
+  const db = getSupabase();
+  const from = new Date();
+  from.setDate(from.getDate() - weeks * 7);
+  const fromStr = isoDate(from);
+
+  const { data } = await db
+    .from('gym_sessions')
+    .select('session_date, xp_awarded, completed_at, gym_workout_plans(name, slug)')
+    .eq('user_id', userId)
+    .gte('session_date', fromStr)
+    .order('session_date', { ascending: true });
+
+  return (data ?? []).map((s: any) => ({
+    date: s.session_date,
+    xp: s.xp_awarded ?? 0,
+    completed: s.completed_at !== null,
+    planName: s.gym_workout_plans?.name ?? '',
+    planSlug: s.gym_workout_plans?.slug ?? '',
+  }));
+}
+
 export async function getExerciseHistory(
   userId: string,
   exerciseId: string,
