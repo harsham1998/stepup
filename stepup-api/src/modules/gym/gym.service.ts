@@ -259,6 +259,15 @@ export async function logSet(
   if (!sess) throw new Error('Session not found');
   if (sess.completed_at) throw new Error('Session already completed');
 
+  // Check if set already exists (to gate XP award)
+  const { data: existingSet } = await db
+    .from('gym_set_logs')
+    .select('id')
+    .eq('session_id', sessionId)
+    .eq('exercise_id', exerciseId)
+    .eq('set_number', setNumber)
+    .maybeSingle();
+
   // Upsert the set log
   const { data: log, error: logErr } = await db
     .from('gym_set_logs')
@@ -279,25 +288,27 @@ export async function logSet(
 
   if (logErr) throw logErr;
 
-  // Award XP for this set
-  await awardXp(userId, XP_PER_SET);
+  if (!existingSet) {
+    // Award XP for this set
+    await awardXp(userId, XP_PER_SET);
 
-  // Check if all sets for this exercise are now logged → award exercise bonus
-  const { data: exercise } = await db
-    .from('gym_plan_exercises')
-    .select('sets')
-    .eq('id', exerciseId)
-    .single();
+    // Check if all sets for this exercise are now logged → award exercise bonus
+    const { data: exercise } = await db
+      .from('gym_plan_exercises')
+      .select('sets')
+      .eq('id', exerciseId)
+      .single();
 
-  if (exercise) {
-    const { count } = await db
-      .from('gym_set_logs')
-      .select('*', { count: 'exact', head: true })
-      .eq('session_id', sessionId)
-      .eq('exercise_id', exerciseId);
+    if (exercise) {
+      const { count } = await db
+        .from('gym_set_logs')
+        .select('*', { count: 'exact', head: true })
+        .eq('session_id', sessionId)
+        .eq('exercise_id', exerciseId);
 
-    if ((count ?? 0) >= exercise.sets) {
-      await awardXp(userId, XP_EXERCISE_BONUS);
+      if ((count ?? 0) >= exercise.sets) {
+        await awardXp(userId, XP_EXERCISE_BONUS);
+      }
     }
   }
 
@@ -377,7 +388,7 @@ export async function getExerciseHistory(
   const { data } = await db
     .from('gym_set_logs')
     .select('set_number, weight_kg, reps, gym_sessions!inner(session_date, user_id)')
-    .eq('gym_sessions.user_id', userId)
+    .filter('gym_sessions.user_id', 'eq', userId)
     .eq('exercise_id', exerciseId)
     .order('logged_at', { ascending: false })
     .limit(60);
