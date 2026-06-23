@@ -51,13 +51,11 @@ gymRouter.post('/session/:sessionId/sets', async (req: Request, res: Response) =
   }
 });
 
-// DELETE /gym/session/:sessionId/sets
-// body: { exercise_id, set_number }
-gymRouter.delete('/session/:sessionId/sets', async (req: Request, res: Response) => {
+// DELETE /gym/session/:sessionId/sets/:exerciseId/:setNumber
+gymRouter.delete('/session/:sessionId/sets/:exerciseId/:setNumber', async (req: Request, res: Response) => {
   try {
-    const sessionId = req.params['sessionId'] as string;
-    const { exercise_id, set_number } = req.body as { exercise_id: string; set_number: number };
-    await deleteSet(req.user!.id, sessionId, exercise_id, set_number);
+    const { sessionId, exerciseId, setNumber } = req.params as { sessionId: string; exerciseId: string; setNumber: string };
+    await deleteSet(req.user!.id, sessionId, exerciseId, parseInt(setNumber, 10));
     res.json({ ok: true });
   } catch (err: unknown) {
     res.status(400).json({ error: err instanceof Error ? err.message : 'Internal error' });

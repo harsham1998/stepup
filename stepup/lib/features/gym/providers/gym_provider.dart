@@ -80,11 +80,30 @@ class GymSessionNotifier extends AsyncNotifier<GymSession?> {
     final session = state.value;
     if (session == null) return;
 
-    await ApiClient.instance.delete(
-      '/gym/session/${session.id}/sets/$exerciseId/$setNumber',
+    // Optimistically remove from local state
+    final updated = GymSession(
+      id: session.id,
+      planId: session.planId,
+      plan: session.plan,
+      sessionDate: session.sessionDate,
+      startedAt: session.startedAt,
+      completedAt: session.completedAt,
+      xpAwarded: session.xpAwarded,
+      setLogs: session.setLogs
+          .where((l) => !(l.exerciseId == exerciseId && l.setNumber == setNumber))
+          .toList(),
     );
-    // Re-fetch to sync server state
-    await init(_date);
+    state = AsyncData(updated);
+
+    try {
+      await ApiClient.instance.delete(
+        '/gym/session/${session.id}/sets/$exerciseId/$setNumber',
+      );
+      ref.invalidate(gymWeekProvider);
+    } catch (_) {
+      // Rollback on error
+      await init(_date);
+    }
   }
 
   Future<int> completeSession() async {
