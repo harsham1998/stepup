@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme.dart';
 import '../models/gym_plan.dart';
-import 'workout_animation.dart';
+import 'muscle_diagram.dart';
 
 // ── Exercise metadata ─────────────────────────────────────────────────────────
 
@@ -216,17 +216,6 @@ const _exerciseMeta = <String, _ExerciseMeta>{
   ),
 };
 
-// ── YouTube search helper ─────────────────────────────────────────────────────
-
-// ── YouTube search helper ─────────────────────────────────────────────────────
-
-Future<void> _openYouTube(String exerciseName) async {
-  final query = Uri.encodeComponent('$exerciseName exercise form tutorial');
-  final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
-  if (await canLaunchUrl(url)) {
-    await launchUrl(url, mode: LaunchMode.externalApplication);
-  }
-}
 
 // ── Main Sheet ────────────────────────────────────────────────────────────────
 
@@ -283,12 +272,12 @@ class _ExerciseDetailSheetState extends State<ExerciseDetailSheet>
   }
 
   Color _muscleColor(String muscle) {
-    if (['chest', 'upper-chest'].contains(muscle)) return AppTheme.blue;
-    if (['lats', 'back', 'mid-back', 'upper-back', 'rear-delt'].contains(muscle)) return AppTheme.green;
-    if (['quads', 'hamstrings', 'glutes', 'calves'].contains(muscle)) return AppTheme.amber;
-    if (['shoulders', 'side-delt', 'front-delt'].contains(muscle)) return AppTheme.purple;
-    if (['biceps', 'brachialis', 'triceps', 'long-head-triceps'].contains(muscle)) return AppTheme.pink;
-    if (['core', 'abs'].contains(muscle)) return AppTheme.voltLime;
+    if ({'chest', 'upper-chest', 'lower-chest'}.contains(muscle)) return AppTheme.blue;
+    if ({'lats', 'back', 'mid-back', 'upper-back', 'rear-delt'}.contains(muscle)) return AppTheme.green;
+    if ({'quads', 'hamstrings', 'glutes', 'calves'}.contains(muscle)) return AppTheme.amber;
+    if ({'shoulders', 'side-delt', 'front-delt'}.contains(muscle)) return AppTheme.purple;
+    if ({'biceps', 'brachialis', 'triceps', 'long-head-triceps'}.contains(muscle)) return AppTheme.pink;
+    if ({'core', 'abs'}.contains(muscle)) return AppTheme.voltLime;
     return AppTheme.ink2;
   }
 
@@ -297,7 +286,6 @@ class _ExerciseDetailSheetState extends State<ExerciseDetailSheet>
     final meta = _exerciseMeta[widget.exercise.name];
     final steps = meta?.steps ?? ['Perform the exercise with controlled form and full range of motion.'];
     final tip = meta?.tip;
-    final category = WorkoutAnimationWidget.categoryFor(widget.exercise);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.88,
@@ -350,60 +338,14 @@ class _ExerciseDetailSheetState extends State<ExerciseDetailSheet>
               ]),
               const SizedBox(height: 20),
 
-              // In-app animated exercise demo + YouTube button
-              Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  color: AppTheme.surface2,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.border),
+              // Muscle targeting diagram + YouTube button
+              _MuscleCard(
+                exercise: widget.exercise,
+                muscleColor: _muscleColor(
+                  widget.exercise.targetMuscles.isNotEmpty
+                      ? widget.exercise.targetMuscles.first
+                      : 'chest',
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(fit: StackFit.expand, children: [
-                  // Custom workout animation
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: WorkoutAnimationWidget(
-                      category: category,
-                      accentColor: _muscleColor(
-                        widget.exercise.targetMuscles.isNotEmpty
-                          ? widget.exercise.targetMuscles.first
-                          : 'chest',
-                      ),
-                    ),
-                  ),
-                  // Label
-                  Positioned(
-                    top: 10, left: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.55),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text('LIVE DEMO', style: AppTheme.label(9, color: Colors.white70)),
-                    ),
-                  ),
-                  // YouTube button — kept as requested
-                  Positioned(
-                    bottom: 10, right: 10,
-                    child: GestureDetector(
-                      onTap: () => _openYouTube(widget.exercise.name),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFCC0000),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 16),
-                          const SizedBox(width: 4),
-                          Text('YouTube', style: AppTheme.label(11, color: Colors.white)),
-                        ]),
-                      ),
-                    ),
-                  ),
-                ]),
               ),
               const SizedBox(height: 20),
 
@@ -530,6 +472,86 @@ class _ExerciseDetailSheetState extends State<ExerciseDetailSheet>
           ),
         ]),
       ),
+    );
+  }
+}
+
+// ── Muscle targeting card ─────────────────────────────────────────────────────
+
+class _MuscleCard extends StatelessWidget {
+  final PlanExercise exercise;
+  final Color muscleColor;
+
+  const _MuscleCard({required this.exercise, required this.muscleColor});
+
+  @override
+  Widget build(BuildContext context) {
+    final muscles = exercise.targetMuscles;
+    final bool isBackExercise = muscles.any(
+      (m) => const {'lats', 'back', 'mid-back', 'upper-back', 'rear-delt',
+                    'hamstrings', 'glutes'}.contains(m),
+    );
+
+    return Container(
+      height: 200,
+      decoration: BoxDecoration(
+        color: AppTheme.surface2,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(children: [
+        // Muscle diagram filling the card
+        Positioned.fill(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+            child: MuscleDiagram(
+              primaryMuscles: muscles,
+              primaryColor: muscleColor,
+            ),
+          ),
+        ),
+
+        // Label badge
+        Positioned(
+          top: 10, left: 12,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.60),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              isBackExercise ? 'MUSCLES · FRONT & BACK' : 'MUSCLE TARGET',
+              style: AppTheme.label(9, color: Colors.white70),
+            ),
+          ),
+        ),
+
+        // YouTube button
+        Positioned(
+          bottom: 10, right: 10,
+          child: GestureDetector(
+            onTap: () {
+              final query = Uri.encodeComponent('${exercise.name} exercise form tutorial');
+              final url = Uri.parse('https://www.youtube.com/results?search_query=$query');
+              launchUrl(url, mode: LaunchMode.externalApplication);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFCC0000),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.play_circle_filled_rounded, color: Colors.white, size: 16),
+                const SizedBox(width: 4),
+                Text('Watch Form', style: AppTheme.label(11, color: Colors.white)),
+              ]),
+            ),
+          ),
+        ),
+      ]),
     );
   }
 }
