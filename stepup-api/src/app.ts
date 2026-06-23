@@ -29,6 +29,7 @@ import { seasonsRouter } from './modules/seasons/seasons.router';
 import { socialRouter } from './modules/social/social.router';
 import { friendsRouter } from './modules/friends/friends.router';
 import { bodyVitalsRouter } from './modules/body-vitals/body_vitals.router';
+import { gymRouter } from './modules/gym/gym.router';
 
 export function createApp() {
   const app = express();
@@ -69,6 +70,7 @@ export function createApp() {
   app.use('/social', socialRouter);
   app.use('/friends', friendsRouter);
   app.use('/body-vitals', bodyVitalsRouter);
+  app.use('/gym', gymRouter);
 
   app.use(errorHandler);
   return app;
