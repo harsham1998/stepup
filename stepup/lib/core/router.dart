@@ -42,6 +42,8 @@ import '../features/seasons/screens/season_rewards_screen.dart';
 import '../features/water/screens/water_screen.dart';
 import '../features/profile/screens/body_vitals_screen.dart';
 import '../features/friends/screens/friends_hub_screen.dart';
+import '../features/gym/screens/gym_screen.dart';
+import '../features/gym/screens/workout_session_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -119,6 +121,11 @@ final router = GoRouter(
         GoRoute(path: '/activities/log', builder: (_, s) => LogSessionScreen(initialType: s.uri.queryParameters['type'])),
         GoRoute(path: '/notifications',  builder: (_, __) => const NotificationsScreen()),
         GoRoute(path: '/season-rewards', builder: (_, __) => const SeasonRewardsScreen()),
+        GoRoute(path: '/gym', builder: (_, __) => const GymScreen()),
+        GoRoute(
+          path: '/gym/session/:date',
+          builder: (_, s) => WorkoutSessionScreen(date: s.pathParameters['date']!),
+        ),
       ],
     ),
   ],

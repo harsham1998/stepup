@@ -8,12 +8,12 @@ class HomeShortcuts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shortcuts = [
-      _ShortcutDef(Icons.emoji_events_outlined,   'Join',      '/challenges'),
-      _ShortcutDef(Icons.sports_kabaddi_rounded,  'Rival',     '/rivals'),
-      _ShortcutDef(Icons.monetization_on_outlined,'Redeem',    '/coins/rewards'),
-      _ShortcutDef(Icons.group_outlined,          'Friends',   '/leaderboard/friends'),
-      _ShortcutDef(Icons.workspace_premium_rounded,'League',   '/leaderboard/league'),
-      _ShortcutDef(Icons.track_changes_rounded,   'Missions',  '/missions'),
+      _ShortcutDef(Icons.fitness_center_rounded,   'Gym',       '/gym'),
+      _ShortcutDef(Icons.emoji_events_outlined,    'Join',      '/challenges'),
+      _ShortcutDef(Icons.sports_kabaddi_rounded,   'Rival',     '/rivals'),
+      _ShortcutDef(Icons.monetization_on_outlined, 'Redeem',    '/coins/rewards'),
+      _ShortcutDef(Icons.workspace_premium_rounded,'League',    '/leaderboard/league'),
+      _ShortcutDef(Icons.track_changes_rounded,    'Missions',  '/missions'),
     ];
 
     return Column(
