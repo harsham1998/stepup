@@ -9,6 +9,10 @@ import {
   getExerciseHistory,
   getGymStats,
   getSessionHistory,
+  getUserSchedule,
+  saveUserSchedule,
+  saveUserPlanExercises,
+  getExercisesForPlanPublic,
 } from './gym.service';
 
 export const gymRouter = Router();
@@ -99,5 +103,47 @@ gymRouter.get('/exercise/:exerciseId/history', async (req: Request, res: Respons
     res.json(await getExerciseHistory(req.user!.id, req.params['exerciseId'] as string));
   } catch (err: unknown) {
     res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
+  }
+});
+
+// GET /gym/user-schedule  — returns { [day_of_week]: plan_id }
+gymRouter.get('/user-schedule', async (req: Request, res: Response) => {
+  try {
+    res.json(await getUserSchedule(req.user!.id));
+  } catch (err: unknown) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
+  }
+});
+
+// PUT /gym/user-schedule  — body: { schedule: { [day]: plan_id } }
+gymRouter.put('/user-schedule', async (req: Request, res: Response) => {
+  try {
+    const { schedule } = req.body as { schedule: Record<number, string> };
+    if (!schedule || typeof schedule !== 'object') return res.status(400).json({ error: 'schedule object required' });
+    await saveUserSchedule(req.user!.id, schedule);
+    res.json({ ok: true });
+  } catch (err: unknown) {
+    res.status(400).json({ error: err instanceof Error ? err.message : 'Internal error' });
+  }
+});
+
+// GET /gym/plan/:planId/my-exercises
+gymRouter.get('/plan/:planId/my-exercises', async (req: Request, res: Response) => {
+  try {
+    res.json(await getExercisesForPlanPublic(req.user!.id, req.params['planId'] as string));
+  } catch (err: unknown) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'Internal error' });
+  }
+});
+
+// PUT /gym/plan/:planId/my-exercises  — body: { exercises: [...] }
+gymRouter.put('/plan/:planId/my-exercises', async (req: Request, res: Response) => {
+  try {
+    const { exercises } = req.body as { exercises: any[] };
+    if (!Array.isArray(exercises)) return res.status(400).json({ error: 'exercises array required' });
+    await saveUserPlanExercises(req.user!.id, req.params['planId'] as string, exercises);
+    res.json({ ok: true });
+  } catch (err: unknown) {
+    res.status(400).json({ error: err instanceof Error ? err.message : 'Internal error' });
   }
 });

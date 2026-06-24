@@ -3,19 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api_client.dart';
 import '../models/gym_analytics.dart';
 
-final gymStatsProvider = FutureProvider<GymStats>((ref) async {
+final gymStatsProvider = FutureProvider.autoDispose<GymStats>((ref) async {
   final res = await ApiClient.instance.get('/gym/stats');
   return GymStats.fromJson(res.data as Map<String, dynamic>);
 });
 
-final gymHistoryProvider = FutureProvider<List<SessionHistoryItem>>((ref) async {
+final gymHistoryProvider = FutureProvider.autoDispose<List<SessionHistoryItem>>((ref) async {
   final res = await ApiClient.instance.get('/gym/history?weeks=8');
   final list = res.data as List<dynamic>;
   return list.map((j) => SessionHistoryItem.fromJson(j as Map<String, dynamic>)).toList();
 });
 
 // Aggregates raw set logs per exercise into max-weight-per-session points
-final exerciseProgressionProvider = FutureProvider.family<List<ExerciseProgressPoint>, String>(
+final exerciseProgressionProvider = FutureProvider.autoDispose.family<List<ExerciseProgressPoint>, String>(
   (ref, exerciseId) async {
     final res = await ApiClient.instance.get('/gym/exercise/$exerciseId/history');
     final list = res.data as List<dynamic>;

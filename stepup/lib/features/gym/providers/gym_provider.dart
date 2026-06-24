@@ -4,6 +4,80 @@ import '../../../core/api_client.dart';
 import '../models/gym_plan.dart';
 import '../models/gym_session.dart';
 
+// ── Schedule provider ─────────────────────────────────────────────────────────
+
+// Returns list of all workout plans with their user-assigned day_of_week
+final userScheduleProvider = FutureProvider.autoDispose<Map<int, String>>((ref) async {
+  final res = await ApiClient.instance.get('/gym/user-schedule');
+  final map = res.data as Map<String, dynamic>;
+  return map.map((k, v) => MapEntry(int.parse(k), v as String));
+});
+
+// ── Edit-exercises provider (per plan) ────────────────────────────────────────
+
+class EditExercisesNotifier extends AsyncNotifier<List<EditableExercise>> {
+  late String _planId;
+
+  @override
+  Future<List<EditableExercise>> build() async => [];
+
+  Future<void> load(String planId) async {
+    _planId = planId;
+    state = const AsyncLoading();
+    try {
+      final res = await ApiClient.instance.get('/gym/plan/$planId/my-exercises');
+      final list = res.data as List<dynamic>;
+      state = AsyncData(list
+          .map((j) => EditableExercise.fromPlanExercise(
+              PlanExercise.fromJson(j as Map<String, dynamic>)))
+          .toList());
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
+  void reorder(int oldIndex, int newIndex) {
+    final list = List<EditableExercise>.from(state.value ?? []);
+    final item = list.removeAt(oldIndex);
+    list.insert(newIndex, item);
+    for (var i = 0; i < list.length; i++) {
+      list[i].sortOrder = i;
+    }
+    state = AsyncData(list);
+  }
+
+  void remove(String id) {
+    state = AsyncData((state.value ?? []).where((e) => e.id != id).toList());
+  }
+
+  void add(MasterExercise master) {
+    final list = List<EditableExercise>.from(state.value ?? []);
+    list.add(EditableExercise.fromMaster(master, list.length));
+    state = AsyncData(list);
+  }
+
+  void updateSets(String id, int sets) {
+    state = AsyncData((state.value ?? []).map((e) {
+      if (e.id == id) e.sets = sets.clamp(1, 10);
+      return e;
+    }).toList());
+  }
+
+  Future<void> save() async {
+    final list = state.value ?? [];
+    await ApiClient.instance.put('/gym/plan/$_planId/my-exercises', {
+      'exercises': list.map((e) => e.toJson()).toList(),
+    });
+    ref.invalidate(gymWeekProvider);
+  }
+}
+
+final editExercisesProvider =
+    AsyncNotifierProvider<EditExercisesNotifier, List<EditableExercise>>(
+  EditExercisesNotifier.new,
+  isAutoDispose: true,
+);
+
 // ── Week plan (read-only, refreshed on invalidate) ─────────────────────────
 
 final gymWeekProvider = FutureProvider<List<WeekDay>>((ref) async {

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme.dart';
 import '../models/gym_plan.dart';
 import '../providers/gym_provider.dart';
+import 'edit_schedule_screen.dart';
+import 'edit_exercises_sheet.dart';
 
 class GymScreen extends ConsumerWidget {
   const GymScreen({super.key});
@@ -31,6 +33,26 @@ class GymScreen extends ConsumerWidget {
                   Text('Weekly Training Plan', style: AppTheme.label(13, color: AppTheme.ink2)),
                 ]),
                 Row(children: [
+                  // Edit schedule button
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const EditScheduleScreen()),
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surface2,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.border),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        const Icon(Icons.calendar_month_rounded, color: AppTheme.ink2, size: 16),
+                        const SizedBox(width: 5),
+                        Text('Schedule', style: AppTheme.label(12, color: AppTheme.ink2)),
+                      ]),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   // Analytics button
                   GestureDetector(
                     onTap: () => context.push('/gym/analytics'),
@@ -330,6 +352,20 @@ class _TodayWorkoutCard extends StatelessWidget {
                         const SizedBox(width: 10),
                         const _InfoChipLight(icon: Icons.bolt_rounded, label: '150+ XP'),
                         const Spacer(),
+                        // Edit exercises button
+                        GestureDetector(
+                          onTap: () => EditExercisesSheet.show(context, plan!),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(color: Colors.white.withOpacity(0.25)),
+                            ),
+                            child: const Icon(Icons.edit_rounded, color: Colors.white, size: 16),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         if (!day.isCompleted)
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -439,8 +475,19 @@ class _WeekDayRow extends StatelessWidget {
             ),
           ),
 
+          if (!isRest && plan != null) ...[
+            // Edit exercises for this plan
+            GestureDetector(
+              onTap: () => EditExercisesSheet.show(context, plan),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: Icon(Icons.edit_rounded, color: AppTheme.ink3, size: 15),
+              ),
+            ),
+          ],
           if (day.isCompleted)
             Row(children: [
+              const SizedBox(width: 6),
               const Icon(Icons.check_circle_rounded, color: AppTheme.voltLime, size: 14),
               const SizedBox(width: 4),
               Text('+${day.xpAwarded}', style: AppTheme.label(11, color: AppTheme.voltLime)),

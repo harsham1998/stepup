@@ -121,13 +121,58 @@ export async function getWeekPlan(userId: string): Promise<WeekDay[]> {
   const today = new Date();
   const monday = startOfWeek(today);
 
-  // Load all plans with exercises
+  // Load all plans
   const { data: plans, error: plansErr } = await db
     .from('gym_workout_plans')
-    .select('*, gym_plan_exercises(*)')
+    .select('id, slug, name, day_of_week, muscle_groups, is_rest, sort_order')
     .order('sort_order');
 
   if (plansErr) throw plansErr;
+
+  // Load user schedule (day → plan_id), fall back to global
+  const { data: scheduleRows } = await db
+    .from('user_workout_schedules')
+    .select('day_of_week, plan_id')
+    .eq('user_id', userId);
+
+  const userSchedule: Record<number, string> = scheduleRows && scheduleRows.length > 0
+    ? Object.fromEntries(scheduleRows.map((r: any) => [r.day_of_week, r.plan_id]))
+    : Object.fromEntries((plans ?? []).map((p: any) => [p.day_of_week, p.id]));
+
+  // Load ALL exercises: user-specific first, then global
+  const { data: userExAll } = await db
+    .from('gym_plan_exercises')
+    .select('*')
+    .eq('user_id', userId);
+  const { data: globalExAll } = await db
+    .from('gym_plan_exercises')
+    .select('*')
+    .is('user_id', null);
+
+  // Group by plan_id
+  const userExByPlan: Record<string, any[]> = {};
+  for (const e of (userExAll ?? [])) {
+    (userExByPlan[e.plan_id] ??= []).push(e);
+  }
+  const globalExByPlan: Record<string, any[]> = {};
+  for (const e of (globalExAll ?? [])) {
+    (globalExByPlan[e.plan_id] ??= []).push(e);
+  }
+
+  function mapExercises(raw: any[]): PlanExercise[] {
+    return raw
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(e => ({
+        id: e.id,
+        name: e.name,
+        target_muscles: e.target_muscles ?? [],
+        sets: e.sets,
+        reps_label: e.reps_label,
+        equipment: e.equipment,
+        sort_order: e.sort_order,
+        gif_url: exerciseImageUrl(e.name),
+      }));
+  }
 
   // Build date list for this week Mon–Sun
   const weekDates: string[] = Array.from({ length: 7 }, (_, i) => {
@@ -145,24 +190,15 @@ export async function getWeekPlan(userId: string): Promise<WeekDay[]> {
 
   const sessionMap = Object.fromEntries((sessions ?? []).map(s => [s.session_date, s]));
 
-  // Map each Mon-Sun day
   return weekDates.map((dateStr, idx) => {
     const dayOfWeek = (idx + 1) % 7; // Mon=1,...,Sun=0
-    const plan = (plans ?? []).find(p => p.day_of_week === dayOfWeek) ?? null;
+    const planId = userSchedule[dayOfWeek];
+    const plan = planId ? (plans ?? []).find((p: any) => p.id === planId) ?? null : null;
     const sess = sessionMap[dateStr];
 
-    const exercises: PlanExercise[] = (plan?.gym_plan_exercises ?? [])
-      .sort((a: any, b: any) => a.sort_order - b.sort_order)
-      .map((e: any) => ({
-        id: e.id,
-        name: e.name,
-        target_muscles: e.target_muscles ?? [],
-        sets: e.sets,
-        reps_label: e.reps_label,
-        equipment: e.equipment,
-        sort_order: e.sort_order,
-        gif_url: exerciseImageUrl(e.name),
-      }));
+    const rawExercises = plan
+      ? (userExByPlan[plan.id]?.length ? userExByPlan[plan.id] : globalExByPlan[plan.id] ?? [])
+      : [];
 
     return {
       day_of_week: dayOfWeek,
@@ -174,10 +210,10 @@ export async function getWeekPlan(userId: string): Promise<WeekDay[]> {
         id: plan.id,
         slug: plan.slug,
         name: plan.name,
-        day_of_week: plan.day_of_week,
+        day_of_week: dayOfWeek,
         muscle_groups: plan.muscle_groups ?? [],
         is_rest: plan.is_rest,
-        exercises,
+        exercises: mapExercises(rawExercises),
       } : null,
     };
   });
@@ -186,15 +222,23 @@ export async function getWeekPlan(userId: string): Promise<WeekDay[]> {
 export async function getOrCreateSession(userId: string, date: string): Promise<SessionWithLogs> {
   const db = getSupabase();
 
-  // Determine which plan belongs to this date's day of week
+  // Determine which plan to use for this date
   const d = new Date(date + 'T12:00:00Z');
   const dow = d.getUTCDay(); // 0=Sun,1=Mon,...
 
-  const { data: plan, error: planErr } = await db
-    .from('gym_workout_plans')
-    .select('*, gym_plan_exercises(*)')
+  // Check user schedule for this day
+  const { data: scheduleRow } = await db
+    .from('user_workout_schedules')
+    .select('plan_id')
+    .eq('user_id', userId)
     .eq('day_of_week', dow)
     .maybeSingle();
+
+  const planQuery = scheduleRow?.plan_id
+    ? db.from('gym_workout_plans').select('id, slug, name, day_of_week, muscle_groups, is_rest').eq('id', scheduleRow.plan_id).maybeSingle()
+    : db.from('gym_workout_plans').select('id, slug, name, day_of_week, muscle_groups, is_rest').eq('day_of_week', dow).maybeSingle();
+
+  const { data: plan, error: planErr } = await planQuery;
 
   if (planErr) throw planErr;
   if (!plan) throw new Error('No plan for this day');
@@ -228,18 +272,7 @@ export async function getOrCreateSession(userId: string, date: string): Promise<
     .eq('session_id', row.id)
     .order('logged_at');
 
-  const exercises: PlanExercise[] = (plan.gym_plan_exercises ?? [])
-    .sort((a: any, b: any) => a.sort_order - b.sort_order)
-    .map((e: any) => ({
-      id: e.id,
-      name: e.name,
-      target_muscles: e.target_muscles ?? [],
-      sets: e.sets,
-      reps_label: e.reps_label,
-      equipment: e.equipment,
-      sort_order: e.sort_order,
-      gif_url: exerciseImageUrl(e.name),
-    }));
+  const exercises = await getExercisesForPlan(userId, plan.id);
 
   return {
     id: row.id,
@@ -410,6 +443,143 @@ export async function completeSession(
   logger.info({ userId, sessionId, xp }, 'gym session completed');
 
   return { xp_awarded: xp };
+}
+
+// ── Schedule customisation ────────────────────────────────────────────────────
+
+// Returns { day_of_week: plan_id } for the user, falling back to global defaults
+export async function getUserSchedule(userId: string): Promise<Record<number, string>> {
+  const db = getSupabase();
+
+  // Try user-specific schedule first
+  const { data: rows } = await db
+    .from('user_workout_schedules')
+    .select('day_of_week, plan_id')
+    .eq('user_id', userId);
+
+  if (rows && rows.length > 0) {
+    return Object.fromEntries(rows.map((r: any) => [r.day_of_week, r.plan_id]));
+  }
+
+  // Fall back to global defaults
+  const { data: plans } = await db
+    .from('gym_workout_plans')
+    .select('id, day_of_week');
+
+  return Object.fromEntries((plans ?? []).map((p: any) => [p.day_of_week, p.id]));
+}
+
+export async function saveUserSchedule(
+  userId: string,
+  schedule: Record<number, string>,
+): Promise<void> {
+  const db = getSupabase();
+
+  // Delete existing rows then insert new ones
+  await db.from('user_workout_schedules').delete().eq('user_id', userId);
+
+  const rows = Object.entries(schedule).map(([day, planId]) => ({
+    user_id: userId,
+    day_of_week: Number(day),
+    plan_id: planId,
+  }));
+
+  if (rows.length > 0) {
+    const { error } = await db.from('user_workout_schedules').insert(rows);
+    if (error) throw error;
+  }
+}
+
+// ── Exercise customisation ────────────────────────────────────────────────────
+
+export interface CustomExercise {
+  id?: string;
+  name: string;
+  target_muscles: string[];
+  equipment: string;
+  sets: number;
+  reps_label: string;
+  sort_order: number;
+}
+
+// Get exercises for a plan: user's custom list if it exists, otherwise global
+export async function getExercisesForPlanPublic(userId: string, planId: string): Promise<PlanExercise[]> {
+  return getExercisesForPlan(userId, planId);
+}
+
+async function getExercisesForPlan(userId: string, planId: string): Promise<PlanExercise[]> {
+  const db = getSupabase();
+
+  // Check for user-specific exercises
+  const { data: userExs } = await db
+    .from('gym_plan_exercises')
+    .select('*')
+    .eq('plan_id', planId)
+    .eq('user_id', userId)
+    .order('sort_order');
+
+  if (userExs && userExs.length > 0) {
+    return userExs.map((e: any) => ({
+      id: e.id,
+      name: e.name,
+      target_muscles: e.target_muscles ?? [],
+      sets: e.sets,
+      reps_label: e.reps_label,
+      equipment: e.equipment,
+      sort_order: e.sort_order,
+      gif_url: exerciseImageUrl(e.name),
+    }));
+  }
+
+  // Fall back to global exercises
+  const { data: globalExs } = await db
+    .from('gym_plan_exercises')
+    .select('*')
+    .eq('plan_id', planId)
+    .is('user_id', null)
+    .order('sort_order');
+
+  return (globalExs ?? []).map((e: any) => ({
+    id: e.id,
+    name: e.name,
+    target_muscles: e.target_muscles ?? [],
+    sets: e.sets,
+    reps_label: e.reps_label,
+    equipment: e.equipment,
+    sort_order: e.sort_order,
+    gif_url: exerciseImageUrl(e.name),
+  }));
+}
+
+export async function saveUserPlanExercises(
+  userId: string,
+  planId: string,
+  exercises: CustomExercise[],
+): Promise<void> {
+  const db = getSupabase();
+
+  // Delete existing user customisations for this plan
+  await db
+    .from('gym_plan_exercises')
+    .delete()
+    .eq('plan_id', planId)
+    .eq('user_id', userId);
+
+  if (exercises.length === 0) return;
+
+  const rows = exercises.map((e, idx) => ({
+    plan_id: planId,
+    user_id: userId,
+    name: e.name,
+    target_muscles: e.target_muscles,
+    equipment: e.equipment,
+    sets: e.sets,
+    reps_label: e.reps_label,
+    sort_order: e.sort_order ?? idx,
+  }));
+
+  const { error } = await db.from('gym_plan_exercises').insert(rows);
+  if (error) throw error;
 }
 
 // ── Analytics ─────────────────────────────────────────────────────────────────

@@ -107,7 +107,9 @@ class _WorkoutSessionScreenState extends ConsumerState<WorkoutSessionScreen> {
           final plan = session.plan;
           final exercises = plan.exercises;
           final completedExercises = exercises.where((e) => session.isExerciseComplete(e.id, e.sets)).length;
-          final progress = exercises.isEmpty ? 0.0 : completedExercises / exercises.length;
+          final totalSets = exercises.fold(0, (sum, e) => sum + e.sets);
+          final loggedSets = session.setLogs.length.clamp(0, totalSets);
+          final progress = totalSets == 0 ? 0.0 : loggedSets / totalSets;
 
           return SafeArea(
             child: Column(children: [
@@ -143,7 +145,7 @@ class _WorkoutSessionScreenState extends ConsumerState<WorkoutSessionScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text('$completedExercises / ${exercises.length} exercises',
+                    Text('$loggedSets / $totalSets sets · $completedExercises / ${exercises.length} exercises',
                         style: AppTheme.label(12, color: AppTheme.ink2)),
                     Text('${(progress * 100).toInt()}%',
                         style: AppTheme.label(12, color: AppTheme.voltLime)),
